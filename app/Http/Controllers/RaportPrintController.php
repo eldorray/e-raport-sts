@@ -7,6 +7,7 @@ use App\Models\Guru;
 use App\Models\Kelas;
 use App\Models\Penilaian;
 use App\Models\Mengajar;
+use App\Models\PrintSetting;
 use App\Models\RaporMetadata;
 use App\Models\SchoolProfile;
 use App\Models\Siswa;
@@ -56,6 +57,7 @@ class RaportPrintController extends Controller
         }
 
         $school = SchoolProfile::first();
+        $printSetting = PrintSetting::first();
         $tahun = TahunAjaran::find($tahunId);
 
         $nilai = Penilaian::with(['mataPelajaran', 'mengajar'])
@@ -154,6 +156,34 @@ class RaportPrintController extends Controller
 
         $prestasi = collect($meta->prestasi ?? [])->values()->take(3);
 
+        // Prefer admin-configured values, then fall back to school/meta defaults
+        $printPlace = $printSetting?->tempat_cetak
+            ?? $school?->city
+            ?? 'Tangerang';
+
+        $raporDate = $printSetting?->tanggal_cetak_rapor
+            ?? $meta->tanggal_rapor
+            ?? now();
+
+        $watermarkText = null;
+        if ($printSetting) {
+            $watermarkText = trim((string) $printSetting->watermark);
+            if ($watermarkText === '') {
+                $watermarkText = null;
+            }
+        } else {
+            $watermarkText = $school?->name ?: 'MI Daarul Hikmah';
+        }
+
+        $watermarkDataUrl = null;
+        if ($watermarkText) {
+            $svg = sprintf(
+                "<svg xmlns='http://www.w3.org/2000/svg' width='150' height='100' viewBox='0 0 150 100'><text x='0' y='30' fill='#2e6b3a' font-size='14' font-family='Times New Roman,serif' transform='rotate(30 0 30)'>%s</text></svg>",
+                $watermarkText,
+            );
+            $watermarkDataUrl = 'data:image/svg+xml,'.rawurlencode($svg);
+        }
+
         return view('rapor.print', [
             'school' => $school,
             'siswa' => $siswa,
@@ -166,6 +196,9 @@ class RaportPrintController extends Controller
             'ekskul' => $ekskul,
             'meta' => $meta,
             'prestasi' => $prestasi,
+            'printPlace' => $printPlace,
+            'raporDate' => $raporDate,
+            'watermarkDataUrl' => $watermarkDataUrl,
         ]);
     }
 }

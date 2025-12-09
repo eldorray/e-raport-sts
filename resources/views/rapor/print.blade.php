@@ -7,7 +7,7 @@
     <title>Rapor {{ $siswa->nama }}</title>
     <style>
         * {
-            box-sizing: border-box;
+            box-sizing: border-box, ;
         }
 
         body {
@@ -17,26 +17,61 @@
             padding: 0;
         }
 
+        @page {
+            size: 210mm 330mm portrait;
+            margin: 10mm;
+        }
+
+        html,
+        body {
+            width: 210mm;
+            margin: 0;
+            padding: 0;
+        }
+
         .page {
             width: 210mm;
-            min-height: 297mm;
-            padding: 18mm 16mm;
+            min-height: calc(330mm - 20mm);
+            padding: 10mm;
             margin: 0 auto;
             position: relative;
             background: #fff;
+            page-break-inside: avoid;
         }
 
-        .page-break {
+        .page-break:not(:last-child) {
             page-break-after: always;
+        }
+
+        .page:last-child {
+            page-break-after: auto;
         }
 
         .watermark {
             position: absolute;
             inset: 0;
-            opacity: 0.08;
-            background-image: radial-gradient(circle at 25% 25%, #5ba373 0, rgba(255, 255, 255, 0) 45%), radial-gradient(circle at 75% 65%, #5ba373 0, rgba(255, 255, 255, 0) 45%);
+            opacity: 0.12;
             pointer-events: none;
+            background-size: 37mm 26mm;
+            background-repeat: repeat;
+            background-position: 0 0;
+            background-attachment: scroll;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
         }
+
+        @media print {
+            .watermark {
+                background-size: 37mm 26mm !important;
+                background-position: 0 0 !important;
+                background-repeat: repeat !important;
+                background-attachment: scroll !important;
+                transform: none !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+        }
+
 
         header {
             display: flex;
@@ -217,14 +252,16 @@
     </style>
 </head>
 
-<body>
+<body onload="window.print()">
     <div class="page">
-        <div class="watermark"></div>
+        @if ($watermarkDataUrl)
+            <div class="watermark" style="background-image: url('{{ $watermarkDataUrl }}');"></div>
+        @endif
         <header>
             <img src="{{ $school?->logo ? asset('storage/' . $school->logo) : asset('images/default-school.png') }}"
                 alt="logo" class="logo">
             <div class="title-block">
-                <h1>Kementerian Agama Republik Indonesia</h1>
+                <h1>YAYASAN PENDIDIKAN DAARUL HIKMAH AL MADANI</h1>
                 <h2>{{ $school->name ?? 'Nama Madrasah' }}</h2>
                 <p>{{ $school->address ?? '-' }}</p>
                 <p>{{ $school->district ?? '' }} {{ $school->city ? '• ' . $school->city : '' }}
@@ -259,8 +296,8 @@
                 <td>: {{ $tahun?->nama ?? '-' }}</td>
             </tr>
         </table>
-
-        <div class="section-title">Capaian Hasil Belajar</div>
+        <hr style="margin:12px 0; border: none; border-top: 1px solid #000;" />
+        <div class="section-title">Capaian Hasil Belajar Asessment Tengah Semester (ASTS)</div>
         <table class="nilai-table">
             <thead>
                 <tr>
@@ -306,8 +343,10 @@
         </table>
     </div>
 
-    <div class="page page-break">
-        <div class="watermark"></div>
+    <div class="page">
+        @if ($watermarkDataUrl)
+            <div class="watermark" style="background-image: url('{{ $watermarkDataUrl }}');"></div>
+        @endif
         <div class="two-col">
             <div class="block">
                 <h3>Ekstrakurikuler</h3>
@@ -395,32 +434,26 @@
             <div class="block">
                 <h3>Tanggapan Orang Tua/Wali</h3>
                 <div class="note" style="height:120px;">{!! nl2br(e($meta->tanggapan_ortu ?? '')) !!}</div>
-                <div class="signature-row">
-                    <div class="signature">
-                        <div>Tangerang, {{ optional($meta->tanggal_rapor ?? now())->translatedFormat('d F Y') }}</div>
-                        <div style="margin-top:4px;">Orang Tua/Wali</div>
-                        <div class="name">___________________</div>
-                    </div>
-                    <div class="signature">
-                        <div>&nbsp;</div>
-                        <div style="margin-top:4px;">Wali Kelas</div>
-                        <div class="name">{{ $wali->nama ?? '—' }}</div>
-                        <div class="nip">NIP. {{ $wali->nip ?? '-' }}</div>
-                    </div>
-                </div>
             </div>
         </div>
 
-        <div class="signature-row" style="margin-top:20px;">
+        <div class="signature-row" style="margin-top:20px; grid-template-columns: repeat(3, 1fr);">
+            <div class="signature" style="text-align:left;">
+                <div>{{ $printPlace }}, {{ optional($raporDate)->translatedFormat('d F Y') }}</div>
+                <div style="margin-top:4px;">Orang Tua/Wali</div>
+                <div class="name" style="margin-top:70px;">___________________</div>
+            </div>
             <div class="signature">
                 <div>Mengetahui</div>
                 <div style="margin-top:2px;">Kepala Madrasah</div>
-                <div class="name">{{ $school->headmaster ?? '—' }}</div>
+                <div class="name" style="margin-top:70px;">{{ $school->headmaster ?? '—' }}</div>
                 <div class="nip">NIP. {{ $school->nip_headmaster ?? '-' }}</div>
             </div>
-            <div class="signature">
-                <div>QR Verifikasi</div>
-                <div class="qr-box">QR</div>
+            <div class="signature" style="text-align:right;">
+                <div>&nbsp;</div>
+                <div style="margin-top:4px;">Wali Kelas</div>
+                <div class="name" style="margin-top:70px;">{{ $wali->nama ?? '—' }}</div>
+                <div class="nip">NIP. {{ $wali->nip ?? '-' }}</div>
             </div>
         </div>
     </div>

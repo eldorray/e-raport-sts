@@ -45,12 +45,18 @@
 
             $mapelDiampu = $mengajarList->pluck('mata_pelajaran_id')->unique()->count();
 
-            // Hitung siswa yang diampu berdasarkan kelas dari jadwal mengajar (bukan dari entri penilaian)
+            // Total siswa unik untuk tampilan
             $totalSiswaGuru = $mengajarList
                 ->flatMap(fn($m) => $m->kelas?->siswas ?? collect())
                 ->pluck('id')
                 ->unique()
                 ->count();
+
+            // Target entri = jumlah siswa di setiap kelas yang diajar (per mapel/mengajar)
+            $targetPenilaian = $mengajarList->sum(function ($m) {
+                return $m->kelas?->siswas?->count() ?? 0;
+            });
+
             $penilaianFilled = 0;
             if ($guruModel) {
                 $penilaianFilled = \App\Models\Penilaian::where('guru_id', $guruModel->id)
@@ -58,7 +64,8 @@
                     ->when($selectedSemester, fn($q) => $q->where('semester', $selectedSemester))
                     ->count();
             }
-            $progress = $totalSiswaGuru > 0 ? round(min(100, ($penilaianFilled / $totalSiswaGuru) * 100)) : 0;
+
+            $progress = $targetPenilaian > 0 ? round(min(100, ($penilaianFilled / $targetPenilaian) * 100)) : 0;
 
             $guruStats = [
                 'mapel_diampu' => $mapelDiampu,
@@ -230,24 +237,6 @@
                             fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                        </svg>
-                    </div>
-                </div>
-            </div>
-            <div
-                class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 border border-gray-200 dark:border-gray-700">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Pengisian Penilaian</p>
-                        <p class="text-3xl font-bold text-gray-800 dark:text-gray-100 mt-1">
-                            {{ $guruStats['penilaian_progress'] }}%</p>
-                        <p class="text-xs text-gray-500 mt-1">Berdasarkan entri penilaian</p>
-                    </div>
-                    <div class="bg-emerald-100 dark:bg-emerald-900 p-3 rounded-full">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-emerald-600 dark:text-emerald-300"
-                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M5 13l4 4L19 7" />
                         </svg>
                     </div>
                 </div>

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Guru;
+use App\Models\Mengajar;
+use App\Models\TahunAjaran;
 use App\Models\User;
 use App\Imports\GuruImport;
 use App\Exports\GuruTemplateExport;
@@ -20,7 +22,26 @@ class GuruController extends Controller
     {
         $gurus = Guru::with('user')->orderBy('nama')->paginate(15);
 
-        return view('guru.index', compact('gurus'));
+        $tahunId = session('selected_tahun_ajaran_id') ?? TahunAjaran::where('is_active', true)->value('id');
+        $guruIds = $gurus->pluck('id');
+
+        $jtmMengajar = [];
+        if ($guruIds->isNotEmpty()) {
+            $mengajar = Mengajar::with('mataPelajaran')
+                ->whereIn('guru_id', $guruIds)
+                ->when($tahunId, fn($q) => $q->where('tahun_ajaran_id', $tahunId))
+                ->get();
+
+            foreach ($mengajar as $m) {
+                $jam = $m->jtm ?? $m->mataPelajaran?->jumlah_jam ?? 0;
+                $jtmMengajar[$m->guru_id] = ($jtmMengajar[$m->guru_id] ?? 0) + (int) $jam;
+            }
+        }
+
+        return view('guru.index', [
+            'gurus' => $gurus,
+            'jtmMengajar' => $jtmMengajar,
+        ]);
     }
 
     public function store(Request $request): RedirectResponse

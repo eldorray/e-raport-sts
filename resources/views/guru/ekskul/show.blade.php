@@ -57,16 +57,11 @@
                                     class="w-full rounded-md border border-gray-300 px-2 py-1 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
                             </td>
                             <td class="px-3 py-3 text-center">
-                                <form method="POST" action="{{ route('guru.ekskul.store', $ekskul) }}" class="inline">
-                                    @csrf
-                                    <input type="hidden" name="action" value="remove">
-                                    <input type="hidden" name="siswa_id" value="{{ $siswa->id }}">
-                                    <button type="submit"
-                                        class="inline-flex items-center gap-1 rounded-md bg-red-100 px-3 py-1 text-xs font-semibold text-red-600 hover:bg-red-200"
-                                        onclick="return confirm('Batalkan siswa ini dari penilaian ekskul?');">
-                                        Batal
-                                    </button>
-                                </form>
+                                <button type="submit" form="remove-{{ $siswa->id }}"
+                                    class="inline-flex items-center gap-1 rounded-md bg-red-100 px-3 py-1 text-xs font-semibold text-red-600 hover:bg-red-200"
+                                    onclick="return confirm('Batalkan siswa ini dari penilaian ekskul?');">
+                                    Batal
+                                </button>
                             </td>
                         </tr>
                     @empty
@@ -85,6 +80,15 @@
             </button>
         </div>
     </form>
+
+    @foreach ($participants as $siswa)
+        <form id="remove-{{ $siswa->id }}" method="POST" action="{{ route('guru.ekskul.store', $ekskul) }}"
+            class="hidden">
+            @csrf
+            <input type="hidden" name="action" value="remove">
+            <input type="hidden" name="siswa_id" value="{{ $siswa->id }}">
+        </form>
+    @endforeach
 
     <!-- Modal tambah siswa -->
     <div id="modalOverlay" class="fixed inset-0 z-40 hidden items-center justify-center bg-gray-900/60 px-4">

@@ -15,6 +15,9 @@ use App\Http\Controllers\EkskulController;
 use App\Http\Controllers\EkskulPenilaianController;
 use App\Http\Controllers\RaporAdminController;
 use App\Http\Controllers\RaportPrintController;
+use App\Http\Controllers\RaporDataController;
+use App\Http\Controllers\PrintSettingController;
+use App\Http\Controllers\AdminUserController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -62,6 +65,9 @@ Route::middleware(['auth'])->group(function () {
         Route::get('siswa/import/template', [SiswaController::class, 'template'])->name('siswa.template');
         Route::post('siswa/import', [SiswaController::class, 'import'])->name('siswa.import');
         Route::resource('siswa', SiswaController::class);
+        Route::get('rapor/pengaturan-cetak', [PrintSettingController::class, 'edit'])->name('rapor.print-settings.edit');
+        Route::post('rapor/pengaturan-cetak', [PrintSettingController::class, 'update'])->name('rapor.print-settings.update');
+        Route::resource('users', AdminUserController::class)->except(['show']);
     });
 
     // Admin & Guru: pengaturan bobot dan cetak rapor
@@ -69,7 +75,14 @@ Route::middleware(['auth'])->group(function () {
         Route::get('penilaian/bobot', [PenilaianController::class, 'editBobot'])->name('penilaian.bobot.edit');
         Route::post('penilaian/bobot', [PenilaianController::class, 'updateBobot'])->name('penilaian.bobot.update');
         Route::get('rapor', [RaporAdminController::class, 'index'])->name('rapor.index');
-        Route::get('rapor/{siswa}', [RaportPrintController::class, 'show'])->name('rapor.print');
+        Route::get('rapor/kelas/{kelas}/ledger', [RaporAdminController::class, 'ledger'])->name('rapor.ledger');
+        Route::get('rapor/{siswa}', [RaportPrintController::class, 'show'])->whereNumber('siswa')->name('rapor.print');
+        Route::get('rapor/absen', [RaporDataController::class, 'absen'])->name('rapor.absen');
+        Route::post('rapor/absen', [RaporDataController::class, 'absenStore'])->name('rapor.absen.store');
+        Route::get('rapor/prestasi', [RaporDataController::class, 'prestasi'])->name('rapor.prestasi');
+        Route::post('rapor/prestasi', [RaporDataController::class, 'prestasiStore'])->name('rapor.prestasi.store');
+        Route::get('rapor/catatan', [RaporDataController::class, 'catatan'])->name('rapor.catatan');
+        Route::post('rapor/catatan', [RaporDataController::class, 'catatanStore'])->name('rapor.catatan.store');
     });
 
     // Guru / wali-only

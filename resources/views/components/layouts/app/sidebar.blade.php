@@ -53,11 +53,16 @@
                             :active="request()->routeIs('rombel*')">Rombel Kelas</x-layouts.sidebar-two-level-link>
                     </x-layouts.sidebar-two-level-link-parent>
 
+                    <x-layouts.sidebar-link href="{{ route('users.index') }}" icon='fas-user-gear'
+                        :active="request()->routeIs('users.*')">Manajemen User</x-layouts.sidebar-link>
+
                     <li class="px-2 pt-4 pb-2">
                         <h2 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                             Rapor
                         </h2>
                     </li>
+                    <x-layouts.sidebar-link href="{{ route('rapor.print-settings.edit') }}" icon='fas-gear'
+                        :active="request()->routeIs('rapor.print-settings.*')">Pengaturan Cetak</x-layouts.sidebar-link>
                     <x-layouts.sidebar-link href="{{ route('rapor.index') }}" icon='fas-file-lines'
                         :active="request()->routeIs('rapor.index')">Cetak Rapor</x-layouts.sidebar-link>
                 @else
@@ -74,6 +79,18 @@
 
                     <x-layouts.sidebar-link href="{{ route('rapor.index') }}" icon='fas-file-lines'
                         :active="request()->routeIs('rapor.index')">Cetak Rapor</x-layouts.sidebar-link>
+                    <x-layouts.sidebar-link href="{{ route('rapor.absen') }}" icon='fas-calendar-check'
+                        :active="request()->routeIs('rapor.absen')">Data Absen</x-layouts.sidebar-link>
+                    <x-layouts.sidebar-link href="{{ route('rapor.prestasi') }}" icon='fas-trophy'
+                        :active="request()->routeIs('rapor.prestasi')">Prestasi Siswa</x-layouts.sidebar-link>
+                    <x-layouts.sidebar-link href="{{ route('rapor.catatan') }}" icon='fas-note-sticky'
+                        :active="request()->routeIs('rapor.catatan')">Catatan Wali</x-layouts.sidebar-link>
+                    <x-layouts.sidebar-link href="{{ route('rapor.absen') }}" icon='fas-calendar-check'
+                        :active="request()->routeIs('rapor.absen')">Data Absen</x-layouts.sidebar-link>
+                    <x-layouts.sidebar-link href="{{ route('rapor.prestasi') }}" icon='fas-trophy'
+                        :active="request()->routeIs('rapor.prestasi')">Prestasi Siswa</x-layouts.sidebar-link>
+                    <x-layouts.sidebar-link href="{{ route('rapor.catatan') }}" icon='fas-note-sticky'
+                        :active="request()->routeIs('rapor.catatan')">Catatan Wali</x-layouts.sidebar-link>
 
                     <li class="px-2 pt-4 pb-2">
                         <h2 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
@@ -82,13 +99,23 @@
                     </li>
 
                     @forelse(($sidebarAssignments ?? collect()) as $mapelId => $items)
-                        @php $mapel = $items->first()?->mataPelajaran; @endphp
+                        @php
+                            $mapel = $items->first()?->mataPelajaran;
+                            $mapelDone = ($sidebarMapelStatus[$mapelId] ?? false) === true;
+                            $mapelBadgeLabel = $mapelDone ? '✓' : 'X';
+                            $mapelBadgeClass = $mapelDone
+                                ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-100'
+                                : 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-100';
+                        @endphp
                         <details class="group"
                             {{ request()->routeIs('guru.penilaian.show') && optional($items->first())->id === optional(request()->route('mengajar'))->id ? 'open' : '' }}>
                             <summary
                                 class="flex cursor-pointer items-center justify-between rounded-lg px-3 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-100 dark:text-gray-100 dark:hover:bg-gray-800">
                                 <span class="flex items-center gap-2"><i class="fa-solid fa-book text-xs"></i>
-                                    {{ $mapel->nama_mapel ?? '-' }}</span>
+                                    {{ $mapel->kode ?? ($mapel->nama_mapel ?? '-') }}
+                                    <span
+                                        class="ml-2 inline-flex items-center rounded-full px-1.5 py-[1px] text-[9px] font-semibold {{ $mapelBadgeClass }}">{{ $mapelBadgeLabel }}</span>
+                                </span>
                                 <i class="fas fa-chevron-down text-xs transition-transform group-open:rotate-180"></i>
                             </summary>
                             <ul class="space-y-1 pb-2 pl-5 pr-2">
@@ -96,7 +123,7 @@
                                     <li>
                                         <a href="{{ route('guru.penilaian.show', $assignment) }}"
                                             class="block rounded-md px-3 py-2 text-sm {{ request()->routeIs('guru.penilaian.show') && optional(request()->route('mengajar'))->id === $assignment->id ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800' }}">
-                                            {{ $assignment->kelas->nama ?? '-' }}
+                                            <span>{{ $assignment->kelas->nama ?? '-' }}</span>
                                         </a>
                                     </li>
                                 @endforeach

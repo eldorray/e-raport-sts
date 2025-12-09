@@ -68,7 +68,7 @@
                             <td class="px-3 py-3">{{ $guru->pendidikan ?? '—' }}</td>
                             <td class="px-3 py-3">{{ $guru->initial_password ?? '—' }}</td>
                             <td class="px-3 py-3">{{ $guru->wali_kelas ?? '—' }}</td>
-                            <td class="px-3 py-3">{{ $guru->jtm ?? '—' }}</td>
+                            <td class="px-3 py-3">{{ $jtmMengajar[$guru->id] ?? 0 }}</td>
                             <td class="px-3 py-3">
                                 <div class="flex flex-wrap items-center gap-2 justify-center">
                                     <button type="button"

@@ -52,12 +52,12 @@
                         class="inline-flex items-center gap-2 rounded-xl bg-blue-500 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-500/30 transition hover:-translate-y-0.5 hover:bg-blue-600">
                         <i class="fa-solid fa-right-to-bracket"></i> Masuk
                     </a>
-                    @if (Route::has('register'))
+                    {{-- @if (Route::has('register'))
                         <a href="{{ route('register') }}"
                             class="inline-flex items-center gap-2 rounded-xl border border-white/15 px-4 py-3 text-sm font-semibold text-white/90 transition hover:-translate-y-0.5 hover:border-white/25 hover:text-white">
                             <i class="fa-solid fa-user-plus"></i> Daftar
                         </a>
-                    @endif
+                    @endif --}}
                 </div>
 
                 <div class="mt-10 grid gap-3 sm:grid-cols-3">

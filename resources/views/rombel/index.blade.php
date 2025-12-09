@@ -4,18 +4,7 @@
             <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100">{{ __('Rombel Kelas') }}</h1>
             <p class="text-gray-600 dark:text-gray-400 mt-1">{{ __('Atur anggota rombel untuk setiap kelas.') }}</p>
         </div>
-        <form method="GET" action="{{ route('rombel.index') }}" class="flex items-center gap-2">
-            <select name="kelas_id"
-                class="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
-                @foreach ($kelasList as $kelas)
-                    <option value="{{ $kelas->id }}" @selected(optional($selectedKelas)->id === $kelas->id)>
-                        {{ $kelas->nama }}
-                    </option>
-                @endforeach
-            </select>
-            <button type="submit"
-                class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-500/30">{{ __('Pilih') }}</button>
-        </form>
+
     </div>
 
     @if ($kelasList->isNotEmpty())
@@ -51,7 +40,20 @@
             @endforeach
         </div>
     @endif
-
+    <div class="mb-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+        <form method="GET" action="{{ route('rombel.index') }}" class="flex items-center gap-2">
+            <select name="kelas_id"
+                class="rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+                @foreach ($kelasList as $kelas)
+                    <option value="{{ $kelas->id }}" @selected(optional($selectedKelas)->id === $kelas->id)>
+                        {{ $kelas->nama }}
+                    </option>
+                @endforeach
+            </select>
+            <button type="submit"
+                class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-500/30">{{ __('Pilih') }}</button>
+        </form>
+    </div>
     @if ($kelasList->isEmpty())
         <div
             class="rounded-2xl border border-gray-200 bg-white p-6 text-sm text-gray-600 shadow-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300">
