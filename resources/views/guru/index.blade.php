@@ -6,6 +6,22 @@
             </p>
         </div>
         <div class="flex flex-wrap gap-2">
+            @if ($gurus->total() > 0)
+                <form action="{{ route('guru.destroy-all') }}" method="POST"
+                    onsubmit="return confirm('{{ __('Hapus semua guru? Tindakan ini tidak dapat dibatalkan.') }}');">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit"
+                        class="inline-flex items-center gap-2 rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-rose-700 focus:outline-none focus:ring-4 focus:ring-rose-500/30">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                                d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                        {{ __('Hapus Semua') }}
+                    </button>
+                </form>
+            @endif
             <button type="button" id="openCreateModal"
                 class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-500/30">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"

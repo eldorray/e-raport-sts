@@ -75,6 +75,21 @@ class SiswaController extends Controller
         return back()->with('status', __('Siswa dihapus.'));
     }
 
+    public function destroyAll(): RedirectResponse
+    {
+        Siswa::chunkById(200, function ($siswas) {
+            foreach ($siswas as $siswa) {
+                if ($siswa->photo_path) {
+                    Storage::disk('public')->delete($siswa->photo_path);
+                }
+
+                $siswa->delete();
+            }
+        });
+
+        return back()->with('status', __('Semua siswa dihapus.'));
+    }
+
     public function import(Request $request): RedirectResponse
     {
         if (! session('selected_tahun_ajaran_id')) {

@@ -120,6 +120,22 @@ class GuruController extends Controller
         return back()->with('status', __('Guru dihapus.'));
     }
 
+    public function destroyAll(): RedirectResponse
+    {
+        Guru::chunkById(100, function ($gurus) {
+            $guruIds = $gurus->pluck('id');
+
+            Mengajar::whereIn('guru_id', $guruIds)->delete();
+
+            foreach ($gurus as $guru) {
+                $guru->user?->delete();
+                $guru->delete();
+            }
+        });
+
+        return back()->with('status', __('Semua guru dihapus.'));
+    }
+
     public function toggleStatus(Guru $guru): RedirectResponse
     {
         $new = ! $guru->is_active;

@@ -49,6 +49,7 @@ Route::middleware(['auth'])->group(function () {
         Route::patch('tahun-ajaran/{tahunAjaran}/activate', [TahunAjaranController::class, 'activate'])->name('tahun-ajaran.activate');
         Route::get('guru/import/template', [GuruController::class, 'template'])->name('guru.template');
         Route::post('guru/import', [GuruController::class, 'import'])->name('guru.import');
+        Route::delete('guru/delete-all', [GuruController::class, 'destroyAll'])->name('guru.destroy-all');
         Route::resource('guru', GuruController::class)->except(['show']);
         Route::patch('guru/{guru}/toggle-status', [GuruController::class, 'toggleStatus'])->name('guru.toggle');
         Route::resource('kelas', KelasController::class)->except(['show'])->parameters([
@@ -64,6 +65,7 @@ Route::middleware(['auth'])->group(function () {
         Route::put('rombel-kelas/{kelas}', [RombelKelasController::class, 'update'])->name('rombel.update');
         Route::get('siswa/import/template', [SiswaController::class, 'template'])->name('siswa.template');
         Route::post('siswa/import', [SiswaController::class, 'import'])->name('siswa.import');
+        Route::delete('siswa/delete-all', [SiswaController::class, 'destroyAll'])->name('siswa.destroy-all');
         Route::resource('siswa', SiswaController::class);
         Route::get('rapor/pengaturan-cetak', [PrintSettingController::class, 'edit'])->name('rapor.print-settings.edit');
         Route::post('rapor/pengaturan-cetak', [PrintSettingController::class, 'update'])->name('rapor.print-settings.update');
