@@ -52,6 +52,20 @@ class LoginController extends Controller
             ]);
         }
 
+        $user = Auth::user();
+
+        if (! $user?->is_active) {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            RateLimiter::hit($this->throttleKey($request));
+
+            throw ValidationException::withMessages([
+                'login' => __('Akun Anda nonaktif. Silakan hubungi admin.'),
+            ]);
+        }
+
         RateLimiter::clear($this->throttleKey($request));
 
         $request->session()->regenerate();
