@@ -40,11 +40,13 @@ class Siswa extends Model
         'pekerjaan_wali',
         'alamat_wali',
         'photo_path',
+        'is_active',
     ];
 
     protected $casts = [
         'tanggal_lahir' => 'date',
         'tanggal_diterima' => 'date',
+        'is_active' => 'boolean',
     ];
 
     public function kelas(): BelongsTo

@@ -38,6 +38,7 @@ class SiswaController extends Controller
 
         $data = $this->validatedData($request);
         $data['tahun_ajaran_id'] = $tahunId;
+        $data['is_active'] = $request->boolean('is_active', true);
 
         if ($request->hasFile('photo')) {
             $data['photo_path'] = $request->file('photo')->store('siswa', 'public');
@@ -51,6 +52,8 @@ class SiswaController extends Controller
     public function update(Request $request, Siswa $siswa): RedirectResponse
     {
         $data = $this->validatedData($request, $siswa->id);
+
+        $data['is_active'] = $request->boolean('is_active', $siswa->is_active);
 
         if ($request->hasFile('photo')) {
             $data['photo_path'] = $request->file('photo')->store('siswa', 'public');
@@ -73,6 +76,14 @@ class SiswaController extends Controller
         $siswa->delete();
 
         return back()->with('status', __('Siswa dihapus.'));
+    }
+
+    public function toggleStatus(Siswa $siswa): RedirectResponse
+    {
+        $new = ! $siswa->is_active;
+        $siswa->update(['is_active' => $new]);
+
+        return back()->with('status', $new ? __('Siswa diaktifkan.') : __('Siswa dinonaktifkan.'));
     }
 
     public function destroyAll(): RedirectResponse
@@ -191,6 +202,7 @@ class SiswaController extends Controller
             'pekerjaan_wali' => ['nullable', 'string', 'max:100'],
             'alamat_wali' => ['nullable', 'string'],
             'photo' => ['nullable', 'image', 'max:2048'],
+            'is_active' => ['sometimes', 'boolean'],
         ];
 
         return $request->validate($rules);

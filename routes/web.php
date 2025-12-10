@@ -65,6 +65,7 @@ Route::middleware(['auth'])->group(function () {
         Route::put('rombel-kelas/{kelas}', [RombelKelasController::class, 'update'])->name('rombel.update');
         Route::get('siswa/import/template', [SiswaController::class, 'template'])->name('siswa.template');
         Route::post('siswa/import', [SiswaController::class, 'import'])->name('siswa.import');
+        Route::patch('siswa/{siswa}/toggle-status', [SiswaController::class, 'toggleStatus'])->name('siswa.toggle');
         Route::delete('siswa/delete-all', [SiswaController::class, 'destroyAll'])->name('siswa.destroy-all');
         Route::resource('siswa', SiswaController::class);
         Route::get('rapor/pengaturan-cetak', [PrintSettingController::class, 'edit'])->name('rapor.print-settings.edit');

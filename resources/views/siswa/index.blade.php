@@ -62,6 +62,7 @@
                         <th class="px-3 py-3">Kelas</th>
                         <th class="px-3 py-3">{{ __('Jenis Kelamin') }}</th>
                         <th class="px-3 py-3">TTL</th>
+                        <th class="px-3 py-3">Status</th>
                         <th class="px-3 py-3 text-center">{{ __('Aksi') }}</th>
                     </tr>
                 </thead>
@@ -76,6 +77,12 @@
                             <td class="px-3 py-3">{{ $siswa->jenis_kelamin }}</td>
                             <td class="px-3 py-3 text-xs">
                                 {{ $siswa->tempat_lahir }}{{ $siswa->tanggal_lahir ? ', ' . $siswa->tanggal_lahir->translatedFormat('d F Y') : '' }}
+                            </td>
+                            <td class="px-3 py-3">
+                                <span
+                                    class="inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold {{ $siswa->is_active ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-100' : 'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-300' }}">
+                                    {{ $siswa->is_active ? __('Aktif') : __('Nonaktif') }}
+                                </span>
                             </td>
                             <td class="px-3 py-3">
                                 <div class="flex flex-wrap items-center gap-2 justify-center">
@@ -116,6 +123,14 @@
                                         <button type="submit"
                                             class="inline-flex items-center gap-1 rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-600">
                                             {{ __('Hapus') }}
+                                        </button>
+                                    </form>
+                                    <form action="{{ route('siswa.toggle', $siswa) }}" method="POST">
+                                        @csrf
+                                        @method('PATCH')
+                                        <button type="submit"
+                                            class="inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold {{ $siswa->is_active ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-600' }}">
+                                            {{ $siswa->is_active ? __('Non Aktifkan') : __('Aktifkan') }}
                                         </button>
                                     </form>
                                 </div>
