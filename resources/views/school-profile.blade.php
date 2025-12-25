@@ -29,24 +29,6 @@
         </div>
     </div>
 
-    @if (session('status'))
-        <div
-            class="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-emerald-800 shadow-sm dark:border-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-200">
-            <p class="text-sm font-semibold">{{ session('status') }}</p>
-        </div>
-    @endif
-
-    @if ($errors->any())
-        <div
-            class="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-red-800 shadow-sm dark:border-red-700 dark:bg-red-900/30 dark:text-red-200">
-            <ul class="space-y-1 text-sm">
-                @foreach ($errors->all() as $error)
-                    <li>• {{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
-
     <div class="grid gap-6 lg:grid-cols-[360px,1fr]">
         <div class="space-y-6">
             <div
@@ -154,8 +136,8 @@
                         </div>
                         <button type="button" title="{{ __('Segera hadir') }}"
                             class="inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-white px-4 py-2 text-sm font-semibold text-indigo-600 transition hover:border-indigo-300 hover:bg-indigo-50 dark:border-indigo-700/60 dark:bg-gray-900 dark:text-indigo-300 dark:hover:border-indigo-600/60">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
                                     d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>

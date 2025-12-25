@@ -5,24 +5,6 @@
             saat mencetak rapor maupun ledger.</p>
     </div>
 
-    @if (session('status'))
-        <div
-            class="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-emerald-800 shadow-sm dark:border-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-200">
-            <p class="text-sm font-semibold">{{ session('status') }}</p>
-        </div>
-    @endif
-
-    @if ($errors->any())
-        <div
-            class="mb-6 rounded-xl border border-red-200 bg-red-50 p-4 text-red-800 shadow-sm dark:border-red-700 dark:bg-red-900/30 dark:text-red-200">
-            <ul class="space-y-1 text-sm">
-                @foreach ($errors->all() as $error)
-                    <li>• {{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
-
     <form action="{{ route('rapor.print-settings.update') }}" method="POST"
         class="space-y-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
         @csrf

@@ -50,6 +50,12 @@
             localStorage.setItem('sidebarOpen', true);
         }
     },
+    closeSidebarOnMobile() {
+        if (window.innerWidth < 768) {
+            this.sidebarOpen = false;
+            localStorage.setItem('sidebarOpen', false);
+        }
+    },
     formSubmitted: false,
 }">
 

@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\GuruTemplateExport;
+use App\Imports\GuruImport;
 use App\Models\Guru;
 use App\Models\Mengajar;
 use App\Models\TahunAjaran;
 use App\Models\User;
-use App\Imports\GuruImport;
-use App\Exports\GuruTemplateExport;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -16,27 +16,41 @@ use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Maatwebsite\Excel\Facades\Excel;
 
+/**
+ * Controller untuk mengelola data guru.
+ *
+ * Menangani operasi CRUD, import/export Excel, dan toggle status guru.
+ */
 class GuruController extends Controller
 {
+    /** @var string Role user untuk guru */
+    private const USER_ROLE_GURU = 'guru';
+
+    /** @var int Jumlah guru per chunk untuk bulk delete */
+    private const BULK_DELETE_CHUNK_SIZE = 100;
+
+    /** @var int Jumlah item per halaman untuk pagination */
+    private const PAGINATION_PER_PAGE = 15;
+
+    /** @var string Domain email default untuk guru */
+    private const EMAIL_DOMAIN = '@guru.local';
+
+    /** @var int Panjang minimum password */
+    private const MIN_PASSWORD_LENGTH = 3;
+
+    /**
+     * Menampilkan daftar semua guru dengan JTM mengajar.
+     *
+     * @return View Halaman index guru
+     */
     public function index(): View
     {
-        $gurus = Guru::with('user')->orderBy('nama')->paginate(15);
+        $gurus = Guru::with('user')->orderBy('nama')->paginate(self::PAGINATION_PER_PAGE);
 
         $tahunId = session('selected_tahun_ajaran_id') ?? TahunAjaran::where('is_active', true)->value('id');
         $guruIds = $gurus->pluck('id');
 
-        $jtmMengajar = [];
-        if ($guruIds->isNotEmpty()) {
-            $mengajar = Mengajar::with('mataPelajaran')
-                ->whereIn('guru_id', $guruIds)
-                ->when($tahunId, fn($q) => $q->where('tahun_ajaran_id', $tahunId))
-                ->get();
-
-            foreach ($mengajar as $m) {
-                $jam = $m->jtm ?? $m->mataPelajaran?->jumlah_jam ?? 0;
-                $jtmMengajar[$m->guru_id] = ($jtmMengajar[$m->guru_id] ?? 0) + (int) $jam;
-            }
-        }
+        $jtmMengajar = $this->calculateJtmMengajar($guruIds, $tahunId);
 
         return view('guru.index', [
             'gurus' => $gurus,
@@ -44,6 +58,14 @@ class GuruController extends Controller
         ]);
     }
 
+    /**
+     * Menyimpan guru baru ke database.
+     *
+     * Membuat user account dan data guru secara bersamaan.
+     *
+     * @param  Request  $request  HTTP request dengan data guru
+     * @return RedirectResponse Redirect ke halaman sebelumnya dengan pesan status
+     */
     public function store(Request $request): RedirectResponse
     {
         $data = $this->validatedData($request);
@@ -52,7 +74,7 @@ class GuruController extends Controller
             'name' => $data['nama'],
             'email' => $this->buildEmail($data['nip']),
             'password' => Hash::make($data['password']),
-            'role' => 'guru',
+            'role' => self::USER_ROLE_GURU,
             'nip' => $data['nip'],
             'nik' => $data['nik'] ?? null,
             'is_active' => $data['is_active'],
@@ -76,6 +98,13 @@ class GuruController extends Controller
         return back()->with('status', __('Guru berhasil ditambahkan.'));
     }
 
+    /**
+     * Memperbarui data guru yang sudah ada.
+     *
+     * @param  Request  $request  HTTP request dengan data yang diperbarui
+     * @param  Guru     $guru     Instance guru dari route model binding
+     * @return RedirectResponse Redirect ke halaman sebelumnya dengan pesan status
+     */
     public function update(Request $request, Guru $guru): RedirectResponse
     {
         $data = $this->validatedData($request, $guru->id);
@@ -83,7 +112,7 @@ class GuruController extends Controller
         $updateUser = [
             'name' => $data['nama'],
             'email' => $guru->user->email ?: $this->buildEmail($data['nip']),
-            'role' => 'guru',
+            'role' => self::USER_ROLE_GURU,
             'nip' => $data['nip'],
             'nik' => $data['nik'] ?? null,
             'is_active' => $data['is_active'],
@@ -112,6 +141,12 @@ class GuruController extends Controller
         return back()->with('status', __('Guru berhasil diperbarui.'));
     }
 
+    /**
+     * Menghapus guru dan user account terkait.
+     *
+     * @param  Guru  $guru  Instance guru dari route model binding
+     * @return RedirectResponse Redirect ke halaman sebelumnya dengan pesan status
+     */
     public function destroy(Guru $guru): RedirectResponse
     {
         $guru->user?->delete();
@@ -120,9 +155,16 @@ class GuruController extends Controller
         return back()->with('status', __('Guru dihapus.'));
     }
 
+    /**
+     * Menghapus semua data guru beserta data mengajar terkait.
+     *
+     * Menggunakan chunking untuk efisiensi memory pada data besar.
+     *
+     * @return RedirectResponse Redirect ke halaman sebelumnya dengan pesan status
+     */
     public function destroyAll(): RedirectResponse
     {
-        Guru::chunkById(100, function ($gurus) {
+        Guru::chunkById(self::BULK_DELETE_CHUNK_SIZE, function ($gurus) {
             $guruIds = $gurus->pluck('id');
 
             Mengajar::whereIn('guru_id', $guruIds)->delete();
@@ -136,15 +178,29 @@ class GuruController extends Controller
         return back()->with('status', __('Semua guru dihapus.'));
     }
 
+    /**
+     * Toggle status aktif/nonaktif guru.
+     *
+     * @param  Guru  $guru  Instance guru dari route model binding
+     * @return RedirectResponse Redirect ke halaman sebelumnya dengan pesan status
+     */
     public function toggleStatus(Guru $guru): RedirectResponse
     {
-        $new = ! $guru->is_active;
-        $guru->update(['is_active' => $new]);
-        $guru->user?->update(['is_active' => $new]);
+        $newStatus = ! $guru->is_active;
+        $guru->update(['is_active' => $newStatus]);
+        $guru->user?->update(['is_active' => $newStatus]);
 
-        return back()->with('status', $new ? __('Guru diaktifkan.') : __('Guru dinonaktifkan.'));
+        $message = $newStatus ? __('Guru diaktifkan.') : __('Guru dinonaktifkan.');
+
+        return back()->with('status', $message);
     }
 
+    /**
+     * Import data guru dari file Excel.
+     *
+     * @param  Request  $request  HTTP request dengan file Excel
+     * @return RedirectResponse Redirect ke halaman sebelumnya dengan hasil import
+     */
     public function import(Request $request): RedirectResponse
     {
         $request->validate([
@@ -161,6 +217,95 @@ class GuruController extends Controller
             ]);
         }
 
+        return $this->buildImportResponse($import);
+    }
+
+    /**
+     * Download template Excel untuk import guru.
+     *
+     * @return \Symfony\Component\HttpFoundation\BinaryFileResponse File template Excel
+     */
+    public function template()
+    {
+        return Excel::download(new GuruTemplateExport(), 'template-guru.xlsx');
+    }
+
+    /**
+     * Validasi data request untuk create/update guru.
+     *
+     * @param  Request   $request       HTTP request dengan data guru
+     * @param  int|null  $ignoreGuruId  ID guru yang diabaikan untuk validasi unique
+     * @return array Data yang sudah divalidasi
+     */
+    private function validatedData(Request $request, ?int $ignoreGuruId = null): array
+    {
+        $rules = [
+            'nama' => ['required', 'string', 'max:255'],
+            'nip' => ['required', 'string', 'max:30', Rule::unique('gurus', 'nip')->ignore($ignoreGuruId)],
+            'nik' => ['nullable', 'string', 'max:30', Rule::unique('gurus', 'nik')->ignore($ignoreGuruId)],
+            'jenis_kelamin' => ['required', Rule::in(['L', 'P'])],
+            'tempat_lahir' => ['nullable', 'string', 'max:100'],
+            'tanggal_lahir' => ['nullable', 'date'],
+            'pendidikan' => ['nullable', 'string', 'max:100'],
+            'wali_kelas' => ['nullable', 'string', 'max:50'],
+            'jtm' => ['nullable', 'integer', 'min:0'],
+            'password' => [$ignoreGuruId ? 'nullable' : 'required', 'string', 'min:' . self::MIN_PASSWORD_LENGTH],
+            'is_active' => ['required', 'boolean'],
+        ];
+
+        $data = $request->validate($rules);
+        $data['password'] = $request->filled('password') ? $request->string('password') : '';
+
+        return $data;
+    }
+
+    /**
+     * Membangun email dari NIP guru.
+     *
+     * @param  string  $nip  Nomor Induk Pegawai
+     * @return string Email yang dibuat
+     */
+    private function buildEmail(string $nip): string
+    {
+        return Str::slug($nip, '.') . self::EMAIL_DOMAIN;
+    }
+
+    /**
+     * Menghitung total JTM mengajar per guru.
+     *
+     * @param  \Illuminate\Support\Collection  $guruIds  Koleksi ID guru
+     * @param  int|null                        $tahunId  ID tahun ajaran
+     * @return array<int, int> Array dengan key guru_id dan value total JTM
+     */
+    private function calculateJtmMengajar($guruIds, ?int $tahunId): array
+    {
+        $jtmMengajar = [];
+
+        if ($guruIds->isEmpty()) {
+            return $jtmMengajar;
+        }
+
+        $mengajar = Mengajar::with('mataPelajaran')
+            ->whereIn('guru_id', $guruIds)
+            ->when($tahunId, fn ($q) => $q->where('tahun_ajaran_id', $tahunId))
+            ->get();
+
+        foreach ($mengajar as $m) {
+            $jam = $m->jtm ?? $m->mataPelajaran?->jumlah_jam ?? 0;
+            $jtmMengajar[$m->guru_id] = ($jtmMengajar[$m->guru_id] ?? 0) + (int) $jam;
+        }
+
+        return $jtmMengajar;
+    }
+
+    /**
+     * Membangun response hasil import.
+     *
+     * @param  GuruImport  $import  Instance import dengan hasil
+     * @return RedirectResponse Response dengan pesan hasil import
+     */
+    private function buildImportResponse(GuruImport $import): RedirectResponse
+    {
         $failuresCount = $import->failures()->count();
         $skippedCount = count($import->skipped);
         $failureMessages = [];
@@ -196,37 +341,5 @@ class GuruController extends Controller
         }
 
         return $response;
-    }
-
-    public function template()
-    {
-        return Excel::download(new GuruTemplateExport(), 'template-guru.xlsx');
-    }
-
-    private function validatedData(Request $request, ?int $ignoreGuruId = null): array
-    {
-        $rules = [
-            'nama' => ['required', 'string', 'max:255'],
-            'nip' => ['required', 'string', 'max:30', Rule::unique('gurus', 'nip')->ignore($ignoreGuruId)],
-            'nik' => ['nullable', 'string', 'max:30', Rule::unique('gurus', 'nik')->ignore($ignoreGuruId)],
-            'jenis_kelamin' => ['required', Rule::in(['L', 'P'])],
-            'tempat_lahir' => ['nullable', 'string', 'max:100'],
-            'tanggal_lahir' => ['nullable', 'date'],
-            'pendidikan' => ['nullable', 'string', 'max:100'],
-            'wali_kelas' => ['nullable', 'string', 'max:50'],
-            'jtm' => ['nullable', 'integer', 'min:0'],
-            'password' => [$ignoreGuruId ? 'nullable' : 'required', 'string', 'min:3'],
-            'is_active' => ['required', 'boolean'],
-        ];
-
-        $data = $request->validate($rules);
-        $data['password'] = $request->filled('password') ? $request->string('password') : '';
-
-        return $data;
-    }
-
-    private function buildEmail(string $nip): string
-    {
-        return Str::slug($nip, '.') . '@guru.local';
     }
 }

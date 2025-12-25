@@ -122,6 +122,7 @@
                                 @foreach ($items as $assignment)
                                     <li>
                                         <a href="{{ route('guru.penilaian.show', $assignment) }}"
+                                            @click="closeSidebarOnMobile()"
                                             class="block rounded-md px-3 py-2 text-sm {{ request()->routeIs('guru.penilaian.show') && optional(request()->route('mengajar'))->id === $assignment->id ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800' }}">
                                             <span>{{ $assignment->kelas->nama ?? '-' }}</span>
                                         </a>

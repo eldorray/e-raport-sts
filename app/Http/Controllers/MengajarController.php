@@ -13,8 +13,19 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
+/**
+ * Controller untuk mengelola jadwal mengajar.
+ *
+ * Menangani penugasan guru ke mata pelajaran per kelas.
+ */
 class MengajarController extends Controller
 {
+    /**
+     * Menampilkan daftar jadwal mengajar per kelas.
+     *
+     * @param  Request  $request  HTTP request
+     * @return View|RedirectResponse Halaman index mengajar
+     */
     public function index(Request $request): View|RedirectResponse
     {
         $tahunId = session('selected_tahun_ajaran_id') ?? TahunAjaran::where('is_active', true)->value('id');
@@ -35,6 +46,7 @@ class MengajarController extends Controller
 
         $mengajars = collect();
         $mengajarByMapel = collect();
+
         if ($selectedKelas && $tahunId) {
             $mengajars = Mengajar::with(['mataPelajaran', 'guru'])
                 ->where('tahun_ajaran_id', $tahunId)
@@ -66,6 +78,12 @@ class MengajarController extends Controller
         ));
     }
 
+    /**
+     * Menyimpan jadwal mengajar baru.
+     *
+     * @param  Request  $request  HTTP request dengan data jadwal
+     * @return RedirectResponse Redirect ke halaman sebelumnya dengan pesan status
+     */
     public function store(Request $request): RedirectResponse
     {
         $tahunId = session('selected_tahun_ajaran_id');
@@ -106,6 +124,13 @@ class MengajarController extends Controller
         return back()->with('status', __('Jadwal mengajar disimpan.'));
     }
 
+    /**
+     * Memperbarui jadwal mengajar yang sudah ada.
+     *
+     * @param  Request   $request   HTTP request dengan data yang diperbarui
+     * @param  Mengajar  $mengajar  Instance mengajar dari route model binding
+     * @return RedirectResponse Redirect ke halaman sebelumnya dengan pesan status
+     */
     public function update(Request $request, Mengajar $mengajar): RedirectResponse
     {
         $data = $this->validatedData($request, $mengajar->tahun_ajaran_id, $mengajar->semester);
@@ -115,6 +140,12 @@ class MengajarController extends Controller
         return back()->with('status', __('Jadwal mengajar diperbarui.'));
     }
 
+    /**
+     * Menghapus jadwal mengajar.
+     *
+     * @param  Mengajar  $mengajar  Instance mengajar dari route model binding
+     * @return RedirectResponse Redirect ke halaman sebelumnya dengan pesan status
+     */
     public function destroy(Mengajar $mengajar): RedirectResponse
     {
         $mengajar->delete();
@@ -122,6 +153,12 @@ class MengajarController extends Controller
         return back()->with('status', __('Jadwal mengajar dihapus.'));
     }
 
+    /**
+     * Menyalin jadwal mengajar dari tahun ajaran lain.
+     *
+     * @param  Request  $request  HTTP request dengan data sumber
+     * @return RedirectResponse Redirect ke halaman sebelumnya dengan pesan status
+     */
     public function copy(Request $request): RedirectResponse
     {
         $targetYear = session('selected_tahun_ajaran_id');
@@ -159,6 +196,12 @@ class MengajarController extends Controller
         return back()->with('status', __('Jadwal mengajar berhasil disalin.'));
     }
 
+    /**
+     * Menampilkan mata pelajaran yang diajar oleh guru yang login.
+     *
+     * @param  Request  $request  HTTP request
+     * @return View|RedirectResponse Halaman daftar pelajaran guru
+     */
     public function mySubjects(Request $request): View|RedirectResponse
     {
         $tahunId = session('selected_tahun_ajaran_id') ?? TahunAjaran::where('is_active', true)->value('id');
@@ -167,6 +210,7 @@ class MengajarController extends Controller
         $guru = Guru::where('user_id', $request->user()->id)->first();
 
         $assignments = collect();
+
         if ($guru && $tahunId) {
             $assignments = Mengajar::with(['kelas', 'mataPelajaran'])
                 ->where('guru_id', $guru->id)
@@ -180,6 +224,14 @@ class MengajarController extends Controller
         return view('guru.pelajaran', compact('assignments', 'tahunId', 'semester', 'guru'));
     }
 
+    /**
+     * Validasi data request untuk update mengajar.
+     *
+     * @param  Request      $request   HTTP request dengan data mengajar
+     * @param  int|null     $tahunId   ID tahun ajaran
+     * @param  string|null  $semester  Semester
+     * @return array Data yang sudah divalidasi
+     */
     private function validatedData(Request $request, ?int $tahunId, ?string $semester): array
     {
         return $request->validate([
@@ -192,5 +244,4 @@ class MengajarController extends Controller
             'jtm' => ['nullable', 'integer', 'min:0'],
         ]);
     }
-
 }
