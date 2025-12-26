@@ -22,6 +22,10 @@ class DatabaseSeeder extends Seeder
         //     'email' => 'test@example.com',
         // ]);
 
+        $this->call([
+            AdminSeeder::class,
+        ]);
+
         SchoolProfile::factory()->create([
             'name' => 'MI Daarul hikmah',
             'nsm' => '111236710070',
