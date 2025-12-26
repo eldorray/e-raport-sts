@@ -72,7 +72,6 @@
             }
         }
 
-
         header {
             display: flex;
             align-items: center;
@@ -267,7 +266,7 @@
                 <p>{{ $school->district ?? '' }} {{ $school->city ? '• ' . $school->city : '' }}
                     {{ $school->province ? '• ' . $school->province : '' }}</p>
             </div>
-            <img src="{{ asset('images/default-school.png') }}" alt="logo" class="logo" style="opacity:0;">
+            <img src="{{ asset('images/logo-kemenag.png') }}" alt="Logo Kemenag" class="logo">
         </header>
 
         <table class="info-table">
