@@ -97,6 +97,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('penilaian', [PenilaianController::class, 'index'])->name('guru.penilaian.index');
         Route::get('penilaian/{mengajar}', [PenilaianController::class, 'show'])->name('guru.penilaian.show');
         Route::post('penilaian/{mengajar}', [PenilaianController::class, 'store'])->name('guru.penilaian.store');
+        Route::delete('penilaian/{mengajar}/reset', [PenilaianController::class, 'reset'])->name('guru.penilaian.reset');
     });
 });
 

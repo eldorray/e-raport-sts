@@ -312,4 +312,32 @@ class PenilaianController extends Controller
             $record->save();
         }
     }
+
+    /**
+     * Reset semua nilai untuk satu mengajar.
+     *
+     * @param  Request   $request   HTTP request
+     * @param  Mengajar  $mengajar  Instance mengajar
+     * @return RedirectResponse
+     */
+    public function reset(Request $request, Mengajar $mengajar): RedirectResponse
+    {
+        $tahunId = session('selected_tahun_ajaran_id');
+        $semester = session('selected_semester');
+        $guru = Guru::where('user_id', $request->user()->id)->first();
+
+        if (! $tahunId || ! $semester) {
+            return back()->withErrors(['tahun_ajaran' => __('Pilih tahun ajaran & semester terlebih dahulu.')]);
+        }
+
+        $this->authorizeGuruAccess($guru, $mengajar);
+
+        // Hapus semua penilaian untuk mengajar ini pada semester/tahun yang dipilih
+        Penilaian::where('mengajar_id', $mengajar->id)
+            ->where('tahun_ajaran_id', $tahunId)
+            ->where('semester', $semester)
+            ->delete();
+
+        return back()->with('status', __('Nilai berhasil direset. Silakan isi ulang.'));
+    }
 }
