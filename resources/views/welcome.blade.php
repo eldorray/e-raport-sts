@@ -25,6 +25,16 @@
 </head>
 
 <body class="min-h-screen bg-slate-950 text-slate-50">
+    @php
+        $school = \App\Models\SchoolProfile::first();
+        $logoUrl = null;
+        if ($school?->logo) {
+            $logoUrl = filter_var($school->logo, FILTER_VALIDATE_URL)
+                ? $school->logo
+                : asset('storage/' . $school->logo);
+        }
+    @endphp
+
     <div class="relative isolate min-h-screen overflow-hidden">
         <div
             class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(59,130,246,0.18),transparent_35%),radial-gradient(circle_at_80%_0%,rgba(14,165,233,0.16),transparent_32%),radial-gradient(circle_at_0%_80%,rgba(99,102,241,0.16),transparent_28%)]">
@@ -33,8 +43,32 @@
             class="pointer-events-none absolute inset-0 bg-[linear-gradient(115deg,rgba(255,255,255,0.05)_0%,rgba(255,255,255,0)_40%),linear-gradient(245deg,rgba(255,255,255,0.06)_0%,rgba(255,255,255,0)_45%)]">
         </div>
 
+        {{-- Header with School Logo and Name --}}
+        <header class="relative z-10 border-b border-white/10">
+            <div class="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+                <div class="flex items-center gap-3">
+                    @if ($logoUrl)
+                        <img src="{{ $logoUrl }}" alt="Logo Sekolah"
+                            class="h-12 w-12 rounded-lg object-contain bg-white/10 p-1">
+                    @else
+                        <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-500/20">
+                            <i class="fa-solid fa-school text-xl text-blue-300"></i>
+                        </div>
+                    @endif
+                    <div>
+                        <p class="font-bold text-white">{{ $school?->name ?? 'Nama Sekolah' }}</p>
+                        <p class="text-xs text-slate-400">{{ $school?->city ?? '' }}</p>
+                    </div>
+                </div>
+                <a href="{{ route('login') }}"
+                    class="inline-flex items-center gap-2 rounded-lg bg-blue-500 px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-blue-500/30 transition hover:bg-blue-600">
+                    <i class="fa-solid fa-right-to-bracket"></i> Masuk
+                </a>
+            </div>
+        </header>
+
         <div
-            class="relative mx-auto flex min-h-screen max-w-6xl flex-col px-6 py-12 lg:flex-row lg:items-center lg:gap-12">
+            class="relative mx-auto flex min-h-[calc(100vh-80px)] max-w-6xl flex-col px-6 py-12 lg:flex-row lg:items-center lg:gap-12">
             <div class="flex-1">
                 <span
                     class="inline-flex items-center gap-2 rounded-full bg-blue-500/10 px-4 py-2 text-xs font-semibold text-blue-200 ring-1 ring-inset ring-blue-400/30">
@@ -129,8 +163,12 @@
             </div>
         </div>
 
-        <footer class="relative border-t border-white/5 bg-slate-950/60 py-6 text-center text-xs text-slate-300">
-            © {{ date('Y') }} Eraport STS 2025 • di kembangkan oleh fahmie al khudhorie
+        <footer class="relative border-t border-white/10 bg-slate-900/80 py-6 text-center text-sm text-slate-400">
+            <div class="mx-auto max-w-6xl px-6">
+                <p>© {{ date('Y') }} <span class="font-semibold text-white">Eraport STS</span> • Dikembangkan oleh
+                    <span class="text-blue-400">Fahmie Al Khudhorie</span>
+                </p>
+            </div>
         </footer>
     </div>
 </body>
