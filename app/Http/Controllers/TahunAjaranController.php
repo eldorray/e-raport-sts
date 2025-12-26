@@ -89,6 +89,8 @@ class TahunAjaranController extends Controller
             'selected_tahun_ajaran_is_active' => (bool) $target->is_active,
         ]);
 
+        $request->session()->save();
+
         return back()->with('status', $shouldActivate ? __('Tahun ajaran diaktifkan.') : __('Tahun ajaran diganti.'));
     }
 
@@ -107,6 +109,8 @@ class TahunAjaranController extends Controller
             'selected_semester' => $semester,
             'selected_tahun_ajaran_is_active' => (bool) $tahun->is_active,
         ]);
+
+        $request->session()->save();
 
         return back()->with('status', __('Tahun ajaran diganti.'));
     }
