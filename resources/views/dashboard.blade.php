@@ -1,95 +1,21 @@
 <x-layouts.app>
 
     @php
-        $sessionYearId = session('selected_tahun_ajaran_id');
-        $sessionSemester = session('selected_semester');
-        $fallbackYearId = App\Models\TahunAjaran::where('is_active', true)->value('id');
-        $selectedTahunAjaran = $sessionYearId ?: $fallbackYearId;
-        $yearModel = $selectedTahunAjaran ? App\Models\TahunAjaran::find($selectedTahunAjaran) : null;
-        $selectedSemester = $sessionSemester ?? $yearModel?->semester;
-        $tahunAjaranOptions = App\Models\TahunAjaran::orderByDesc('is_active')->orderByDesc('tahun_mulai')->get();
-        $isAdmin = auth()->user()->role === 'admin';
-        $isGuru = auth()->user()->role === 'guru';
-        $waliKelasNama = null;
-
-        $adminStats = null;
-        $guruStats = null;
-
-        if ($isAdmin) {
-            $adminStats = [
-                'siswa' => \App\Models\Siswa::count(),
-                'guru' => \App\Models\Guru::count(),
-                'mapel' => \App\Models\MataPelajaran::count(),
-                'rombel' => \App\Models\Kelas::when(
-                    $selectedTahunAjaran,
-                    fn($q) => $q->where('tahun_ajaran_id', $selectedTahunAjaran),
-                )->count(),
-            ];
-        }
-
-        if ($isGuru) {
-            $guruModel = \App\Models\Guru::where('user_id', auth()->id())->first();
-            if ($guruModel) {
-                $waliKelasNama = \App\Models\Kelas::where('guru_id', $guruModel->id)
-                    ->when($selectedTahunAjaran, fn($q) => $q->where('tahun_ajaran_id', $selectedTahunAjaran))
-                    ->value('nama');
-            }
-            $mengajarList = collect();
-            if ($guruModel) {
-                $mengajarList = \App\Models\Mengajar::with('kelas.siswas')
-                    ->where('guru_id', $guruModel->id)
-                    ->when($selectedTahunAjaran, fn($q) => $q->where('tahun_ajaran_id', $selectedTahunAjaran))
-                    ->when($selectedSemester, fn($q) => $q->where('semester', $selectedSemester))
-                    ->get();
-            }
-
-            $mapelDiampu = $mengajarList->pluck('mata_pelajaran_id')->unique()->count();
-
-            // Total siswa unik untuk tampilan
-            $totalSiswaGuru = $mengajarList
-                ->flatMap(fn($m) => $m->kelas?->siswas ?? collect())
-                ->pluck('id')
-                ->unique()
-                ->count();
-
-            // Target entri = jumlah siswa di setiap kelas yang diajar (per mapel/mengajar)
-            $targetPenilaian = $mengajarList->sum(function ($m) {
-                return $m->kelas?->siswas?->count() ?? 0;
-            });
-
-            $penilaianFilled = 0;
-            if ($guruModel) {
-                $penilaianFilled = \App\Models\Penilaian::where('guru_id', $guruModel->id)
-                    ->when($selectedTahunAjaran, fn($q) => $q->where('tahun_ajaran_id', $selectedTahunAjaran))
-                    ->when($selectedSemester, fn($q) => $q->where('semester', $selectedSemester))
-                    ->count();
-            }
-
-            $progress = $targetPenilaian > 0 ? round(min(100, ($penilaianFilled / $targetPenilaian) * 100)) : 0;
-
-            $guruStats = [
-                'mapel_diampu' => $mapelDiampu,
-                'siswa' => $totalSiswaGuru,
-                'penilaian_progress' => $progress,
-            ];
-        }
+        $currentYear = $selectedTahunAjaran ? App\Models\TahunAjaran::find($selectedTahunAjaran) : null;
+        $isActive = $currentYear?->is_active ?? false;
     @endphp
 
     <div class="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
             <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100">{{ __('Dashboard') }}</h1>
             <p class="text-gray-600 dark:text-gray-400 mt-1">{{ __('Welcome to the dashboard') }}</p>
-            @if ($waliKelasNama)
+            @if ($waliKelasNama ?? false)
                 <h1 class="text-xl font-semibold text-emerald-700 dark:text-emerald-300 mt-1">
                     Selamat datang, {{ $guruModel->nama ?? auth()->user()->name }} • Wali Kelas {{ $waliKelasNama }}
                 </h1>
             @endif
         </div>
         @if ($selectedTahunAjaran)
-            @php
-                $currentYear = App\Models\TahunAjaran::find($selectedTahunAjaran);
-                $isActive = $currentYear?->is_active ?? false;
-            @endphp
             <div class="flex flex-col gap-2">
                 <div
                     class="inline-flex items-center gap-3 rounded-2xl border border-blue-200 bg-blue-50 px-4 py-3 text-sm font-semibold text-blue-700 shadow-sm dark:border-blue-800 dark:bg-blue-900/40 dark:text-blue-100">

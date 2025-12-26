@@ -18,12 +18,13 @@ use App\Http\Controllers\RaportPrintController;
 use App\Http\Controllers\RaporDataController;
 use App\Http\Controllers\PrintSettingController;
 use App\Http\Controllers\AdminUserController;
+use App\Http\Controllers\DashboardController;
 
 Route::get('/', function () {
     return view('welcome');
 })->name('home');
 
-Route::view('dashboard', 'dashboard')
+Route::get('dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 

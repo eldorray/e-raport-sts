@@ -4,7 +4,47 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Eraport STS</title>
+
+    @php
+        $school = \App\Models\SchoolProfile::first();
+        $schoolName = $school?->name ?? 'Sekolah';
+        $appName = 'Eraport STS';
+        $pageTitle = "$appName - $schoolName";
+        $pageDescription = "Sistem Rapor Digital untuk $schoolName. Kelola penilaian siswa, capaian pembelajaran, dan cetak rapor dengan mudah. Dirancang untuk STS (Sumatif Tengah Semester).";
+        $logoUrl = null;
+        if ($school?->logo) {
+            $logoUrl = filter_var($school->logo, FILTER_VALIDATE_URL)
+                ? $school->logo
+                : asset('storage/' . $school->logo);
+        }
+    @endphp
+
+    <title>{{ $pageTitle }}</title>
+
+    {{-- SEO Meta Tags --}}
+    <meta name="description" content="{{ $pageDescription }}">
+    <meta name="keywords" content="rapor, eraport, STS, penilaian siswa, sekolah, nilai, rapor digital">
+    <meta name="author" content="Fahmie Al Khudhorie">
+    <meta name="robots" content="index, follow">
+
+    {{-- Open Graph / Facebook --}}
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ url('/') }}">
+    <meta property="og:title" content="{{ $pageTitle }}">
+    <meta property="og:description" content="{{ $pageDescription }}">
+    @if ($logoUrl)
+        <meta property="og:image" content="{{ $logoUrl }}">
+    @endif
+    <meta property="og:locale" content="id_ID">
+
+    {{-- Twitter Card --}}
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ $pageTitle }}">
+    <meta name="twitter:description" content="{{ $pageDescription }}">
+    @if ($logoUrl)
+        <meta name="twitter:image" content="{{ $logoUrl }}">
+    @endif
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
@@ -25,15 +65,6 @@
 </head>
 
 <body class="min-h-screen bg-slate-950 text-slate-50">
-    @php
-        $school = \App\Models\SchoolProfile::first();
-        $logoUrl = null;
-        if ($school?->logo) {
-            $logoUrl = filter_var($school->logo, FILTER_VALIDATE_URL)
-                ? $school->logo
-                : asset('storage/' . $school->logo);
-        }
-    @endphp
 
     <div class="relative isolate min-h-screen overflow-hidden">
         <div
