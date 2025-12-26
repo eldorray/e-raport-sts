@@ -85,12 +85,6 @@
                         :active="request()->routeIs('rapor.prestasi')">Prestasi Siswa</x-layouts.sidebar-link>
                     <x-layouts.sidebar-link href="{{ route('rapor.catatan') }}" icon='fas-note-sticky'
                         :active="request()->routeIs('rapor.catatan')">Catatan Wali</x-layouts.sidebar-link>
-                    <x-layouts.sidebar-link href="{{ route('rapor.absen') }}" icon='fas-calendar-check'
-                        :active="request()->routeIs('rapor.absen')">Data Absen</x-layouts.sidebar-link>
-                    <x-layouts.sidebar-link href="{{ route('rapor.prestasi') }}" icon='fas-trophy'
-                        :active="request()->routeIs('rapor.prestasi')">Prestasi Siswa</x-layouts.sidebar-link>
-                    <x-layouts.sidebar-link href="{{ route('rapor.catatan') }}" icon='fas-note-sticky'
-                        :active="request()->routeIs('rapor.catatan')">Catatan Wali</x-layouts.sidebar-link>
 
                     <li class="px-2 pt-4 pb-2">
                         <h2 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
