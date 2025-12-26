@@ -21,98 +21,92 @@
 
         body {
             font-family: 'Inter', system-ui, sans-serif;
-            background: #f8fafc;
-            color: #1e293b;
         }
     </style>
 </head>
 
-<body>
-    <div class="min-h-screen flex flex-col">
-        {{-- Header --}}
-        <header class="bg-white border-b border-gray-100">
-            <div class="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
-                <img src="{{ asset('images/eraport-logo.png') }}" alt="eraport" class="h-9">
+@php
+    $school = \App\Models\SchoolProfile::first();
+    $logoUrl = null;
+    if ($school?->logo) {
+        $logoUrl = filter_var($school->logo, FILTER_VALIDATE_URL) ? $school->logo : asset('storage/' . $school->logo);
+    }
+@endphp
+
+<body class="min-h-screen bg-amber-50/50">
+    <div class="min-h-screen flex items-center justify-center p-6">
+        {{-- Main Card --}}
+        <div class="w-full max-w-5xl rounded-3xl overflow-hidden shadow-2xl"
+            style="background: linear-gradient(135deg, #f5ebe0 0%, #e8d5c4 25%, #d5c4a1 50%, #c9b896 75%, #b8a67e 100%);">
+
+            {{-- Header --}}
+            <div class="flex items-center justify-between px-8 py-4">
+                <div class="flex items-center gap-3">
+                    @if ($logoUrl)
+                        <img src="{{ $logoUrl }}" alt="Logo"
+                            class="w-10 h-10 rounded-full object-cover bg-white/50">
+                    @else
+                        <div class="w-10 h-10 rounded-full bg-white/30"></div>
+                    @endif
+                    <span class="text-amber-900 font-semibold uppercase tracking-wide text-sm">
+                        {{ $school?->name ?? 'SEKOLAH' }}
+                    </span>
+                </div>
                 <a href="{{ route('login') }}"
-                    class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg text-sm font-medium transition">
-                    Masuk
+                    class="bg-amber-700 hover:bg-amber-800 text-white px-5 py-2 rounded-full text-sm font-medium transition">
+                    MASUK
                 </a>
             </div>
-        </header>
 
-        {{-- Main Content --}}
-        <main class="flex-1 flex items-center">
-            <div class="max-w-5xl mx-auto px-6 py-16 w-full">
-                <div class="text-center max-w-2xl mx-auto">
-                    <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 leading-tight">
-                        Sistem Penilaian Rapor Digital
+            {{-- Content --}}
+            <div class="grid md:grid-cols-2 gap-8 px-8 py-12 min-h-[400px]">
+                {{-- Left: Login Form --}}
+                <div class="flex flex-col justify-center">
+                    <form method="POST" action="{{ route('login') }}" class="space-y-4 max-w-sm">
+                        @csrf
+                        <div>
+                            <input type="text" name="login" placeholder="USERNAME / NIP / EMAIL"
+                                class="w-full px-4 py-3 rounded-full border border-amber-300/50 bg-white/40 text-amber-900 placeholder-amber-700/60 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:bg-white/60 transition"
+                                required>
+                        </div>
+                        <div>
+                            <input type="password" name="password" placeholder="PASSWORD"
+                                class="w-full px-4 py-3 rounded-full border border-amber-300/50 bg-white/40 text-amber-900 placeholder-amber-700/60 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:bg-white/60 transition"
+                                required>
+                        </div>
+                        <div>
+                            <button type="submit"
+                                class="w-full bg-amber-600 hover:bg-amber-700 text-white py-3 rounded-full font-semibold tracking-wide transition shadow-lg">
+                                LOGIN
+                            </button>
+                        </div>
+                        <div class="flex items-center justify-between text-sm">
+                            <label class="flex items-center gap-2 text-amber-800 cursor-pointer">
+                                <input type="checkbox" name="remember"
+                                    class="rounded border-amber-400 text-amber-600 focus:ring-amber-500">
+                                Ingat Saya
+                            </label>
+                        </div>
+                    </form>
+                </div>
+
+                {{-- Right: Welcome Text --}}
+                <div class="flex flex-col justify-center text-right">
+                    <h1 class="text-4xl md:text-5xl font-bold text-amber-900" style="font-family: Georgia, serif;">
+                        Selamat Datang.
                     </h1>
-                    <p class="mt-4 text-gray-600 text-lg">
-                        Kelola nilai siswa dengan mudah. Input nilai sumatif dan STS, dapatkan deskripsi capaian
-                        otomatis.
+                    <p class="mt-4 text-amber-800/80 leading-relaxed">
+                        Sistem Penilaian Rapor Digital<br>
+                        {{ $school?->name ?? 'Sekolah' }}
                     </p>
-                    <div class="mt-8">
-                        <a href="{{ route('login') }}"
-                            class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-medium transition">
-                            Mulai Sekarang
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
-                                stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                            </svg>
-                        </a>
-                    </div>
-                </div>
-
-                {{-- Features --}}
-                <div class="mt-20 grid sm:grid-cols-3 gap-8">
-                    <div class="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
-                        <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                            </svg>
-                        </div>
-                        <h3 class="font-semibold text-gray-900">Penilaian Otomatis</h3>
-                        <p class="mt-2 text-sm text-gray-600">Rata-rata rapor dihitung secara otomatis dari nilai
-                            sumatif dan STS.</p>
-                    </div>
-
-                    <div class="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
-                        <div class="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center mb-4">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-600" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        </div>
-                        <h3 class="font-semibold text-gray-900">Deskripsi Capaian</h3>
-                        <p class="mt-2 text-sm text-gray-600">Predikat dan kalimat capaian terisi otomatis sesuai
-                            rentang nilai.</p>
-                    </div>
-
-                    <div class="bg-white rounded-xl p-6 border border-gray-100 shadow-sm">
-                        <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-purple-600" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                        </div>
-                        <h3 class="font-semibold text-gray-900">Data Terintegrasi</h3>
-                        <p class="mt-2 text-sm text-gray-600">Guru, kelas, dan siswa tersinkron dalam satu sistem.</p>
-                    </div>
+                    @if ($school?->address)
+                        <p class="mt-2 text-sm text-amber-700/70">
+                            {{ $school->address }}, {{ $school->district }}, {{ $school->city }}
+                        </p>
+                    @endif
                 </div>
             </div>
-        </main>
-
-        {{-- Footer --}}
-        <footer class="bg-white border-t border-gray-100 py-6">
-            <div class="max-w-5xl mx-auto px-6 text-center text-sm text-gray-500">
-                © {{ date('Y') }} Eraport STS • Dikembangkan oleh Fahmie Al Khudhorie
-            </div>
-        </footer>
+        </div>
     </div>
 </body>
 
