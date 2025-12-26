@@ -241,6 +241,68 @@
                     </div>
                 </div>
             </div>
+            {{-- Progress Penilaian Card --}}
+            @php
+                $progress = $guruStats['penilaian_progress'];
+                $progressColor = $progress < 50 ? 'red' : ($progress < 80 ? 'amber' : 'emerald');
+                $progressBg = [
+                    'red' => 'bg-red-500',
+                    'amber' => 'bg-amber-500',
+                    'emerald' => 'bg-emerald-500',
+                ][$progressColor];
+                $progressBgLight = [
+                    'red' => 'bg-red-100 dark:bg-red-900/30',
+                    'amber' => 'bg-amber-100 dark:bg-amber-900/30',
+                    'emerald' => 'bg-emerald-100 dark:bg-emerald-900/30',
+                ][$progressColor];
+                $progressText = [
+                    'red' => 'text-red-600 dark:text-red-400',
+                    'amber' => 'text-amber-600 dark:text-amber-400',
+                    'emerald' => 'text-emerald-600 dark:text-emerald-400',
+                ][$progressColor];
+                $progressLabel =
+                    $progress < 50
+                        ? 'Perlu Perhatian'
+                        : ($progress < 80
+                            ? 'Dalam Proses'
+                            : ($progress < 100
+                                ? 'Hampir Selesai'
+                                : 'Selesai'));
+            @endphp
+            <div
+                class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 border border-gray-200 dark:border-gray-700 col-span-1 md:col-span-2">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Status Pengisian Nilai</p>
+                        <div class="flex items-baseline gap-2 mt-1">
+                            <p class="text-3xl font-bold {{ $progressText }}">{{ $progress }}%</p>
+                            <span class="text-sm font-semibold {{ $progressText }}">{{ $progressLabel }}</span>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">{{ $penilaianFilled }} / {{ $targetPenilaian }} entri
+                            nilai</p>
+                    </div>
+                    <div class="{{ $progressBgLight }} p-3 rounded-full">
+                        @if ($progress >= 100)
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 {{ $progressText }}"
+                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        @else
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 {{ $progressText }}"
+                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                            </svg>
+                        @endif
+                    </div>
+                </div>
+                {{-- Progress Bar --}}
+                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 overflow-hidden">
+                    <div class="{{ $progressBg }} h-3 rounded-full transition-all duration-500 ease-out"
+                        style="width: {{ $progress }}%"></div>
+                </div>
+            </div>
         @endif
     </div>
 
