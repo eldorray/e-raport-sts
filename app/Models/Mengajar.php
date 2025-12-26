@@ -5,12 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Str;
 
 class Mengajar extends Model
 {
     use HasFactory;
 
     protected $fillable = [
+        'uuid',
         'tahun_ajaran_id',
         'semester',
         'kelas_id',
@@ -20,6 +22,28 @@ class Mengajar extends Model
         'bobot_sumatif',
         'bobot_sts',
     ];
+
+    /**
+     * Boot the model and auto-generate UUID on creating.
+     */
+    protected static function boot(): void
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            if (empty($model->uuid)) {
+                $model->uuid = Str::uuid()->toString();
+            }
+        });
+    }
+
+    /**
+     * Get the route key name for Laravel route model binding.
+     */
+    public function getRouteKeyName(): string
+    {
+        return 'uuid';
+    }
 
     public function tahunAjaran(): BelongsTo
     {
