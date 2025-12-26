@@ -82,10 +82,10 @@
                     selaras dengan panel admin Eraport STS.
                 </p>
                 <div class="mt-6 flex flex-wrap items-center gap-3">
-                    <a href="{{ route('login') }}"
+                    {{-- <a href="{{ route('login') }}"
                         class="inline-flex items-center gap-2 rounded-xl bg-blue-500 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-500/30 transition hover:-translate-y-0.5 hover:bg-blue-600">
                         <i class="fa-solid fa-right-to-bracket"></i> Masuk
-                    </a>
+                    </a> --}}
                     {{-- @if (Route::has('register'))
                         <a href="{{ route('register') }}"
                             class="inline-flex items-center gap-2 rounded-xl border border-white/15 px-4 py-3 text-sm font-semibold text-white/90 transition hover:-translate-y-0.5 hover:border-white/25 hover:text-white">
