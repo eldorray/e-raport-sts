@@ -4,6 +4,7 @@
             old('tahun_ajaran_id') ??
             ($tahunAjaranOptions->firstWhere('is_active', true)->id ?? ($tahunAjaranOptions->first()->id ?? null));
         $defaultSemester = old('semester', 'Ganjil');
+        $school = \App\Models\SchoolProfile::first();
     @endphp
 
     <div class="relative overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-xl">
@@ -14,7 +15,7 @@
                     <p class="text-sm font-semibold tracking-wide text-gray-700 uppercase">
                         {{ __('E-Raport Kurikulum Merdeka') }}</p>
                     <h1 class="text-3xl font-extrabold leading-tight text-gray-900 lg:text-4xl">
-                        MI Daarul Hikmah
+                        {{ $school?->name }}
                     </h1>
                     <p class="text-sm text-gray-600">{{ __('Silahkan login menggunakan akun Anda') }}</p>
 
