@@ -51,10 +51,16 @@ class DashboardController extends Controller
 
         if ($isAdmin) {
             $adminStats = $this->buildAdminStats($selectedTahunAjaran);
-            $recentLogins = LoginLog::with('user')
-                ->orderByDesc('logged_in_at')
-                ->limit(10)
-                ->get();
+
+            // Try to get login logs, but don't crash if table doesn't exist yet
+            try {
+                $recentLogins = LoginLog::with('user')
+                    ->orderByDesc('logged_in_at')
+                    ->limit(10)
+                    ->get();
+            } catch (\Exception $e) {
+                $recentLogins = collect();
+            }
         }
 
         if ($isGuru) {
