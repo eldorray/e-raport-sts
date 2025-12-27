@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Guru;
 use App\Models\Kelas;
+use App\Models\LoginLog;
 use App\Models\MataPelajaran;
 use App\Models\Mengajar;
 use App\Models\Penilaian;
@@ -46,9 +47,14 @@ class DashboardController extends Controller
         $waliKelasNama = null;
         $penilaianFilled = 0;
         $targetPenilaian = 0;
+        $recentLogins = collect();
 
         if ($isAdmin) {
             $adminStats = $this->buildAdminStats($selectedTahunAjaran);
+            $recentLogins = LoginLog::with('user')
+                ->orderByDesc('logged_in_at')
+                ->limit(10)
+                ->get();
         }
 
         if ($isGuru) {
@@ -72,6 +78,7 @@ class DashboardController extends Controller
             'waliKelasNama',
             'penilaianFilled',
             'targetPenilaian',
+            'recentLogins',
         ));
     }
 

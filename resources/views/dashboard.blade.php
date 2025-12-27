@@ -232,4 +232,87 @@
         @endif
     </div>
 
+    {{-- Recent Login Logs (Admin Only) --}}
+    @if ($isAdmin && $recentLogins->isNotEmpty())
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                <div class="flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-500" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">{{ __('Log Login Terakhir') }}
+                    </h2>
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead class="bg-gray-50 dark:bg-gray-700">
+                        <tr>
+                            <th
+                                class="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
+                                {{ __('User') }}</th>
+                            <th
+                                class="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
+                                {{ __('Role') }}</th>
+                            <th
+                                class="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
+                                {{ __('IP Address') }}</th>
+                            <th
+                                class="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
+                                {{ __('Waktu Login') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                        @foreach ($recentLogins as $log)
+                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition">
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center gap-3">
+                                        <div
+                                            class="h-8 w-8 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-blue-600 dark:text-blue-300 font-semibold text-sm">
+                                            {{ strtoupper(substr($log->user?->name ?? 'U', 0, 1)) }}
+                                        </div>
+                                        <div>
+                                            <p class="font-medium text-gray-900 dark:text-gray-100">
+                                                {{ $log->user?->name ?? '-' }}</p>
+                                            <p class="text-xs text-gray-500 dark:text-gray-400">
+                                                {{ $log->user?->email ?? '-' }}</p>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    @php
+                                        $role = $log->user?->role ?? 'user';
+                                        $roleColor = match ($role) {
+                                            'admin' => 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300',
+                                            'guru'
+                                                => 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300',
+                                            default => 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
+                                        };
+                                    @endphp
+                                    <span
+                                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold {{ $roleColor }}">
+                                        {{ ucfirst($role) }}
+                                    </span>
+                                </td>
+                                <td
+                                    class="px-6 py-4 whitespace-nowrap text-gray-600 dark:text-gray-400 font-mono text-xs">
+                                    {{ $log->ip_address ?? '-' }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-gray-600 dark:text-gray-400">
+                                    <div>
+                                        <p class="font-medium">{{ $log->logged_in_at?->format('d M Y') }}</p>
+                                        <p class="text-xs text-gray-500">{{ $log->logged_in_at?->format('H:i:s') }}
+                                        </p>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    @endif
+
 </x-layouts.app>
