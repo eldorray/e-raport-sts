@@ -16,10 +16,13 @@ class NoCacheHeaders
     {
         $response = $next($request);
 
-        return $response->withHeaders([
+        // Use headers->add() to support all response types including StreamedResponse
+        $response->headers->add([
             'Cache-Control' => 'no-cache, no-store, must-revalidate, max-age=0',
             'Pragma' => 'no-cache',
             'Expires' => '0',
         ]);
+
+        return $response;
     }
 }

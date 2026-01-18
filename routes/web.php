@@ -18,6 +18,7 @@ use App\Http\Controllers\RaportPrintController;
 use App\Http\Controllers\RaporDataController;
 use App\Http\Controllers\PrintSettingController;
 use App\Http\Controllers\AdminUserController;
+use App\Http\Controllers\BackupController;
 use App\Http\Controllers\DashboardController;
 
 Route::get('/', function () {
@@ -72,6 +73,11 @@ Route::middleware(['auth'])->group(function () {
         Route::get('rapor/pengaturan-cetak', [PrintSettingController::class, 'edit'])->name('rapor.print-settings.edit');
         Route::post('rapor/pengaturan-cetak', [PrintSettingController::class, 'update'])->name('rapor.print-settings.update');
         Route::resource('users', AdminUserController::class)->except(['show']);
+
+        // Backup & Restore
+        Route::get('backup', [BackupController::class, 'index'])->name('backup.index');
+        Route::get('backup/download', [BackupController::class, 'download'])->name('backup.download');
+        Route::post('backup/restore', [BackupController::class, 'restore'])->name('backup.restore');
     });
 
     // Admin & Guru: pengaturan bobot dan cetak rapor

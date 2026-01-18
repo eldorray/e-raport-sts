@@ -65,6 +65,14 @@
                         :active="request()->routeIs('rapor.print-settings.*')">Pengaturan Cetak</x-layouts.sidebar-link>
                     <x-layouts.sidebar-link href="{{ route('rapor.index') }}" icon='fas-file-lines'
                         :active="request()->routeIs('rapor.index')">Cetak Rapor</x-layouts.sidebar-link>
+
+                    <li class="px-2 pt-4 pb-2">
+                        <h2 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                            Sistem
+                        </h2>
+                    </li>
+                    <x-layouts.sidebar-link href="{{ route('backup.index') }}" icon='fas-database'
+                        :active="request()->routeIs('backup.*')">Backup & Restore</x-layouts.sidebar-link>
                 @else
                     <li class="px-2 pt-4 pb-2">
                         <h2 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
