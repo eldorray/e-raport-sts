@@ -80,9 +80,15 @@ class AppServiceProvider extends ServiceProvider
                 ->orderBy('nama')
                 ->get();
 
+            // Check apakah guru adalah wali kelas pada tahun ajaran yang dipilih
+            $isWaliKelas = \App\Models\Kelas::where('guru_id', $guru->id)
+                ->when($tahunId, fn ($q) => $q->where('tahun_ajaran_id', $tahunId))
+                ->exists();
+
             $view->with('sidebarAssignments', $assignments);
             $view->with('sidebarMapelStatus', $mapelStatus);
             $view->with('sidebarEkskul', $ekskulAssignments);
+            $view->with('isWaliKelas', $isWaliKelas);
         });
     }
 }

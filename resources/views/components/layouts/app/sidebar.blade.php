@@ -85,14 +85,16 @@
                     <x-layouts.sidebar-link href="{{ route('guru.ekskul.index') }}" icon='fas-star'
                         :active="request()->routeIs('guru.ekskul.*')">Ekskul Saya</x-layouts.sidebar-link>
 
-                    <x-layouts.sidebar-link href="{{ route('rapor.index') }}" icon='fas-file-lines'
-                        :active="request()->routeIs('rapor.index')">Cetak Rapor</x-layouts.sidebar-link>
-                    <x-layouts.sidebar-link href="{{ route('rapor.absen') }}" icon='fas-calendar-check'
-                        :active="request()->routeIs('rapor.absen')">Data Absen</x-layouts.sidebar-link>
-                    <x-layouts.sidebar-link href="{{ route('rapor.prestasi') }}" icon='fas-trophy'
-                        :active="request()->routeIs('rapor.prestasi')">Prestasi Siswa</x-layouts.sidebar-link>
-                    <x-layouts.sidebar-link href="{{ route('rapor.catatan') }}" icon='fas-note-sticky'
-                        :active="request()->routeIs('rapor.catatan')">Catatan Wali</x-layouts.sidebar-link>
+                    @if ($isWaliKelas ?? false)
+                        <x-layouts.sidebar-link href="{{ route('rapor.index') }}" icon='fas-file-lines'
+                            :active="request()->routeIs('rapor.index')">Cetak Rapor</x-layouts.sidebar-link>
+                        <x-layouts.sidebar-link href="{{ route('rapor.absen') }}" icon='fas-calendar-check'
+                            :active="request()->routeIs('rapor.absen')">Data Absen</x-layouts.sidebar-link>
+                        <x-layouts.sidebar-link href="{{ route('rapor.prestasi') }}" icon='fas-trophy'
+                            :active="request()->routeIs('rapor.prestasi')">Prestasi Siswa</x-layouts.sidebar-link>
+                        <x-layouts.sidebar-link href="{{ route('rapor.catatan') }}" icon='fas-note-sticky'
+                            :active="request()->routeIs('rapor.catatan')">Catatan Wali</x-layouts.sidebar-link>
+                    @endif
 
                     <li class="px-2 pt-4 pb-2">
                         <h2 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">

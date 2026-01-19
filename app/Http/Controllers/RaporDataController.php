@@ -38,6 +38,11 @@ class RaporDataController extends Controller
                 abort(403, __('Akun Anda belum terhubung dengan data guru.'));
             }
             $kelasQuery->where('guru_id', $guru->id);
+
+            // Guru bukan wali kelas tidak boleh mengakses data rapor wali
+            if (! $kelasQuery->exists()) {
+                abort(403, __('Anda bukan wali kelas pada tahun ajaran ini.'));
+            }
         }
 
         return [$kelasQuery->get(), $guru];
