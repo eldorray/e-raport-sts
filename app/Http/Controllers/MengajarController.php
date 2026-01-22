@@ -58,7 +58,10 @@ class MengajarController extends Controller
             $mengajarByMapel = $mengajars->keyBy('mata_pelajaran_id');
         }
 
-        $mataPelajarans = MataPelajaran::orderBy('urutan')->orderBy('nama_mapel')->get();
+            $mataPelajarans = MataPelajaran::orderByRaw("FIELD(kelompok, 'PAI', 'Umum', 'Mulok')")
+            ->orderBy('urutan')
+            ->orderBy('nama_mapel')
+            ->get();
         $gurus = Guru::orderBy('nama')->get();
         $tahunOptions = TahunAjaran::orderByDesc('is_active')->orderByDesc('tahun_mulai')->get();
 

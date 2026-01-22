@@ -62,13 +62,13 @@
                                 class="bg-gray-100 text-xs font-semibold uppercase tracking-wide text-gray-600 dark:bg-gray-900/40 dark:text-gray-400">
                                 <tr>
                                     <th class="px-3 py-3">{{ __('Mata Pelajaran') }}</th>
-                                    <th class="px-3 py-3">{{ __('Kelompok') }}</th>
-                                    <th class="px-3 py-3">{{ __('Jurusan') }}</th>
+                                    <th class="px-3 py-3">{{ __('Induk') }}</th>
                                     <th class="px-3 py-3">{{ __('JTM') }}</th>
                                     <th class="px-3 py-3">{{ __('Guru Pengajar') }}</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                                @php $currentKelompok = null; $rowNumber = 0; @endphp
                                 @foreach ($mataPelajarans as $mapel)
                                     @php
                                         $assignment = $mengajarByMapel->get($mapel->id);
@@ -77,19 +77,46 @@
                                             "items.{$mapel->id}.jtm",
                                             $assignment?->jtm ?? $mapel->jumlah_jam,
                                         );
+                                        $isChildSubject = in_array($mapel->kelompok, ['PAI', 'Mulok']);
+                                    @endphp
+                                    
+                                    {{-- Group header for PAI --}}
+                                    @if ($mapel->kelompok === 'PAI' && $currentKelompok !== 'PAI')
+                                        @php $currentKelompok = 'PAI'; $rowNumber++; @endphp
+                                        <tr class="bg-gray-50 dark:bg-gray-800/50">
+                                            <td class="px-3 py-3" colspan="4">
+                                                <span class="font-bold text-gray-900 dark:text-gray-100">{{ __('Pendidikan Agama Islam') }}</span>
+                                            </td>
+                                        </tr>
+                                    @endif
+                                    
+                                    {{-- Group header for Mulok --}}
+                                    @if ($mapel->kelompok === 'Mulok' && $currentKelompok !== 'Mulok')
+                                        @php $currentKelompok = 'Mulok'; $rowNumber++; @endphp
+                                        <tr class="bg-gray-50 dark:bg-gray-800/50">
+                                            <td class="px-3 py-3" colspan="4">
+                                                <span class="font-bold text-gray-900 dark:text-gray-100">{{ __('Muatan Lokal') }}</span>
+                                            </td>
+                                        </tr>
+                                    @endif
+                                    
+                                    @php 
+                                        if ($currentKelompok !== 'PAI' && $currentKelompok !== 'Mulok' && $mapel->kelompok === 'Umum') {
+                                            $currentKelompok = 'Umum';
+                                        }
+                                        $rowNumber++; 
                                     @endphp
                                     <tr>
                                         <td class="px-3 py-3">
                                             <input type="hidden" name="items[{{ $mapel->id }}][mata_pelajaran_id]"
                                                 value="{{ $mapel->id }}">
-                                            <div class="font-semibold text-gray-900 dark:text-gray-100">
+                                            <div class="{{ $isChildSubject ? 'italic pl-4' : '' }} font-semibold text-gray-900 dark:text-gray-100">
                                                 {{ $mapel->nama_mapel }}</div>
                                             @if ($mapel->kode)
-                                                <div class="text-xs text-gray-500">{{ $mapel->kode }}</div>
+                                                <div class="text-xs text-gray-500 {{ $isChildSubject ? 'pl-4' : '' }}">{{ $mapel->kode }}</div>
                                             @endif
                                         </td>
-                                        <td class="px-3 py-3">{{ $mapel->kelompok ?? '—' }}</td>
-                                        <td class="px-3 py-3">{{ $mapel->jurusan ?? '—' }}</td>
+                                        <td class="px-3 py-3">{{ $isChildSubject ? $mapel->kelompok : '—' }}</td>
                                         <td class="px-3 py-3">
                                             <input type="number" name="items[{{ $mapel->id }}][jtm]" min="0"
                                                 value="{{ $jtmValue }}"
