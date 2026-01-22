@@ -10,6 +10,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
@@ -31,7 +32,6 @@ class LoginController extends Controller
             'login' => ['required', 'string', 'max:255'],
             'password' => ['required', 'string'],
             'tahun_ajaran_id' => ['required', 'integer', 'exists:tahun_ajarans,id'],
-            'semester' => ['required', 'string', 'max:20'],
         ]);
 
         $this->ensureIsNotRateLimited($request);
@@ -72,17 +72,20 @@ class LoginController extends Controller
         $request->session()->regenerate();
 
         // Log the successful login
-        LoginLog::create([
-            'user_id' => $user->id,
-            'ip_address' => $request->ip(),
-            'user_agent' => $request->userAgent(),
-            'logged_in_at' => now(),
-        ]);
+        if (Schema::hasTable('login_logs')) {
+            LoginLog::create([
+                'user_id' => $user->id,
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'logged_in_at' => now(),
+            ]);
+        }
 
         $selectedYearId = $request->integer('tahun_ajaran_id');
-        $selectedSemester = $request->string('semester');
-
         $yearModel = TahunAjaran::find($selectedYearId);
+
+        // Semester is now taken from the selected TahunAjaran record
+        $selectedSemester = $yearModel?->semester ?? 'Ganjil';
 
         $request->session()->put([
             'selected_tahun_ajaran_id' => $selectedYearId,

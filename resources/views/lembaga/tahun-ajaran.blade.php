@@ -63,19 +63,20 @@
                                         </td>
                                         <td class="px-4 py-3">{{ $tahun->semester ?? '—' }}</td>
                                         <td class="px-4 py-3">
-                                            @if ($tahun->is_active)
-                                                <span
-                                                    class="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-200">
-                                                    <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
-                                                    {{ __('Aktif') }}
-                                                </span>
-                                            @else
-                                                <span
-                                                    class="inline-flex items-center gap-1 rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-600 dark:bg-gray-800/60 dark:text-gray-300">
-                                                    <span class="h-2 w-2 rounded-full bg-gray-400"></span>
-                                                    {{ __('Nonaktif') }}
-                                                </span>
-                                            @endif
+                                            <form action="{{ route('tahun-ajaran.toggle-active', $tahun) }}" method="POST" class="inline">
+                                                @csrf
+                                                @method('PATCH')
+                                                <button type="submit"
+                                                    class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 {{ $tahun->is_active ? 'bg-emerald-500 focus:ring-emerald-500' : 'bg-gray-300 dark:bg-gray-600 focus:ring-gray-400' }}"
+                                                    title="{{ $tahun->is_active ? __('Klik untuk menonaktifkan') : __('Klik untuk mengaktifkan') }}">
+                                                    <span class="sr-only">{{ __('Toggle status') }}</span>
+                                                    <span
+                                                        class="inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform duration-200 {{ $tahun->is_active ? 'translate-x-6' : 'translate-x-1' }}"></span>
+                                                </button>
+                                            </form>
+                                            <span class="ml-2 text-xs font-medium {{ $tahun->is_active ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-500 dark:text-gray-400' }}">
+                                                {{ $tahun->is_active ? __('Aktif') : __('Nonaktif') }}
+                                            </span>
                                         </td>
                                         <td class="px-4 py-3">
                                             <div class="flex items-center justify-center gap-2">
@@ -166,9 +167,13 @@
                 <div class="grid gap-4 sm:grid-cols-2">
                     <div>
                         <label for="create_semester"
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Semester (opsional)') }}</label>
-                        <input id="create_semester" name="semester" type="text"
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Semester') }} <span class="text-red-500">*</span></label>
+                        <select id="create_semester" name="semester" required
                             class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+                            <option value="">{{ __('-- Pilih Semester --') }}</option>
+                            <option value="Ganjil">{{ __('Ganjil') }}</option>
+                            <option value="Genap">{{ __('Genap') }}</option>
+                        </select>
                     </div>
                     <div class="flex items-center gap-3 pt-6">
                         <input type="hidden" name="is_active" value="0">
@@ -234,9 +239,13 @@
                 <div class="grid gap-4 sm:grid-cols-2">
                     <div>
                         <label for="edit_semester"
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Semester') }}</label>
-                        <input id="edit_semester" name="semester" type="text"
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Semester') }} <span class="text-red-500">*</span></label>
+                        <select id="edit_semester" name="semester" required
                             class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+                            <option value="">{{ __('-- Pilih Semester --') }}</option>
+                            <option value="Ganjil">{{ __('Ganjil') }}</option>
+                            <option value="Genap">{{ __('Genap') }}</option>
+                        </select>
                     </div>
                     <div class="flex items-center gap-3 pt-6">
                         <input type="hidden" name="is_active" value="0">

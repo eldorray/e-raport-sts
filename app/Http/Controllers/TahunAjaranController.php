@@ -65,6 +65,23 @@ class TahunAjaranController extends Controller
         return back()->with('status', __('Tahun ajaran berhasil dihapus.'));
     }
 
+    public function toggleActive(TahunAjaran $tahunAjaran)
+    {
+        DB::transaction(function () use ($tahunAjaran) {
+            if (!$tahunAjaran->is_active) {
+                // Activating: deactivate all others first
+                TahunAjaran::where('id', '!=', $tahunAjaran->id)->update(['is_active' => false]);
+                $tahunAjaran->update(['is_active' => true]);
+            } else {
+                // Deactivating
+                $tahunAjaran->update(['is_active' => false]);
+            }
+        });
+
+        $status = $tahunAjaran->fresh()->is_active;
+        return back()->with('status', $status ? __('Tahun ajaran diaktifkan.') : __('Tahun ajaran dinonaktifkan.'));
+    }
+
     public function activate(Request $request, TahunAjaran $tahunAjaran)
     {
         // Choose target from request dropdown (dashboard) or route model binding
@@ -124,14 +141,25 @@ class TahunAjaranController extends Controller
                 'required',
                 'string',
                 'max:50',
-                Rule::unique('tahun_ajarans', 'nama')->ignore($ignoreId),
             ],
             'tahun_mulai' => ['required', 'integer', 'between:' . ($currentYear - 10) . ',' . ($currentYear + 10)],
             'tahun_selesai' => ['required', 'integer', 'gte:tahun_mulai', 'between:' . ($currentYear - 10) . ',' . ($currentYear + 11)],
-            'semester' => ['nullable', 'string', 'max:20'],
+            'semester' => ['required', 'string', 'max:20'],
             'keterangan' => ['nullable', 'string', 'max:500'],
             'is_active' => ['sometimes', 'boolean'],
         ]);
+
+        // Check unique constraint for nama + semester combination
+        $exists = TahunAjaran::where('nama', $data['nama'])
+            ->where('semester', $data['semester'])
+            ->when($ignoreId, fn ($q) => $q->where('id', '!=', $ignoreId))
+            ->exists();
+
+        if ($exists) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'nama' => __('Kombinasi nama tahun ajaran dan semester ini sudah ada.'),
+            ]);
+        }
 
         $data['is_active'] = $request->boolean('is_active');
 

@@ -50,7 +50,7 @@
                             class="rounded-lg border border-blue-200 bg-white px-2 py-1 text-xs font-semibold text-blue-700 shadow-sm focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-300/50 dark:border-blue-700 dark:bg-blue-900/60 dark:text-blue-100">
                             @foreach ($tahunAjaranOptions as $option)
                                 <option value="{{ $option->id }}" @selected($option->id === $selectedTahunAjaran)>
-                                    {{ $option->nama }} {{ $option->is_active ? '• Aktif' : '' }}
+                                    {{ $option->nama }} - {{ $option->semester }} {{ $option->is_active ? '• Aktif' : '' }}
                                 </option>
                             @endforeach
                         </select>

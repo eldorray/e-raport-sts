@@ -49,6 +49,7 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('mata-pelajaran', MataPelajaranController::class)->only(['index', 'store', 'update', 'destroy']);
         Route::resource('tahun-ajaran', TahunAjaranController::class)->only(['index', 'store', 'update', 'destroy']);
         Route::patch('tahun-ajaran/{tahunAjaran}/activate', [TahunAjaranController::class, 'activate'])->name('tahun-ajaran.activate');
+        Route::patch('tahun-ajaran/{tahunAjaran}/toggle-active', [TahunAjaranController::class, 'toggleActive'])->name('tahun-ajaran.toggle-active');
         Route::get('guru/import/template', [GuruController::class, 'template'])->name('guru.template');
         Route::post('guru/import', [GuruController::class, 'import'])->name('guru.import');
         Route::delete('guru/delete-all', [GuruController::class, 'destroyAll'])->name('guru.destroy-all');

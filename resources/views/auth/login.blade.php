@@ -78,7 +78,7 @@
                             </div>
 
                             <div class="space-y-1">
-                                <label class="text-sm font-semibold text-gray-700">{{ __('Tahun Ajaran') }}</label>
+                                <label class="text-sm font-semibold text-gray-700">{{ __('Tahun Ajaran & Semester') }}</label>
                                 <div
                                     class="flex items-center gap-2 rounded-xl border border-gray-300 bg-white px-3 py-2.5 ring-1 ring-transparent focus-within:border-blue-500 focus-within:ring-blue-200">
                                     <span class="text-gray-500">
@@ -93,35 +93,13 @@
                                         <option value="" disabled {{ $defaultTahunAjaran ? '' : 'selected' }}>
                                             {{ __('Pilih tahun ajaran') }}</option>
                                         @foreach ($tahunAjaranOptions as $tahun)
-                                            <option value="{{ $tahun->id }}" @selected($defaultTahunAjaran == $tahun->id)>
-                                                {{ $tahun->nama }}
+                                            <option value="{{ $tahun->id }}" data-semester="{{ $tahun->semester }}" @selected($defaultTahunAjaran == $tahun->id)>
+                                                {{ $tahun->nama }} - Semester {{ $tahun->semester }}
                                             </option>
                                         @endforeach
                                     </select>
                                 </div>
                                 @error('tahun_ajaran_id')
-                                    <p class="text-sm text-red-600">{{ $message }}</p>
-                                @enderror
-                            </div>
-
-                            <div class="space-y-1">
-                                <label class="text-sm font-semibold text-gray-700">{{ __('Semester') }}</label>
-                                <div
-                                    class="flex items-center gap-2 rounded-xl border border-gray-300 bg-white px-3 py-2.5 ring-1 ring-transparent focus-within:border-blue-500 focus-within:ring-blue-200">
-                                    <span class="text-gray-500">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
-                                            viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"
-                                                d="M8 7h12M8 12h12m-5 5h5M4 7h.01M4 12h.01M4 17h.01" />
-                                        </svg>
-                                    </span>
-                                    <select name="semester"
-                                        class="w-full bg-transparent text-base font-semibold text-gray-900 focus:outline-none">
-                                        <option value="Ganjil" @selected($defaultSemester === 'Ganjil')>Ganjil</option>
-                                        <option value="Genap" @selected($defaultSemester === 'Genap')>Genap</option>
-                                    </select>
-                                </div>
-                                @error('semester')
                                     <p class="text-sm text-red-600">{{ $message }}</p>
                                 @enderror
                             </div>

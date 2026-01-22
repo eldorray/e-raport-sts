@@ -6,7 +6,7 @@ use App\Models\User;
 use App\Models\SchoolProfile;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-
+use App\Models\TahunAjaran;
 
 class DatabaseSeeder extends Seeder
 {
@@ -38,6 +38,15 @@ class DatabaseSeeder extends Seeder
             'headmaster' => 'Dra. Nurjanah',
             'nip_headmaster' => '1987654321',
             'logo' => 'logo_mi_daarul_hikmah.png',
+        ]);
+
+        // tahun ajaran
+        TahunAjaran::factory()->create([
+            'nama' => '2025/2026',
+            'tahun_mulai' => 2025,
+            'tahun_selesai' => 2026,
+            'semester' => '1',
+            'is_active' => true,
         ]);
     }
 }
