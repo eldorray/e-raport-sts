@@ -59,7 +59,7 @@ class MengajarController extends Controller
         }
 
             $mataPelajarans = MataPelajaran::orderByRaw("FIELD(kelompok, 'PAI', 'Umum', 'Mulok')")
-            ->orderBy('urutan')
+            ->orderByRaw('CAST(urutan AS UNSIGNED)')
             ->orderBy('nama_mapel')
             ->get();
         $gurus = Guru::orderBy('nama')->get();
