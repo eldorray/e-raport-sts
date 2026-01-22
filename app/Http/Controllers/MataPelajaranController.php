@@ -54,6 +54,12 @@ class MataPelajaranController extends Controller
 
         $mataPelajaran->update($data);
 
+        // Sync JTM to all related Mengajar records
+        if (isset($data['jumlah_jam'])) {
+            \App\Models\Mengajar::where('mata_pelajaran_id', $mataPelajaran->id)
+                ->update(['jtm' => $data['jumlah_jam']]);
+        }
+
         return back()->with('status', __('Mata pelajaran berhasil diperbarui.'));
     }
 
