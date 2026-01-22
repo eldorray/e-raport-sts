@@ -159,7 +159,7 @@
 <script>
     $(document).ready(function() {
         const tableIds = ['#subjects-table', '#guru-table', '#siswa-table', '#kelas-table', '#rombel-table',
-            '#mengajar-table', '#guru-subjects-table', '#rapor-table'
+            '#guru-subjects-table', '#rapor-table'
         ];
         tableIds.forEach((id) => {
             const tableEl = document.querySelector(id);
