@@ -105,9 +105,12 @@
                     </p>
                 </div>
 
-                <form method="POST" action="{{ $selectedKelas ? route('rombel.update', $selectedKelas) : '#' }}">
+                <form id="rombelForm" method="POST" action="{{ $selectedKelas ? route('rombel.update', $selectedKelas) : '#' }}">
                     @csrf
                     @method('PUT')
+                    
+                    {{-- Hidden container for checked siswa IDs --}}
+                    <div id="hiddenSiswaIds"></div>
 
                     @if ($siswas->isEmpty())
                         <div class="px-6 py-10 text-center text-sm text-gray-500 dark:text-gray-400">
@@ -130,7 +133,7 @@
                                     @foreach ($siswas as $siswa)
                                         <tr>
                                             <td class="px-3 py-3 text-center">
-                                                <input type="checkbox" name="siswa_ids[]" value="{{ $siswa->id }}"
+                                                <input type="checkbox" class="siswa-checkbox" data-siswa-id="{{ $siswa->id }}"
                                                     @checked($selectedKelas && $siswa->kelas_id === $selectedKelas->id)
                                                     class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
                                             </td>
@@ -154,4 +157,46 @@
             </div>
         </div>
     @endif
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('rombelForm');
+            const hiddenContainer = document.getElementById('hiddenSiswaIds');
+            
+            // Track checked state across all pages
+            const checkedSiswaIds = new Set();
+            
+            // Initialize with already checked checkboxes
+            document.querySelectorAll('.siswa-checkbox:checked').forEach(function(cb) {
+                checkedSiswaIds.add(cb.dataset.siswaId);
+            });
+            
+            // Listen for checkbox changes (works even with DataTables pagination)
+            document.addEventListener('change', function(e) {
+                if (e.target.classList.contains('siswa-checkbox')) {
+                    const siswaId = e.target.dataset.siswaId;
+                    if (e.target.checked) {
+                        checkedSiswaIds.add(siswaId);
+                    } else {
+                        checkedSiswaIds.delete(siswaId);
+                    }
+                }
+            });
+            
+            // Before form submit, add all checked IDs as hidden inputs
+            form.addEventListener('submit', function(e) {
+                // Clear old hidden inputs
+                hiddenContainer.innerHTML = '';
+                
+                // Add hidden input for each checked siswa
+                checkedSiswaIds.forEach(function(siswaId) {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'siswa_ids[]';
+                    input.value = siswaId;
+                    hiddenContainer.appendChild(input);
+                });
+            });
+        });
+    </script>
 </x-layouts.app>
