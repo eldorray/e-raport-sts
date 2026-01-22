@@ -29,7 +29,7 @@ class RaportPrintController extends Controller
      * @param  Siswa    $siswa    Instance siswa dari route model binding
      * @return View Halaman cetak rapor
      */
-    public function show(Request $request, Siswa $siswa): View
+    public function show(Request $request, Siswa $siswa): View|\Illuminate\Http\RedirectResponse
     {
         $tahunId = $request->integer('tahun_ajaran_id') ?: session('selected_tahun_ajaran_id');
         $semester = $request->input('semester') ?: session('selected_semester');
@@ -38,7 +38,13 @@ class RaportPrintController extends Controller
         $this->authorizeAccess($request->user(), $siswa, $tahunId);
 
         $kelas = $siswa->kelas;
-        $wali = $kelas?->guru;
+        
+        // Validate student has a class assigned
+        if (! $kelas) {
+            return redirect()->back()->with('error', __('Siswa belum ditempatkan di kelas. Silakan tetapkan kelas terlebih dahulu.'));
+        }
+        
+        $wali = $kelas->guru;
 
         $school = SchoolProfile::first();
         $printSetting = PrintSetting::first();

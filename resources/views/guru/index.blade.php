@@ -6,7 +6,7 @@
             </p>
         </div>
         <div class="flex flex-wrap gap-2">
-            @if ($gurus->total() > 0)
+            @if ($gurus->count() > 0)
                 <form action="{{ route('guru.destroy-all') }}" method="POST"
                     onsubmit="return confirm('{{ __('Hapus semua guru? Tindakan ini tidak dapat dibatalkan.') }}');">
                     @csrf
@@ -44,6 +44,15 @@
                 class="inline-flex items-center gap-2 rounded-lg bg-gray-100 px-4 py-2 text-sm font-semibold text-gray-800 shadow-sm transition hover:bg-gray-200 focus:outline-none focus:ring-4 focus:ring-gray-300/60">
                 {{ __('Unduh Template') }}
             </a>
+            <button type="button" id="openSyncModal"
+                class="inline-flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-green-700 focus:outline-none focus:ring-4 focus:ring-green-500/30">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                {{ __('Sync API') }}
+            </button>
         </div>
     </div>
 
@@ -71,7 +80,7 @@
                 <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                     @foreach ($gurus as $index => $guru)
                         <tr>
-                            <td class="px-3 py-3">{{ $gurus->firstItem() + $index }}</td>
+                            <td class="px-3 py-3">{{ $index + 1 }}</td>
                             <td class="px-3 py-3">
                                 <div class="font-semibold text-gray-900 dark:text-gray-100">{{ $guru->nip }}</div>
                                 <div class="text-xs text-gray-500">{{ $guru->nik ?? '—' }}</div>
@@ -129,10 +138,6 @@
                 {{ __('Belum ada data guru.') }}
             </div>
         @endif
-
-        <div class="px-4 py-3 border-t border-gray-100 dark:border-gray-700 text-sm text-gray-600 dark:text-gray-300">
-            {{ $gurus->links() }}
-        </div>
     </div>
 
     <div id="modalOverlay" class="fixed inset-0 z-40 hidden items-center justify-center bg-gray-900/60 px-4">
@@ -158,6 +163,39 @@
                 @include('guru.partials.form', ['mode' => 'edit'])
             </form>
         </div>
+
+        <div id="syncModal"
+            class="modal-card hidden w-full max-w-lg overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-900">
+            <div class="border-b border-gray-100 bg-gray-50 px-6 py-4 dark:border-gray-700 dark:bg-gray-900/40">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ __('Sync Data Guru dari API') }}</h3>
+            </div>
+            <form action="{{ route('guru.sync') }}" method="POST" class="space-y-4 px-6 py-6">
+                @csrf
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('Pilih Sumber Data') }}</label>
+                    <select name="source" required class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100">
+                        <option value="">-- Pilih Sumber --</option>
+                        <option value="guru-mi">Guru MI</option>
+                        <option value="guru-smp">Guru SMP</option>
+                    </select>
+                </div>
+                <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 text-sm text-blue-800 dark:text-blue-300">
+                    <p class="font-medium mb-2">{{ __('Informasi:') }}</p>
+                    <ul class="list-disc list-inside space-y-1">
+                        <li>Data akan diambil dari: <code class="bg-blue-100 dark:bg-blue-800 px-1 rounded">{{ env('SYNC_API_BASE_URL', 'https://datainduk.ypdhalmadani.sch.id') }}/api/[source]/all</code></li>
+                        <li>Guru yang sudah ada (berdasarkan NIP) akan diperbarui</li>
+                        <li>Guru baru akan ditambahkan beserta akun login</li>
+                        <li>Password default: sama dengan NIP</li>
+                    </ul>
+                </div>
+                <div class="flex justify-end gap-3">
+                    <button type="button" data-close-modal
+                        class="rounded-lg bg-gray-100 px-4 py-2.5 text-sm font-semibold text-gray-800 hover:bg-gray-200">{{ __('Batal') }}</button>
+                    <button type="submit"
+                        class="rounded-lg bg-green-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-green-700">{{ __('Sync Sekarang') }}</button>
+                </div>
+            </form>
+        </div>
     </div>
 
     <script>
@@ -165,7 +203,9 @@
             const modalOverlay = document.getElementById('modalOverlay');
             const createModal = document.getElementById('createModal');
             const editModal = document.getElementById('editModal');
+            const syncModal = document.getElementById('syncModal');
             const openCreateModalButton = document.getElementById('openCreateModal');
+            const openSyncModalButton = document.getElementById('openSyncModal');
             const editForm = document.getElementById('editForm');
 
             function openModal(modal) {
@@ -180,10 +220,12 @@
                 modalOverlay.classList.add('hidden');
                 createModal.classList.add('hidden');
                 editModal.classList.add('hidden');
+                syncModal?.classList.add('hidden');
                 document.body.classList.remove('overflow-hidden');
             }
 
             openCreateModalButton?.addEventListener('click', () => openModal(createModal));
+            openSyncModalButton?.addEventListener('click', () => openModal(syncModal));
             modalOverlay?.addEventListener('click', (event) => {
                 if (event.target === modalOverlay) closeModal();
             });

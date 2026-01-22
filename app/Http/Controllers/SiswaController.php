@@ -7,6 +7,8 @@ use App\Imports\SiswaImport;
 use App\Models\Siswa;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
@@ -198,6 +200,150 @@ class SiswaController extends Controller
     public function template()
     {
         return Excel::download(new SiswaTemplateExport(), 'template-siswa.xlsx');
+    }
+
+    /**
+     * Sync siswa data dari API eksternal.
+     *
+     * @param  Request  $request  HTTP request dengan source (siswa-mi atau siswa-smp)
+     * @return RedirectResponse Redirect dengan hasil sync
+     */
+    public function syncFromApi(Request $request): RedirectResponse
+    {
+        $tahunId = session('selected_tahun_ajaran_id');
+        if (!$tahunId) {
+            return back()->with('error', 'Pilih tahun ajaran terlebih dahulu.');
+        }
+
+        $request->validate([
+            'source' => ['required', 'in:siswa-mi,siswa-smp'],
+        ]);
+
+        $source = $request->input('source');
+        $created = 0;
+        $updated = 0;
+        $failed = 0;
+        $errors = [];
+
+        try {
+            $page = 1;
+            $hasMorePages = true;
+            $apiBaseUrl = env('SYNC_API_BASE_URL', 'https://datainduk.ypdhalmadani.sch.id');
+            $baseUrl = "{$apiBaseUrl}/api/{$source}/all";
+
+            while ($hasMorePages) {
+                $response = Http::timeout(60)->get($baseUrl, ['page' => $page]);
+
+                if (!$response->successful()) {
+                    return back()->with('error', 'Gagal mengambil data dari API. Status: ' . $response->status());
+                }
+
+                $data = $response->json();
+                $siswas = $data['data'] ?? $data;
+
+                if (!is_array($siswas)) {
+                    return back()->with('error', 'Format response API tidak valid.');
+                }
+
+                foreach ($siswas as $siswaData) {
+                    try {
+                        // Map API fields to local fields
+                        $nama = $siswaData['nama_lengkap'] ?? $siswaData['nama'] ?? null;
+                        $nis = $siswaData['nisn'] ?? $siswaData['nik'] ?? null; // Use NISN or NIK as NIS
+                        $nisn = $siswaData['nisn'] ?? null;
+                        $gender = $siswaData['jenis_kelamin'] ?? 'L';
+
+                        // Normalize gender
+                        if (in_array(strtolower($gender), ['laki-laki', 'male', 'l'])) {
+                            $gender = 'L';
+                        } elseif (in_array(strtolower($gender), ['perempuan', 'female', 'p'])) {
+                            $gender = 'P';
+                        }
+
+                        if (!$nama) {
+                            $failed++;
+                            $errors[] = "Data tidak lengkap: Nama kosong";
+                            continue;
+                        }
+
+                        // Generate unique NIS if not available
+                        if (!$nis) {
+                            $nis = 'TMP-' . time() . '-' . rand(1000, 9999);
+                        }
+
+                        // Prepare siswa data
+                        $syncData = [
+                            'tahun_ajaran_id' => $tahunId,
+                            'nis' => $nis,
+                            'nisn' => $nisn,
+                            'nama' => $nama,
+                            'jenis_kelamin' => $gender,
+                            'tempat_lahir' => $siswaData['tempat_lahir'] ?? null,
+                            'tanggal_lahir' => $siswaData['tanggal_lahir'] ?? null,
+                            'alamat' => $siswaData['alamat'] ?? null,
+                            'telpon' => $siswaData['no_telepon'] ?? null,
+                            'nama_ayah' => $siswaData['nama_ayah_kandung'] ?? null,
+                            'nama_ibu' => $siswaData['nama_ibu_kandung'] ?? null,
+                            'nama_wali' => $siswaData['nama_wali'] ?? null,
+                            'is_active' => ($siswaData['status'] ?? 'Aktif') === 'Aktif',
+                        ];
+
+                        // Find existing siswa by NISN or NIS
+                        $existingSiswa = null;
+                        if ($nisn) {
+                            $existingSiswa = Siswa::where('tahun_ajaran_id', $tahunId)
+                                ->where('nisn', $nisn)
+                                ->first();
+                        }
+                        if (!$existingSiswa && $nis) {
+                            $existingSiswa = Siswa::where('tahun_ajaran_id', $tahunId)
+                                ->where('nis', $nis)
+                                ->first();
+                        }
+
+                        if ($existingSiswa) {
+                            $existingSiswa->update($syncData);
+                            $updated++;
+                        } else {
+                            Siswa::create($syncData);
+                            $created++;
+                        }
+                    } catch (\Exception $e) {
+                        $failed++;
+                        $errors[] = "Error: " . $e->getMessage();
+                    }
+                }
+
+                // Check pagination
+                $lastPage = $data['last_page'] ?? 1;
+                $currentPage = $data['current_page'] ?? $page;
+                $nextPageUrl = $data['next_page_url'] ?? null;
+
+                if ($nextPageUrl || $currentPage < $lastPage) {
+                    $page++;
+                } else {
+                    $hasMorePages = false;
+                }
+
+                if ($page > 1000) {
+                    $hasMorePages = false;
+                }
+            }
+
+            $message = "Sync berhasil: {$created} siswa baru, {$updated} diperbarui.";
+            if ($failed > 0) {
+                $message .= " {$failed} gagal.";
+            }
+
+            return back()->with('status', $message);
+
+        } catch (\Illuminate\Http\Client\ConnectionException $e) {
+            Log::error('Sync API Error: ' . $e->getMessage());
+            return back()->with('error', 'Tidak dapat terhubung ke API. Pastikan server API berjalan.');
+        } catch (\Exception $e) {
+            Log::error('Sync API Error: ' . $e->getMessage());
+            return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
     }
 
     /**

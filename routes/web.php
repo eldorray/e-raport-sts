@@ -54,6 +54,9 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('guru/delete-all', [GuruController::class, 'destroyAll'])->name('guru.destroy-all');
         Route::resource('guru', GuruController::class)->except(['show']);
         Route::patch('guru/{guru}/toggle-status', [GuruController::class, 'toggleStatus'])->name('guru.toggle');
+        Route::post('guru/sync', [GuruController::class, 'syncFromApi'])->name('guru.sync');
+        Route::post('siswa/sync', [SiswaController::class, 'syncFromApi'])->name('siswa.sync');
+        Route::post('mata-pelajaran/sync', [MataPelajaranController::class, 'syncFromApi'])->name('mata-pelajaran.sync');
         Route::resource('kelas', KelasController::class)->except(['show'])->parameters([
             'kelas' => 'kelas',
         ]);

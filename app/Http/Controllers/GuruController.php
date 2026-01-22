@@ -11,6 +11,8 @@ use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
@@ -45,7 +47,7 @@ class GuruController extends Controller
      */
     public function index(): View
     {
-        $gurus = Guru::with('user')->orderBy('nama')->paginate(self::PAGINATION_PER_PAGE);
+        $gurus = Guru::with('user')->orderBy('nama')->get();
 
         $tahunId = session('selected_tahun_ajaran_id') ?? TahunAjaran::where('is_active', true)->value('id');
         $guruIds = $gurus->pluck('id');
@@ -228,6 +230,143 @@ class GuruController extends Controller
     public function template()
     {
         return Excel::download(new GuruTemplateExport(), 'template-guru.xlsx');
+    }
+
+    /**
+     * Sync guru data dari API eksternal.
+     *
+     * @param  Request  $request  HTTP request dengan source (guru-mi atau guru-smp)
+     * @return RedirectResponse Redirect dengan hasil sync
+     */
+    public function syncFromApi(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'source' => ['required', 'in:guru-mi,guru-smp'],
+        ]);
+
+        $source = $request->input('source');
+        $created = 0;
+        $updated = 0;
+        $failed = 0;
+        $errors = [];
+
+        try {
+            $page = 1;
+            $hasMorePages = true;
+            $apiBaseUrl = env('SYNC_API_BASE_URL', 'https://datainduk.ypdhalmadani.sch.id');
+            $baseUrl = "{$apiBaseUrl}/api/{$source}/all";
+
+            while ($hasMorePages) {
+                $response = Http::timeout(60)->get($baseUrl, ['page' => $page]);
+
+                if (!$response->successful()) {
+                    return back()->with('error', 'Gagal mengambil data dari API. Status: ' . $response->status());
+                }
+
+                $data = $response->json();
+                $gurus = $data['data'] ?? $data;
+
+                if (!is_array($gurus)) {
+                    return back()->with('error', 'Format response API tidak valid.');
+                }
+
+                foreach ($gurus as $guruData) {
+                    try {
+                        // Map API fields to local fields
+                        $nip = $guruData['nik'] ?? null; // Using NIK as NIP identifier
+                        $nik = $guruData['nik'] ?? null;
+                        $nama = $guruData['full_name'] ?? $guruData['nama'] ?? null;
+                        $gender = $guruData['gender'] ?? 'L';
+
+                        // Normalize gender
+                        if (in_array(strtolower($gender), ['laki-laki', 'male', 'l'])) {
+                            $gender = 'L';
+                        } elseif (in_array(strtolower($gender), ['perempuan', 'female', 'p'])) {
+                            $gender = 'P';
+                        }
+
+                        if (!$nip || !$nama) {
+                            $failed++;
+                            $errors[] = "Data tidak lengkap: NIP={$nip}, Nama={$nama}";
+                            continue;
+                        }
+
+                        // Prepare guru data
+                        $syncData = [
+                            'nama' => $nama,
+                            'nip' => $nip,
+                            'nik' => $nik,
+                            'jenis_kelamin' => $gender,
+                            'tempat_lahir' => $guruData['pob'] ?? null,
+                            'tanggal_lahir' => $guruData['dob'] ?? null,
+                            'is_active' => $guruData['is_active'] ?? true,
+                        ];
+
+                        // Find existing guru by NIP
+                        $existingGuru = Guru::where('nip', $nip)->first();
+
+                        if ($existingGuru) {
+                            $existingGuru->update($syncData);
+                            $existingGuru->user?->update([
+                                'name' => $nama,
+                                'nip' => $nip,
+                                'nik' => $nik,
+                                'is_active' => $guruData['is_active'] ?? true,
+                            ]);
+                            $updated++;
+                        } else {
+                            // Create user first
+                            $user = User::create([
+                                'name' => $nama,
+                                'email' => Str::slug($nip, '.') . self::EMAIL_DOMAIN,
+                                'password' => Hash::make($nip), // Default password is NIP
+                                'role' => self::USER_ROLE_GURU,
+                                'nip' => $nip,
+                                'nik' => $nik,
+                                'is_active' => $guruData['is_active'] ?? true,
+                            ]);
+
+                            $syncData['user_id'] = $user->id;
+                            $syncData['initial_password'] = $nip;
+                            Guru::create($syncData);
+                            $created++;
+                        }
+                    } catch (\Exception $e) {
+                        $failed++;
+                        $errors[] = "Error: " . $e->getMessage();
+                    }
+                }
+
+                // Check pagination
+                $lastPage = $data['last_page'] ?? 1;
+                $currentPage = $data['current_page'] ?? $page;
+                $nextPageUrl = $data['next_page_url'] ?? null;
+
+                if ($nextPageUrl || $currentPage < $lastPage) {
+                    $page++;
+                } else {
+                    $hasMorePages = false;
+                }
+
+                if ($page > 1000) {
+                    $hasMorePages = false;
+                }
+            }
+
+            $message = "Sync berhasil: {$created} guru baru, {$updated} diperbarui.";
+            if ($failed > 0) {
+                $message .= " {$failed} gagal.";
+            }
+
+            return back()->with('status', $message);
+
+        } catch (\Illuminate\Http\Client\ConnectionException $e) {
+            Log::error('Sync API Error: ' . $e->getMessage());
+            return back()->with('error', 'Tidak dapat terhubung ke API. Pastikan server API berjalan.');
+        } catch (\Exception $e) {
+            Log::error('Sync API Error: ' . $e->getMessage());
+            return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
     }
 
     /**
