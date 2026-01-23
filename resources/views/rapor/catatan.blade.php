@@ -29,7 +29,8 @@
         </div>
     @else
         @if (!$canEdit)
-            <div class="mb-4 rounded-lg border border-amber-300 bg-amber-50 p-4 dark:border-amber-700 dark:bg-amber-900/30">
+            <div
+                class="mb-4 rounded-lg border border-amber-300 bg-amber-50 p-4 dark:border-amber-700 dark:bg-amber-900/30">
                 <div class="flex items-center gap-2 text-sm font-semibold text-amber-700 dark:text-amber-300">
                     <i class="fas fa-exclamation-triangle"></i>
                     {{ __('Tahun ajaran yang dipilih tidak aktif. Anda hanya dapat melihat data, tidak dapat mengubah data.') }}
@@ -63,7 +64,8 @@
                                 <td class="px-3 py-3">{{ $siswa->nisn ?? '—' }}</td>
                                 <td class="px-3 py-3">{{ $siswa->nama }}</td>
                                 <td class="px-3 py-3">
-                                    <textarea name="catatan[{{ $siswa->id }}]" rows="2" placeholder="Catatan singkat dari wali kelas" @disabled(!$canEdit)
+                                    <textarea name="catatan[{{ $siswa->id }}]" rows="2" placeholder="Catatan singkat dari wali kelas"
+                                        @disabled(!$canEdit)
                                         class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-900 disabled:opacity-60 disabled:cursor-not-allowed">{{ old('catatan.' . $siswa->id, $val) }}</textarea>
                                 </td>
                             </tr>

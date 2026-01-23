@@ -140,9 +140,10 @@
                                 </thead>
                                 <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                                     @foreach ($siswas as $siswa)
-                                        <tr>
+                                        <tr class="siswa-row cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                                            data-siswa-id="{{ $siswa->id }}">
                                             <td class="px-3 py-3 text-center">
-                                                <input type="checkbox" class="siswa-checkbox"
+                                                <input type="checkbox" class="siswa-checkbox pointer-events-none"
                                                     data-siswa-id="{{ $siswa->id }}" @checked($selectedKelas && $siswa->kelas_id === $selectedKelas->id)
                                                     class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
                                             </td>
@@ -180,14 +181,53 @@
                 checkedSiswaIds.add(cb.dataset.siswaId);
             });
 
-            // Listen for checkbox changes (works even with DataTables pagination)
+            // Function to update row styling based on checkbox state
+            function updateRowStyle(row, isChecked) {
+                if (isChecked) {
+                    row.classList.add('bg-blue-50', 'dark:bg-blue-900/30');
+                } else {
+                    row.classList.remove('bg-blue-50', 'dark:bg-blue-900/30');
+                }
+            }
+
+            // Initialize row styles
+            document.querySelectorAll('.siswa-row').forEach(function(row) {
+                const checkbox = row.querySelector('.siswa-checkbox');
+                if (checkbox) {
+                    updateRowStyle(row, checkbox.checked);
+                }
+            });
+
+            // Listen for row clicks to toggle checkbox
+            document.addEventListener('click', function(e) {
+                const row = e.target.closest('.siswa-row');
+                if (row) {
+                    const checkbox = row.querySelector('.siswa-checkbox');
+                    if (checkbox) {
+                        checkbox.checked = !checkbox.checked;
+                        const siswaId = checkbox.dataset.siswaId;
+                        if (checkbox.checked) {
+                            checkedSiswaIds.add(siswaId);
+                        } else {
+                            checkedSiswaIds.delete(siswaId);
+                        }
+                        updateRowStyle(row, checkbox.checked);
+                    }
+                }
+            });
+
+            // Listen for checkbox changes (for DataTables pagination)
             document.addEventListener('change', function(e) {
                 if (e.target.classList.contains('siswa-checkbox')) {
                     const siswaId = e.target.dataset.siswaId;
+                    const row = e.target.closest('.siswa-row');
                     if (e.target.checked) {
                         checkedSiswaIds.add(siswaId);
                     } else {
                         checkedSiswaIds.delete(siswaId);
+                    }
+                    if (row) {
+                        updateRowStyle(row, e.target.checked);
                     }
                 }
             });

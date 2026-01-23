@@ -65,7 +65,8 @@
                             </td>
                             <td class="px-3 py-3">
                                 @if ($record?->predikat)
-                                    <span class="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold
+                                    <span
+                                        class="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold
                                         {{ $record->predikat === 'A' ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300' : '' }}
                                         {{ $record->predikat === 'B' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300' : '' }}
                                         {{ $record->predikat === 'C' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300' : '' }}

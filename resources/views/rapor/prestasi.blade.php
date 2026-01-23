@@ -29,7 +29,8 @@
         </div>
     @else
         @if (!$canEdit)
-            <div class="mb-4 rounded-lg border border-amber-300 bg-amber-50 p-4 dark:border-amber-700 dark:bg-amber-900/30">
+            <div
+                class="mb-4 rounded-lg border border-amber-300 bg-amber-50 p-4 dark:border-amber-700 dark:bg-amber-900/30">
                 <div class="flex items-center gap-2 text-sm font-semibold text-amber-700 dark:text-amber-300">
                     <i class="fas fa-exclamation-triangle"></i>
                     {{ __('Tahun ajaran yang dipilih tidak aktif. Anda hanya dapat melihat data, tidak dapat mengubah data.') }}
