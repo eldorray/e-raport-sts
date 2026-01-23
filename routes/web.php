@@ -90,13 +90,14 @@ Route::middleware(['auth'])->group(function () {
         Route::post('penilaian/bobot', [PenilaianController::class, 'updateBobot'])->name('penilaian.bobot.update');
         Route::get('rapor', [RaporAdminController::class, 'index'])->name('rapor.index');
         Route::get('rapor/kelas/{kelas}/ledger', [RaporAdminController::class, 'ledger'])->name('rapor.ledger');
-        Route::get('rapor/{siswa}', [RaportPrintController::class, 'show'])->whereNumber('siswa')->name('rapor.print');
         Route::get('rapor/absen', [RaporDataController::class, 'absen'])->name('rapor.absen');
         Route::post('rapor/absen', [RaporDataController::class, 'absenStore'])->name('rapor.absen.store');
         Route::get('rapor/prestasi', [RaporDataController::class, 'prestasi'])->name('rapor.prestasi');
         Route::post('rapor/prestasi', [RaporDataController::class, 'prestasiStore'])->name('rapor.prestasi.store');
         Route::get('rapor/catatan', [RaporDataController::class, 'catatan'])->name('rapor.catatan');
         Route::post('rapor/catatan', [RaporDataController::class, 'catatanStore'])->name('rapor.catatan.store');
+        // Route dengan parameter dinamis harus di akhir
+        Route::get('rapor/{siswa}', [RaportPrintController::class, 'show'])->whereNumber('siswa')->name('rapor.print');
     });
 
     // Guru / wali-only
