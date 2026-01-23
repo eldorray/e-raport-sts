@@ -113,10 +113,11 @@
                     </p>
                 </div>
 
-                <form id="rombelForm" method="POST" action="{{ $selectedKelas ? route('rombel.update', $selectedKelas) : '#' }}">
+                <form id="rombelForm" method="POST"
+                    action="{{ $selectedKelas ? route('rombel.update', $selectedKelas) : '#' }}">
                     @csrf
                     @method('PUT')
-                    
+
                     {{-- Hidden container for checked siswa IDs --}}
                     <div id="hiddenSiswaIds"></div>
 
@@ -141,8 +142,8 @@
                                     @foreach ($siswas as $siswa)
                                         <tr>
                                             <td class="px-3 py-3 text-center">
-                                                <input type="checkbox" class="siswa-checkbox" data-siswa-id="{{ $siswa->id }}"
-                                                    @checked($selectedKelas && $siswa->kelas_id === $selectedKelas->id)
+                                                <input type="checkbox" class="siswa-checkbox"
+                                                    data-siswa-id="{{ $siswa->id }}" @checked($selectedKelas && $siswa->kelas_id === $selectedKelas->id)
                                                     class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
                                             </td>
                                             <td class="px-3 py-3">{{ $siswa->nis }}</td>
@@ -170,15 +171,15 @@
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.getElementById('rombelForm');
             const hiddenContainer = document.getElementById('hiddenSiswaIds');
-            
+
             // Track checked state across all pages
             const checkedSiswaIds = new Set();
-            
+
             // Initialize with already checked checkboxes
             document.querySelectorAll('.siswa-checkbox:checked').forEach(function(cb) {
                 checkedSiswaIds.add(cb.dataset.siswaId);
             });
-            
+
             // Listen for checkbox changes (works even with DataTables pagination)
             document.addEventListener('change', function(e) {
                 if (e.target.classList.contains('siswa-checkbox')) {
@@ -190,12 +191,12 @@
                     }
                 }
             });
-            
+
             // Before form submit, add all checked IDs as hidden inputs
             form.addEventListener('submit', function(e) {
                 // Clear old hidden inputs
                 hiddenContainer.innerHTML = '';
-                
+
                 // Add hidden input for each checked siswa
                 checkedSiswaIds.forEach(function(siswaId) {
                     const input = document.createElement('input');
@@ -211,8 +212,9 @@
     {{-- Copy Modal --}}
     <div id="copyModal" class="hidden fixed inset-0 z-50 overflow-y-auto" aria-modal="true">
         <div class="flex min-h-screen items-center justify-center p-4">
-            <div class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm" onclick="document.getElementById('copyModal').classList.add('hidden')"></div>
-            
+            <div class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm"
+                onclick="document.getElementById('copyModal').classList.add('hidden')"></div>
+
             <div class="relative w-full max-w-md rounded-2xl bg-white p-6 shadow-xl dark:bg-gray-800">
                 <div class="mb-4 flex items-center justify-between">
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
@@ -238,16 +240,19 @@
                                 @if ($tahun->id != $currentTahunId)
                                     <option value="{{ $tahun->id }}">
                                         {{ $tahun->nama }} - {{ $tahun->semester }}
-                                        @if ($tahun->is_active) (Aktif) @endif
+                                        @if ($tahun->is_active)
+                                            (Aktif)
+                                        @endif
                                     </option>
                                 @endif
                             @endforeach
                         </select>
                     </div>
 
-                    <div class="mb-4 rounded-lg bg-amber-50 p-3 text-sm text-amber-700 dark:bg-amber-900/50 dark:text-amber-200">
+                    <div
+                        class="mb-4 rounded-lg bg-amber-50 p-3 text-sm text-amber-700 dark:bg-amber-900/50 dark:text-amber-200">
                         <i class="fas fa-info-circle mr-1"></i>
-                        {{ __('Siswa akan disalin ke kelas dengan nama yang sama di tahun ajaran saat ini.') }}
+                        {{ __('Siswa akan disalin ke tahun ajaran saat ini beserta kelasnya. Jika siswa sudah ada, hanya kelas yang akan di-update.') }}
                     </div>
 
                     <div class="flex justify-end gap-3">
