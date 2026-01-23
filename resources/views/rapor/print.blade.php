@@ -5,6 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rapor {{ $siswa->nama }}</title>
+    @php
+        // Set locale ke Indonesia untuk format tanggal
+        \Carbon\Carbon::setLocale('id');
+    @endphp
     <style>
         * {
             box-sizing: border-box, ;
@@ -277,22 +281,20 @@
                 <td>: {{ $kelas->nama ?? '-' }}</td>
             </tr>
             <tr>
-                <td class="label">NIS/NISN</td>
-                <td>: {{ $siswa->nis ?? '-' }} / {{ $siswa->nisn ?? '-' }}</td>
-                <td class="label">Fase</td>
-                <td>: {{ $kelas->tingkat ?? '-' }}</td>
-            </tr>
-            <tr>
-                <td class="label">Madrasah</td>
-                <td>: {{ $school->name ?? '-' }}</td>
+                <td class="label">NISN</td>
+                <td>: {{ $siswa->nisn ?? '-' }}</td>
                 <td class="label">Semester</td>
                 <td>: {{ ucfirst($semester) }}</td>
             </tr>
             <tr>
-                <td class="label">Alamat</td>
-                <td>: {{ $school->address ?? '-' }}</td>
+                <td class="label">Madrasah</td>
+                <td>: {{ $school->name ?? '-' }}</td>
                 <td class="label">Tahun Ajaran</td>
                 <td>: {{ $tahun?->nama ?? '-' }}</td>
+            </tr>
+            <tr>
+                <td class="label">Alamat</td>
+                <td colspan="3">: {{ $school->address ?? '-' }}</td>
             </tr>
         </table>
         <hr style="margin:12px 0; border: none; border-top: 1px solid #000;" />
@@ -446,13 +448,11 @@
                 <div>Mengetahui</div>
                 <div style="margin-top:2px;">Kepala Madrasah</div>
                 <div class="name" style="margin-top:70px;">{{ $school->headmaster ?? '—' }}</div>
-                <div class="nip">NIP. {{ $school->nip_headmaster ?? '-' }}</div>
             </div>
             <div class="signature" style="text-align:right;">
                 <div>&nbsp;</div>
                 <div style="margin-top:4px;">Wali Kelas</div>
                 <div class="name" style="margin-top:70px;">{{ $wali->nama ?? '—' }}</div>
-                <div class="nip">NIP. {{ $wali->nip ?? '-' }}</div>
             </div>
         </div>
     </div>
