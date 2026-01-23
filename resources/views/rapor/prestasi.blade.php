@@ -28,6 +28,15 @@
             Pilih kelas untuk mengisi prestasi siswa.
         </div>
     @else
+        @if (!$canEdit)
+            <div class="mb-4 rounded-lg border border-amber-300 bg-amber-50 p-4 dark:border-amber-700 dark:bg-amber-900/30">
+                <div class="flex items-center gap-2 text-sm font-semibold text-amber-700 dark:text-amber-300">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    {{ __('Tahun ajaran yang dipilih tidak aktif. Anda hanya dapat melihat data, tidak dapat mengubah data.') }}
+                </div>
+            </div>
+        @endif
+
         {{-- Alerts are handled in the base layout --}}
 
         <form method="POST" action="{{ route('rapor.prestasi.store') }}"
@@ -55,8 +64,8 @@
                                 <td class="px-3 py-3">{{ $siswa->nama }}</td>
                                 <td class="px-3 py-3">
                                     <input type="text" name="prestasi[{{ $siswa->id }}]" maxlength="255"
-                                        placeholder="Contoh: Juara 1 Lomba Pidato"
-                                        class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-900"
+                                        placeholder="Contoh: Juara 1 Lomba Pidato" @disabled(!$canEdit)
+                                        class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-900 disabled:opacity-60 disabled:cursor-not-allowed"
                                         value="{{ old('prestasi.' . $siswa->id, $val) }}">
                                 </td>
                             </tr>
@@ -72,10 +81,12 @@
             </div>
             <div
                 class="flex items-center justify-end gap-3 border-t border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-700 dark:bg-gray-900/30">
-                <button type="submit"
-                    class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900">
-                    <i class="fas fa-save text-xs"></i> Simpan Prestasi
-                </button>
+                @if ($canEdit)
+                    <button type="submit"
+                        class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900">
+                        <i class="fas fa-save text-xs"></i> Simpan Prestasi
+                    </button>
+                @endif
             </div>
         </form>
     @endif

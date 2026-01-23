@@ -6,6 +6,7 @@ use App\Models\Ekskul;
 use App\Models\EkskulPenilaian;
 use App\Models\Guru;
 use App\Models\Siswa;
+use App\Models\TahunAjaran;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -58,6 +59,10 @@ class EkskulPenilaianController extends Controller
             ->orderBy('nama')
             ->get();
 
+        // Check if tahun ajaran is active (guru can only edit on active tahun ajaran)
+        $tahunAjaran = TahunAjaran::find($tahunId);
+        $canEdit = $tahunAjaran && $tahunAjaran->is_active;
+
         return view('guru.ekskul.show', [
             'ekskul' => $ekskul,
             'participants' => $participants,
@@ -65,6 +70,7 @@ class EkskulPenilaianController extends Controller
             'existing' => $existing,
             'tahunId' => $tahunId,
             'semester' => $semester,
+            'canEdit' => $canEdit,
         ]);
     }
 
@@ -80,6 +86,12 @@ class EkskulPenilaianController extends Controller
 
         if (! $tahunId || ! $semester) {
             return back()->withErrors(['tahun_ajaran' => __('Pilih tahun ajaran & semester terlebih dahulu.')]);
+        }
+
+        // Block guru from editing inactive tahun ajaran
+        $tahunAjaran = TahunAjaran::find($tahunId);
+        if (! $tahunAjaran || ! $tahunAjaran->is_active) {
+            return back()->withErrors(['tahun_ajaran' => __('Tidak dapat menyimpan data pada tahun ajaran yang tidak aktif.')]);
         }
 
         $action = $request->input('action', 'save');

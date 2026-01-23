@@ -13,13 +13,24 @@
         </div>
     </div>
 
+    @if (!$canEdit)
+        <div class="mb-4 rounded-lg border border-amber-300 bg-amber-50 p-4 dark:border-amber-700 dark:bg-amber-900/30">
+            <div class="flex items-center gap-2 text-sm font-semibold text-amber-700 dark:text-amber-300">
+                <i class="fas fa-exclamation-triangle"></i>
+                {{ __('Tahun ajaran yang dipilih tidak aktif. Anda hanya dapat melihat data, tidak dapat mengubah data.') }}
+            </div>
+        </div>
+    @endif
+
     <div class="flex items-center justify-between mb-3">
         <div class="text-sm text-gray-600 dark:text-gray-300">Tambahkan siswa yang ikut ekskul sebelum memberi nilai.
         </div>
-        <button type="button" id="openAddSiswa"
-            class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700 focus:outline-none focus:ring-4 focus:ring-emerald-500/30">
-            <i class="fa-solid fa-user-plus text-xs"></i> Tambah Siswa
-        </button>
+        @if ($canEdit)
+            <button type="button" id="openAddSiswa"
+                class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700 focus:outline-none focus:ring-4 focus:ring-emerald-500/30">
+                <i class="fa-solid fa-user-plus text-xs"></i> Tambah Siswa
+            </button>
+        @endif
     </div>
 
     <form method="POST" action="{{ route('guru.ekskul.store', $ekskul) }}"
@@ -49,8 +60,8 @@
                             <td class="px-3 py-3">{{ $siswa->kelas->nama ?? '—' }}</td>
                             <td class="px-3 py-3">
                                 <input type="number" name="nilai[{{ $siswa->id }}]" min="0" max="100"
-                                    step="0.01" value="{{ $record?->nilai }}"
-                                    class="w-28 rounded-md border border-gray-300 px-2 py-1 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+                                    step="0.01" value="{{ $record?->nilai }}" @disabled(!$canEdit)
+                                    class="w-28 rounded-md border border-gray-300 px-2 py-1 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 disabled:opacity-60 disabled:cursor-not-allowed">
                             </td>
                             <td class="px-3 py-3">
                                 @if ($record?->predikat)
@@ -67,15 +78,19 @@
                             </td>
                             <td class="px-3 py-3">
                                 <input type="text" name="catatan[{{ $siswa->id }}]"
-                                    value="{{ $record?->catatan }}"
-                                    class="w-full rounded-md border border-gray-300 px-2 py-1 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+                                    value="{{ $record?->catatan }}" @disabled(!$canEdit)
+                                    class="w-full rounded-md border border-gray-300 px-2 py-1 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 disabled:opacity-60 disabled:cursor-not-allowed">
                             </td>
                             <td class="px-3 py-3 text-center">
-                                <button type="submit" form="remove-{{ $siswa->id }}"
-                                    class="inline-flex items-center gap-1 rounded-md bg-red-100 px-3 py-1 text-xs font-semibold text-red-600 hover:bg-red-200"
-                                    onclick="return confirm('Batalkan siswa ini dari penilaian ekskul?');">
-                                    Batal
-                                </button>
+                                @if ($canEdit)
+                                    <button type="submit" form="remove-{{ $siswa->id }}"
+                                        class="inline-flex items-center gap-1 rounded-md bg-red-100 px-3 py-1 text-xs font-semibold text-red-600 hover:bg-red-200"
+                                        onclick="return confirm('Batalkan siswa ini dari penilaian ekskul?');">
+                                        Batal
+                                    </button>
+                                @else
+                                    <span class="text-gray-400">—</span>
+                                @endif
                             </td>
                         </tr>
                     @empty
@@ -88,10 +103,12 @@
             </table>
         </div>
         <div class="border-t border-gray-100 px-6 py-4 text-right dark:border-gray-700">
-            <button type="submit"
-                class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-500/30">
-                Simpan Penilaian
-            </button>
+            @if ($canEdit)
+                <button type="submit"
+                    class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-500/30">
+                    Simpan Penilaian
+                </button>
+            @endif
         </div>
     </form>
 

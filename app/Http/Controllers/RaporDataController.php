@@ -64,6 +64,10 @@ class RaporDataController extends Controller
         $kelasId = $request->integer('kelas_id');
         $kelas = $this->findKelasOrAbort($kelasId, $kelasList);
 
+        // Check if tahun ajaran is active (guru can only edit on active tahun ajaran)
+        $isAdmin = $request->user()->role === 'admin';
+        $canEdit = $isAdmin || ($tahun && $tahun->is_active);
+
         $siswas = collect();
         $absen = [];
         if ($kelas) {
@@ -81,12 +85,21 @@ class RaporDataController extends Controller
             }
         }
 
-        return view('rapor.absen', compact('kelasList', 'kelas', 'kelasId', 'tahunId', 'semester', 'tahun', 'siswas', 'absen'));
+        return view('rapor.absen', compact('kelasList', 'kelas', 'kelasId', 'tahunId', 'semester', 'tahun', 'siswas', 'absen', 'canEdit'));
     }
 
     public function absenStore(Request $request): RedirectResponse
     {
         [$tahunId, $semester] = $this->ensureContext();
+
+        // Block guru from editing inactive tahun ajaran
+        if ($request->user()->role !== 'admin') {
+            $tahun = TahunAjaran::find($tahunId);
+            if (! $tahun || ! $tahun->is_active) {
+                return back()->withErrors(['tahun_ajaran' => __('Tidak dapat menyimpan data pada tahun ajaran yang tidak aktif.')]);
+            }
+        }
+
         $kelasId = $request->integer('kelas_id');
         if (! $kelasId) {
             return back()->withErrors(['kelas_id' => __('Pilih kelas terlebih dahulu.')]);
@@ -134,6 +147,10 @@ class RaporDataController extends Controller
         $kelasId = $request->integer('kelas_id');
         $kelas = $this->findKelasOrAbort($kelasId, $kelasList);
 
+        // Check if tahun ajaran is active (guru can only edit on active tahun ajaran)
+        $isAdmin = $request->user()->role === 'admin';
+        $canEdit = $isAdmin || ($tahun && $tahun->is_active);
+
         $siswas = collect();
         $prestasi = [];
         if ($kelas) {
@@ -147,12 +164,21 @@ class RaporDataController extends Controller
             }
         }
 
-        return view('rapor.prestasi', compact('kelasList', 'kelas', 'kelasId', 'tahunId', 'semester', 'tahun', 'siswas', 'prestasi'));
+        return view('rapor.prestasi', compact('kelasList', 'kelas', 'kelasId', 'tahunId', 'semester', 'tahun', 'siswas', 'prestasi', 'canEdit'));
     }
 
     public function prestasiStore(Request $request): RedirectResponse
     {
         [$tahunId, $semester] = $this->ensureContext();
+
+        // Block guru from editing inactive tahun ajaran
+        if ($request->user()->role !== 'admin') {
+            $tahun = TahunAjaran::find($tahunId);
+            if (! $tahun || ! $tahun->is_active) {
+                return back()->withErrors(['tahun_ajaran' => __('Tidak dapat menyimpan data pada tahun ajaran yang tidak aktif.')]);
+            }
+        }
+
         $kelasId = $request->integer('kelas_id');
         if (! $kelasId) {
             return back()->withErrors(['kelas_id' => __('Pilih kelas terlebih dahulu.')]);
@@ -198,6 +224,10 @@ class RaporDataController extends Controller
         $kelasId = $request->integer('kelas_id');
         $kelas = $this->findKelasOrAbort($kelasId, $kelasList);
 
+        // Check if tahun ajaran is active (guru can only edit on active tahun ajaran)
+        $isAdmin = $request->user()->role === 'admin';
+        $canEdit = $isAdmin || ($tahun && $tahun->is_active);
+
         $siswas = collect();
         $catatan = [];
         if ($kelas) {
@@ -211,12 +241,21 @@ class RaporDataController extends Controller
             }
         }
 
-        return view('rapor.catatan', compact('kelasList', 'kelas', 'kelasId', 'tahunId', 'semester', 'tahun', 'siswas', 'catatan'));
+        return view('rapor.catatan', compact('kelasList', 'kelas', 'kelasId', 'tahunId', 'semester', 'tahun', 'siswas', 'catatan', 'canEdit'));
     }
 
     public function catatanStore(Request $request): RedirectResponse
     {
         [$tahunId, $semester] = $this->ensureContext();
+
+        // Block guru from editing inactive tahun ajaran
+        if ($request->user()->role !== 'admin') {
+            $tahun = TahunAjaran::find($tahunId);
+            if (! $tahun || ! $tahun->is_active) {
+                return back()->withErrors(['tahun_ajaran' => __('Tidak dapat menyimpan data pada tahun ajaran yang tidak aktif.')]);
+            }
+        }
+
         $kelasId = $request->integer('kelas_id');
         if (! $kelasId) {
             return back()->withErrors(['kelas_id' => __('Pilih kelas terlebih dahulu.')]);

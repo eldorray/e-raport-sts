@@ -28,6 +28,15 @@
             Pilih kelas untuk mengisi absen siswa.
         </div>
     @else
+        @if (!$canEdit)
+            <div class="mb-4 rounded-lg border border-amber-300 bg-amber-50 p-4 dark:border-amber-700 dark:bg-amber-900/30">
+                <div class="flex items-center gap-2 text-sm font-semibold text-amber-700 dark:text-amber-300">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    {{ __('Tahun ajaran yang dipilih tidak aktif. Anda hanya dapat melihat data, tidak dapat mengubah data.') }}
+                </div>
+            </div>
+        @endif
+
         {{-- Alerts are handled in the base layout --}}
 
         <form method="POST" action="{{ route('rapor.absen.store') }}"
@@ -57,20 +66,20 @@
                                 <td class="px-3 py-3">{{ $siswa->nama }}</td>
                                 <td class="px-3 py-3 text-center">
                                     <input type="number" name="absen[{{ $siswa->id }}][sakit]" min="0"
-                                        max="365"
-                                        class="w-20 rounded-lg border border-gray-300 px-2 py-1 text-center text-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-900"
+                                        max="365" @disabled(!$canEdit)
+                                        class="w-20 rounded-lg border border-gray-300 px-2 py-1 text-center text-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-900 disabled:opacity-60 disabled:cursor-not-allowed"
                                         value="{{ old('absen.' . $siswa->id . '.sakit', $row['sakit']) }}">
                                 </td>
                                 <td class="px-3 py-3 text-center">
                                     <input type="number" name="absen[{{ $siswa->id }}][izin]" min="0"
-                                        max="365"
-                                        class="w-20 rounded-lg border border-gray-300 px-2 py-1 text-center text-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-900"
+                                        max="365" @disabled(!$canEdit)
+                                        class="w-20 rounded-lg border border-gray-300 px-2 py-1 text-center text-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-900 disabled:opacity-60 disabled:cursor-not-allowed"
                                         value="{{ old('absen.' . $siswa->id . '.izin', $row['izin']) }}">
                                 </td>
                                 <td class="px-3 py-3 text-center">
                                     <input type="number" name="absen[{{ $siswa->id }}][alpa]" min="0"
-                                        max="365"
-                                        class="w-20 rounded-lg border border-gray-300 px-2 py-1 text-center text-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-900"
+                                        max="365" @disabled(!$canEdit)
+                                        class="w-20 rounded-lg border border-gray-300 px-2 py-1 text-center text-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-900 disabled:opacity-60 disabled:cursor-not-allowed"
                                         value="{{ old('absen.' . $siswa->id . '.alpa', $row['alpa']) }}">
                                 </td>
                             </tr>
@@ -86,10 +95,12 @@
             </div>
             <div
                 class="flex items-center justify-end gap-3 border-t border-gray-200 bg-gray-50 px-4 py-3 dark:border-gray-700 dark:bg-gray-900/30">
-                <button type="submit"
-                    class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900">
-                    <i class="fas fa-save text-xs"></i> Simpan Absen
-                </button>
+                @if ($canEdit)
+                    <button type="submit"
+                        class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900">
+                        <i class="fas fa-save text-xs"></i> Simpan Absen
+                    </button>
+                @endif
             </div>
         </form>
     @endif

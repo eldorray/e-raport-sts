@@ -13,6 +13,15 @@
         </div>
     </div>
 
+    @if (!$canEdit)
+        <div class="mb-4 rounded-lg border border-amber-300 bg-amber-50 p-4 dark:border-amber-700 dark:bg-amber-900/30">
+            <div class="flex items-center gap-2 text-sm font-semibold text-amber-700 dark:text-amber-300">
+                <i class="fas fa-exclamation-triangle"></i>
+                {{ __('Tahun ajaran yang dipilih tidak aktif. Anda hanya dapat melihat data, tidak dapat mengubah data.') }}
+            </div>
+        </div>
+    @endif
+
     <div
         class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
         <form method="POST" action="{{ route('guru.penilaian.store', $mengajar) }}">
@@ -37,7 +46,8 @@
                     </div>
                     <div class="flex flex-1 flex-col gap-1 md:max-w-xl">
                         <input id="materi_tp" name="materi_tp" type="text" value="{{ $currentMateriTp }}"
-                            class="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm font-medium shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
+                            @disabled(!$canEdit)
+                            class="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm font-medium shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 disabled:opacity-60 disabled:cursor-not-allowed"
                             placeholder="{{ __('Contoh: Persamaan linear satu variabel') }}">
                         <p class="text-xs text-gray-500 dark:text-gray-400">
                             {{ __('Materi/TP ini digunakan dalam pola deskripsi capaian.') }}</p>
@@ -152,12 +162,14 @@
                                 <td class="px-4 py-3">
                                     <input type="number" step="0.01" min="0" max="100"
                                         name="nilai_sumatif[{{ $siswa->id }}]" value="{{ $sumatif }}"
-                                        class="w-28 rounded-lg border border-gray-300 px-3 py-2 text-center text-sm font-medium shadow-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 dark:focus:border-blue-400">
+                                        @disabled(!$canEdit)
+                                        class="w-28 rounded-lg border border-gray-300 px-3 py-2 text-center text-sm font-medium shadow-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 dark:focus:border-blue-400 disabled:opacity-60 disabled:cursor-not-allowed">
                                 </td>
                                 <td class="px-4 py-3">
                                     <input type="number" step="0.01" min="0" max="100"
                                         name="nilai_sts[{{ $siswa->id }}]" value="{{ $sts }}"
-                                        class="w-28 rounded-lg border border-gray-300 px-3 py-2 text-center text-sm font-medium shadow-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 dark:focus:border-blue-400">
+                                        @disabled(!$canEdit)
+                                        class="w-28 rounded-lg border border-gray-300 px-3 py-2 text-center text-sm font-medium shadow-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 dark:focus:border-blue-400 disabled:opacity-60 disabled:cursor-not-allowed">
                                 </td>
                                 <td class="px-4 py-3 text-gray-600 dark:text-gray-300">{{ $rapor ?? '—' }}</td>
                                 <td class="px-4 py-3 text-gray-500 dark:text-gray-400">
@@ -189,36 +201,40 @@
                     {{ __('Nilai 0-100. Kolom Sumatif dan STS dapat langsung diubah. Nilai Rapor dihitung dengan bobot yang Anda tentukan di atas.') }}
                 </p>
                 <div class="flex items-center gap-3">
-                    {{-- Reset button placeholder - actual form is outside --}}
-                    <button type="button" id="reset-trigger"
-                        class="inline-flex items-center gap-2 rounded-lg border border-red-300 bg-white px-4 py-2 text-sm font-semibold text-red-600 shadow hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:border-red-600 dark:bg-gray-800 dark:text-red-400 dark:hover:bg-red-900/30">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                        </svg>
-                        {{ __('Reset Nilai') }}
-                    </button>
-                    <button type="submit"
-                        class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus:ring-offset-gray-900">
-                        {{ __('Simpan Nilai') }}
-                    </button>
+                    @if ($canEdit)
+                        {{-- Reset button placeholder - actual form is outside --}}
+                        <button type="button" id="reset-trigger"
+                            class="inline-flex items-center gap-2 rounded-lg border border-red-300 bg-white px-4 py-2 text-sm font-semibold text-red-600 shadow hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:border-red-600 dark:bg-gray-800 dark:text-red-400 dark:hover:bg-red-900/30">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                            {{ __('Reset Nilai') }}
+                        </button>
+                        <button type="submit"
+                            class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus:ring-offset-gray-900">
+                            {{ __('Simpan Nilai') }}
+                        </button>
+                    @endif
                 </div>
             </div>
         </form>
     </div>
 
     {{-- Hidden reset form outside main form --}}
-    <form id="reset-form" method="POST" action="{{ route('guru.penilaian.reset', $mengajar) }}" class="hidden">
-        @csrf
-        @method('DELETE')
-    </form>
+    @if ($canEdit)
+        <form id="reset-form" method="POST" action="{{ route('guru.penilaian.reset', $mengajar) }}" class="hidden">
+            @csrf
+            @method('DELETE')
+        </form>
 
-    <script>
-        document.getElementById('reset-trigger').addEventListener('click', function() {
-            if (confirm('{{ __('Yakin ingin mereset semua nilai? Tindakan ini tidak dapat dibatalkan.') }}')) {
-                document.getElementById('reset-form').submit();
-            }
-        });
-    </script>
+        <script>
+            document.getElementById('reset-trigger').addEventListener('click', function() {
+                if (confirm('{{ __('Yakin ingin mereset semua nilai? Tindakan ini tidak dapat dibatalkan.') }}')) {
+                    document.getElementById('reset-form').submit();
+                }
+            });
+        </script>
+    @endif
 </x-layouts.app>

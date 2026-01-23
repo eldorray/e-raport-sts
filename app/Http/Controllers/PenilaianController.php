@@ -6,6 +6,7 @@ use App\Models\Guru;
 use App\Models\Mengajar;
 use App\Models\Penilaian;
 use App\Models\Siswa;
+use App\Models\TahunAjaran;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -94,6 +95,10 @@ class PenilaianController extends Controller
         $bobotSumatif = $user?->bobot_sumatif ?? $this->getDefaultBobotSumatif();
         $bobotSts = $user?->bobot_sts ?? $this->getDefaultBobotSts();
 
+        // Check if tahun ajaran is active (guru can only edit on active tahun ajaran)
+        $tahunAjaran = TahunAjaran::find($tahunId);
+        $canEdit = $tahunAjaran && $tahunAjaran->is_active;
+
         return view('guru.penilaian.show', [
             'mengajar' => $mengajar,
             'siswas' => $siswas,
@@ -102,6 +107,7 @@ class PenilaianController extends Controller
             'semester' => $semester,
             'bobotSumatif' => $bobotSumatif,
             'bobotSts' => $bobotSts,
+            'canEdit' => $canEdit,
         ]);
     }
 
@@ -123,6 +129,12 @@ class PenilaianController extends Controller
         }
 
         $this->authorizeGuruAccess($guru, $mengajar);
+
+        // Block guru from editing inactive tahun ajaran
+        $tahunAjaran = TahunAjaran::find($tahunId);
+        if (! $tahunAjaran || ! $tahunAjaran->is_active) {
+            return back()->withErrors(['tahun_ajaran' => __('Tidak dapat menyimpan data pada tahun ajaran yang tidak aktif.')]);
+        }
 
         $validated = $request->validate([
             'nilai_sumatif' => ['sometimes', 'array'],
@@ -331,6 +343,12 @@ class PenilaianController extends Controller
         }
 
         $this->authorizeGuruAccess($guru, $mengajar);
+
+        // Block guru from resetting inactive tahun ajaran
+        $tahunAjaran = TahunAjaran::find($tahunId);
+        if (! $tahunAjaran || ! $tahunAjaran->is_active) {
+            return back()->withErrors(['tahun_ajaran' => __('Tidak dapat mereset data pada tahun ajaran yang tidak aktif.')]);
+        }
 
         // Hapus semua penilaian untuk mengajar ini pada semester/tahun yang dipilih
         Penilaian::where('mengajar_id', $mengajar->id)
