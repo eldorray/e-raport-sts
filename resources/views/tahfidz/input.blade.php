@@ -32,9 +32,23 @@
         </div>
     </div>
 
+    @if ($errors->any())
+        <div class="mb-4 rounded-lg border border-red-300 bg-red-50 p-4 dark:border-red-700 dark:bg-red-900/30">
+            <div class="flex items-center gap-2 text-sm font-semibold text-red-700 dark:text-red-300">
+                <i class="fas fa-exclamation-circle"></i>
+                {{ __('Terjadi kesalahan saat menyimpan:') }}
+            </div>
+            <ul class="mt-2 list-inside list-disc text-sm text-red-600 dark:text-red-400">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     <form action="{{ route('tahfidz.store', $siswa->id) }}" method="POST">
         @csrf
-        
+
         <div class="space-y-6">
             <!-- Pembimbing Tahfidz -->
             <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
@@ -55,9 +69,12 @@
                     <table class="min-w-full divide-y divide-gray-200 text-sm dark:divide-gray-700">
                         <thead class="bg-gray-50 dark:bg-gray-900/40">
                             <tr>
-                                <th class="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-300">Mata Pelajaran</th>
-                                <th class="px-4 py-3 text-center font-semibold text-gray-700 dark:text-gray-300 w-32">Predikat</th>
-                                <th class="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-300">Deskripsi</th>
+                                <th class="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-300">Mata
+                                    Pelajaran</th>
+                                <th class="px-4 py-3 text-center font-semibold text-gray-700 dark:text-gray-300 w-32">
+                                    Predikat</th>
+                                <th class="px-4 py-3 text-left font-semibold text-gray-700 dark:text-gray-300">Deskripsi
+                                </th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -65,15 +82,18 @@
                             <tr>
                                 <td class="px-4 py-3 font-medium">Adab</td>
                                 <td class="px-4 py-3">
-                                    <select name="predikat_adab" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100">
+                                    <select name="predikat_adab"
+                                        class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100">
                                         <option value="">-</option>
                                         @foreach ($predikatList as $key => $label)
-                                            <option value="{{ $key }}" @selected(($penilaian->predikat_adab ?? '') == $key)>{{ $key }}</option>
+                                            <option value="{{ $key }}" @selected(($penilaian->predikat_adab ?? '') == $key)>
+                                                {{ $key }}</option>
                                         @endforeach
                                     </select>
                                 </td>
                                 <td class="px-4 py-3">
-                                    <input type="text" name="deskripsi_adab" value="{{ $penilaian->deskripsi_adab ?? 'Baik' }}" 
+                                    <input type="text" name="deskripsi_adab"
+                                        value="{{ $penilaian->deskripsi_adab ?? 'Baik' }}"
                                         class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
                                         placeholder="Deskripsi...">
                                 </td>
@@ -82,15 +102,18 @@
                             <tr>
                                 <td class="px-4 py-3 font-medium">Tajwid</td>
                                 <td class="px-4 py-3">
-                                    <select name="predikat_tajwid" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100">
+                                    <select name="predikat_tajwid"
+                                        class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100">
                                         <option value="">-</option>
                                         @foreach ($predikatList as $key => $label)
-                                            <option value="{{ $key }}" @selected(($penilaian->predikat_tajwid ?? '') == $key)>{{ $key }}</option>
+                                            <option value="{{ $key }}" @selected(($penilaian->predikat_tajwid ?? '') == $key)>
+                                                {{ $key }}</option>
                                         @endforeach
                                     </select>
                                 </td>
                                 <td class="px-4 py-3">
-                                    <input type="text" name="deskripsi_tajwid" value="{{ $penilaian->deskripsi_tajwid ?? 'Baik' }}" 
+                                    <input type="text" name="deskripsi_tajwid"
+                                        value="{{ $penilaian->deskripsi_tajwid ?? 'Baik' }}"
                                         class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
                                         placeholder="Deskripsi...">
                                 </td>
@@ -99,15 +122,18 @@
                             <tr>
                                 <td class="px-4 py-3 font-medium">Makhorijul Huruf</td>
                                 <td class="px-4 py-3">
-                                    <select name="predikat_makhorijul" class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100">
+                                    <select name="predikat_makhorijul"
+                                        class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100">
                                         <option value="">-</option>
                                         @foreach ($predikatList as $key => $label)
-                                            <option value="{{ $key }}" @selected(($penilaian->predikat_makhorijul ?? '') == $key)>{{ $key }}</option>
+                                            <option value="{{ $key }}" @selected(($penilaian->predikat_makhorijul ?? '') == $key)>
+                                                {{ $key }}</option>
                                         @endforeach
                                     </select>
                                 </td>
                                 <td class="px-4 py-3">
-                                    <input type="text" name="deskripsi_makhorijul" value="{{ $penilaian->deskripsi_makhorijul ?? 'Cukup' }}" 
+                                    <input type="text" name="deskripsi_makhorijul"
+                                        value="{{ $penilaian->deskripsi_makhorijul ?? 'Cukup' }}"
                                         class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
                                         placeholder="Deskripsi...">
                                 </td>
@@ -120,19 +146,23 @@
             <!-- Hafalan Surah -->
             <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
                 <div class="mb-4 flex items-center justify-between">
-                    <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100">Pencapaian Target Hafalan (Juz 'Amma)</h3>
-                    <span id="surah-count" class="rounded-full bg-blue-100 px-3 py-1 text-sm font-semibold text-blue-700 dark:bg-blue-900 dark:text-blue-200">
+                    <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100">Pencapaian Target Hafalan (Juz 'Amma)
+                    </h3>
+                    <span id="surah-count"
+                        class="rounded-full bg-blue-100 px-3 py-1 text-sm font-semibold text-blue-700 dark:bg-blue-900 dark:text-blue-200">
                         {{ count($penilaian->surah_hafalan ?? []) }} / 38
                     </span>
                 </div>
                 <div class="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
                     @php $surahHafalan = $penilaian->surah_hafalan ?? []; @endphp
                     @foreach ($surahList as $key => $nama)
-                        <label class="flex cursor-pointer items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 transition-colors hover:bg-gray-100 has-[:checked]:border-green-500 has-[:checked]:bg-green-50 dark:border-gray-700 dark:bg-gray-900/50 dark:hover:bg-gray-800 dark:has-[:checked]:border-green-600 dark:has-[:checked]:bg-green-900/30">
+                        <label
+                            class="flex cursor-pointer items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 transition-colors hover:bg-gray-100 has-[:checked]:border-green-500 has-[:checked]:bg-green-50 dark:border-gray-700 dark:bg-gray-900/50 dark:hover:bg-gray-800 dark:has-[:checked]:border-green-600 dark:has-[:checked]:bg-green-900/30">
                             <input type="checkbox" name="surah_hafalan[]" value="{{ $key }}"
                                 class="surah-checkbox h-4 w-4 rounded border-gray-300 text-green-600 focus:ring-green-500 dark:border-gray-600 dark:bg-gray-800"
                                 @checked(in_array($key, $surahHafalan))>
-                            <span class="text-xs font-medium text-gray-700 dark:text-gray-300">{{ $nama }}</span>
+                            <span
+                                class="text-xs font-medium text-gray-700 dark:text-gray-300">{{ $nama }}</span>
                         </label>
                     @endforeach
                 </div>
@@ -144,6 +174,12 @@
                     class="rounded-lg border border-gray-300 bg-white px-6 py-2.5 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700">
                     Batal
                 </a>
+                @if ($penilaian->exists)
+                    <button type="button" id="reset-trigger"
+                        class="rounded-lg border border-red-300 bg-white px-6 py-2.5 text-sm font-semibold text-red-600 shadow-sm hover:bg-red-50 dark:border-red-600 dark:bg-gray-800 dark:text-red-400 dark:hover:bg-red-900/20">
+                        <i class="fas fa-undo mr-1"></i> Reset
+                    </button>
+                @endif
                 <button type="submit"
                     class="rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
                     <i class="fas fa-save mr-1"></i> Simpan
@@ -152,17 +188,37 @@
         </div>
     </form>
 
+    {{-- Hidden reset form --}}
+    @if ($penilaian->exists)
+        <form id="reset-form" method="POST" action="{{ route('tahfidz.reset', $siswa->id) }}" class="hidden">
+            @csrf
+            @method('DELETE')
+        </form>
+    @endif
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const checkboxes = document.querySelectorAll('.surah-checkbox');
             const countDisplay = document.getElementById('surah-count');
-            
+
             function updateCount() {
                 const checked = document.querySelectorAll('.surah-checkbox:checked').length;
                 countDisplay.textContent = checked + ' / 38';
             }
-            
+
             checkboxes.forEach(cb => cb.addEventListener('change', updateCount));
+
+            // Reset button handler
+            const resetTrigger = document.getElementById('reset-trigger');
+            if (resetTrigger) {
+                resetTrigger.addEventListener('click', function() {
+                    if (confirm(
+                            '{{ __('Yakin ingin mereset semua penilaian tahfidz? Tindakan ini tidak dapat dibatalkan.') }}'
+                            )) {
+                        document.getElementById('reset-form').submit();
+                    }
+                });
+            }
         });
     </script>
 </x-layouts.app>

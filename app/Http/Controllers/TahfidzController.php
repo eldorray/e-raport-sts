@@ -51,7 +51,7 @@ class TahfidzController extends Controller
         }
 
         $kelasId = $request->input('kelas_id');
-        
+
         // Query kelas berdasarkan role
         $kelasList = Kelas::where('tahun_ajaran_id', $tahunId)
             ->when(! $isAdmin, fn ($q) => $q->whereIn('id', $kelasIds))
@@ -176,6 +176,9 @@ class TahfidzController extends Controller
             'surah_hafalan.*' => 'string|in:' . implode(',', array_keys(TahfidzPenilaian::SURAH_LIST)),
         ]);
 
+        // Ensure surah_hafalan is always an array (empty array if no checkboxes selected)
+        $validated['surah_hafalan'] = $validated['surah_hafalan'] ?? [];
+
         TahfidzPenilaian::updateOrCreate(
             [
                 'siswa_id' => $siswa->id,
@@ -188,6 +191,31 @@ class TahfidzController extends Controller
         return redirect()
             ->route('tahfidz.index', ['kelas_id' => $siswa->kelas_id])
             ->with('success', __('Penilaian tahfidz berhasil disimpan.'));
+    }
+
+    /**
+     * Reset penilaian tahfidz siswa.
+     */
+    public function reset(Request $request, Siswa $siswa)
+    {
+        $tahunId = session('selected_tahun_ajaran_id');
+        $semester = session('selected_semester');
+
+        if (! $tahunId || ! $semester) {
+            abort(422, __('Pilih tahun ajaran dan semester terlebih dahulu.'));
+        }
+
+        // Authorize access
+        $this->authorizeAccess($request, $siswa, $tahunId, $semester);
+
+        TahfidzPenilaian::where('siswa_id', $siswa->id)
+            ->where('tahun_ajaran_id', $tahunId)
+            ->where('semester', $semester)
+            ->delete();
+
+        return redirect()
+            ->route('tahfidz.show', $siswa)
+            ->with('success', __('Penilaian tahfidz berhasil direset.'));
     }
 
     /**
