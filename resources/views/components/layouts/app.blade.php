@@ -68,6 +68,45 @@
             };
             document.documentElement.style.fontFamily = fonts[fontFamily] || fonts.sfpro;
         })();
+
+        // Apply font color settings
+        ;
+        (function() {
+            const fontColor = window.localStorage.getItem('fontColor') || 'default';
+            const colors = {
+                default: {
+                    light: '#1f2937',
+                    dark: '#e5e7eb'
+                },
+                slate: {
+                    light: '#334155',
+                    dark: '#cbd5e1'
+                },
+                zinc: {
+                    light: '#3f3f46',
+                    dark: '#d4d4d8'
+                },
+                neutral: {
+                    light: '#404040',
+                    dark: '#d4d4d4'
+                },
+                stone: {
+                    light: '#44403c',
+                    dark: '#d6d3d1'
+                },
+                warmgray: {
+                    light: '#78350f',
+                    dark: '#fcd34d'
+                },
+                coolgray: {
+                    light: '#1e3a5f',
+                    dark: '#93c5fd'
+                }
+            };
+            const selectedColor = colors[fontColor] || colors.default;
+            document.documentElement.style.setProperty('--font-color-light', selectedColor.light);
+            document.documentElement.style.setProperty('--font-color-dark', selectedColor.dark);
+        })();
     </script>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])

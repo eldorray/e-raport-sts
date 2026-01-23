@@ -132,6 +132,54 @@
                     </div>
                 </div>
 
+                <!-- Font Color Section -->
+                <div
+                    class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+                    <div class="p-6">
+                        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">
+                            {{ __('Warna Font') }}</h3>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                            {{ __('Pilih warna teks yang diinginkan') }}</p>
+                        <div class="flex flex-wrap gap-3">
+                            <button onclick="setFontColor('default')" data-color="default"
+                                class="font-color-btn w-10 h-10 rounded-full bg-gray-800 dark:bg-gray-200 hover:ring-4 hover:ring-gray-300 dark:hover:ring-gray-600 transition-all flex items-center justify-center border-2 border-gray-300 dark:border-gray-600"
+                                title="Default">
+                                <i class="fas fa-check text-white dark:text-gray-800 hidden"></i>
+                            </button>
+                            <button onclick="setFontColor('slate')" data-color="slate"
+                                class="font-color-btn w-10 h-10 rounded-full bg-slate-700 hover:ring-4 hover:ring-slate-300 dark:hover:ring-slate-600 transition-all flex items-center justify-center"
+                                title="Slate">
+                                <i class="fas fa-check text-white hidden"></i>
+                            </button>
+                            <button onclick="setFontColor('zinc')" data-color="zinc"
+                                class="font-color-btn w-10 h-10 rounded-full bg-zinc-700 hover:ring-4 hover:ring-zinc-300 dark:hover:ring-zinc-600 transition-all flex items-center justify-center"
+                                title="Zinc">
+                                <i class="fas fa-check text-white hidden"></i>
+                            </button>
+                            <button onclick="setFontColor('neutral')" data-color="neutral"
+                                class="font-color-btn w-10 h-10 rounded-full bg-neutral-700 hover:ring-4 hover:ring-neutral-300 dark:hover:ring-neutral-600 transition-all flex items-center justify-center"
+                                title="Neutral">
+                                <i class="fas fa-check text-white hidden"></i>
+                            </button>
+                            <button onclick="setFontColor('stone')" data-color="stone"
+                                class="font-color-btn w-10 h-10 rounded-full bg-stone-700 hover:ring-4 hover:ring-stone-300 dark:hover:ring-stone-600 transition-all flex items-center justify-center"
+                                title="Stone">
+                                <i class="fas fa-check text-white hidden"></i>
+                            </button>
+                            <button onclick="setFontColor('warmgray')" data-color="warmgray"
+                                class="font-color-btn w-10 h-10 rounded-full bg-amber-900 hover:ring-4 hover:ring-amber-300 dark:hover:ring-amber-700 transition-all flex items-center justify-center"
+                                title="Warm Gray">
+                                <i class="fas fa-check text-white hidden"></i>
+                            </button>
+                            <button onclick="setFontColor('coolgray')" data-color="coolgray"
+                                class="font-color-btn w-10 h-10 rounded-full bg-blue-900 hover:ring-4 hover:ring-blue-300 dark:hover:ring-blue-700 transition-all flex items-center justify-center"
+                                title="Cool Gray">
+                                <i class="fas fa-check text-white hidden"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Sidebar Mode Section -->
                 <div
                     class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
@@ -191,6 +239,11 @@
             const currentFontFamily = localStorage.getItem('fontFamily') || 'inter';
             updateFontFamilyButtons(currentFontFamily);
             applyFontFamily(currentFontFamily);
+
+            // Font Color
+            const currentFontColor = localStorage.getItem('fontColor') || 'default';
+            updateFontColorButtons(currentFontColor);
+            applyFontColor(currentFontColor);
 
             // Sidebar Mode
             const sidebarOpen = localStorage.getItem('sidebarOpen');
@@ -272,6 +325,68 @@
             }
         }
 
+        // Font Color functions
+        function setFontColor(color) {
+            localStorage.setItem('fontColor', color);
+            applyFontColor(color);
+            updateFontColorButtons(color);
+        }
+
+        function applyFontColor(color) {
+            const root = document.documentElement;
+            const colors = {
+                default: {
+                    light: '#1f2937',
+                    dark: '#e5e7eb'
+                },
+                slate: {
+                    light: '#334155',
+                    dark: '#cbd5e1'
+                },
+                zinc: {
+                    light: '#3f3f46',
+                    dark: '#d4d4d8'
+                },
+                neutral: {
+                    light: '#404040',
+                    dark: '#d4d4d4'
+                },
+                stone: {
+                    light: '#44403c',
+                    dark: '#d6d3d1'
+                },
+                warmgray: {
+                    light: '#78350f',
+                    dark: '#fcd34d'
+                },
+                coolgray: {
+                    light: '#1e3a5f',
+                    dark: '#93c5fd'
+                }
+            };
+            const selectedColor = colors[color] || colors.default;
+            root.style.setProperty('--font-color-light', selectedColor.light);
+            root.style.setProperty('--font-color-dark', selectedColor.dark);
+
+            // Apply immediately based on current theme
+            const isDark = document.documentElement.classList.contains('dark');
+            document.body.style.color = isDark ? selectedColor.dark : selectedColor.light;
+        }
+
+        function updateFontColorButtons(color) {
+            document.querySelectorAll('.font-color-btn').forEach(btn => {
+                const icon = btn.querySelector('i');
+                btn.classList.remove('ring-4', 'ring-offset-2');
+                if (icon) icon.classList.add('hidden');
+            });
+            const activeBtn = document.querySelector('.font-color-btn[data-color="' + color + '"]');
+            if (activeBtn) {
+                activeBtn.classList.add('ring-4', 'ring-offset-2');
+                const icon = activeBtn.querySelector('i');
+                if (icon) icon.classList.remove('hidden');
+            }
+        }
+
         // Sidebar Mode functions
         function setSidebarMode(mode) {
             const isExpanded = mode === 'expanded';
@@ -306,12 +421,14 @@
                 localStorage.removeItem('appearance');
                 localStorage.removeItem('fontSize');
                 localStorage.removeItem('fontFamily');
+                localStorage.removeItem('fontColor');
                 localStorage.setItem('sidebarOpen', 'true');
 
                 // Apply defaults
                 setAppearance('system');
                 applyFontSize('normal');
                 applyFontFamily('sfpro');
+                applyFontColor('default');
 
                 // Reload to apply all changes
                 location.reload();

@@ -51,6 +51,8 @@
         --sidebar-accent-foreground: 210 40% 98%;
         --sidebar-border: 214 32% 91%;
         --sidebar-ring: 221 83% 53%;
+        --font-color-light: #1f2937;
+        --font-color-dark: #e5e7eb;
     }
 
     .dark {
@@ -60,6 +62,15 @@
         --sidebar-accent-foreground: 217 33% 17%;
         --sidebar-border: 215 25% 27%;
         --sidebar-ring: 221 83% 65%;
+    }
+
+    /* Apply custom font color */
+    body {
+        color: var(--font-color-light);
+    }
+
+    .dark body {
+        color: var(--font-color-dark);
     }
 }
 
