@@ -68,6 +68,9 @@ class RombelKelasController extends Controller
 
     /**
      * Menyalin rombel dari tahun ajaran/semester sebelumnya.
+     * 
+     * Mencari siswa di tahun ajaran TARGET berdasarkan NISN yang sama
+     * dengan siswa di kelas sumber, lalu assign ke kelas target.
      */
     public function copy(Request $request): RedirectResponse
     {
@@ -83,7 +86,7 @@ class RombelKelasController extends Controller
 
         $sourceTahunId = $data['source_tahun_ajaran_id'];
 
-        // Get kelas dari source tahun ajaran
+        // Get kelas dari source tahun ajaran beserta siswanya
         $sourceKelasWithSiswas = Kelas::with('siswas')
             ->where('tahun_ajaran_id', $sourceTahunId)
             ->get();
@@ -93,7 +96,8 @@ class RombelKelasController extends Controller
         }
 
         $copiedCount = 0;
-        $skippedCount = 0;
+        $skippedKelasCount = 0;
+        $notFoundCount = 0;
 
         foreach ($sourceKelasWithSiswas as $sourceKelas) {
             // Cari kelas dengan nama yang sama di target tahun ajaran
@@ -102,26 +106,41 @@ class RombelKelasController extends Controller
                 ->first();
 
             if (! $targetKelas) {
-                $skippedCount++;
+                $skippedKelasCount++;
                 continue;
             }
 
-            // Copy siswa assignments
-            foreach ($sourceKelas->siswas as $siswa) {
-                // Hanya update jika siswa belum punya kelas di target tahun ajaran
-                if ($siswa->kelas_id === $sourceKelas->id || $siswa->kelas_id === null) {
-                    $siswa->update(['kelas_id' => $targetKelas->id]);
+            // Untuk setiap siswa di kelas sumber, cari siswa dengan NISN sama di tahun ajaran target
+            foreach ($sourceKelas->siswas as $sourceSiswa) {
+                if (empty($sourceSiswa->nisn)) {
+                    continue;
+                }
+
+                // Cari siswa di tahun ajaran TARGET dengan NISN yang sama
+                $targetSiswa = Siswa::where('tahun_ajaran_id', $targetTahunId)
+                    ->where('nisn', $sourceSiswa->nisn)
+                    ->whereNull('kelas_id') // Hanya yang belum punya kelas
+                    ->first();
+
+                if ($targetSiswa) {
+                    $targetSiswa->update(['kelas_id' => $targetKelas->id]);
                     $copiedCount++;
+                } else {
+                    $notFoundCount++;
                 }
             }
         }
 
-        $message = __('Berhasil menyalin :count siswa ke rombel.', ['count' => $copiedCount]);
-        if ($skippedCount > 0) {
-            $message .= ' ' . __(':count kelas dilewati karena tidak ditemukan di tahun ajaran tujuan.', ['count' => $skippedCount]);
+        $message = __('Berhasil assign :count siswa ke rombel.', ['count' => $copiedCount]);
+        if ($skippedKelasCount > 0) {
+            $message .= ' ' . __(':count kelas dilewati (tidak ditemukan).', ['count' => $skippedKelasCount]);
+        }
+        if ($notFoundCount > 0) {
+            $message .= ' ' . __(':count siswa tidak ditemukan/sudah punya kelas.', ['count' => $notFoundCount]);
         }
 
         return back()->with('status', $message);
     }
 }
+
 
