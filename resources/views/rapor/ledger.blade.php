@@ -142,6 +142,7 @@
                         <th class="nowrap">{{ $mapel->kode ?? $mapel->nama_mapel }}</th>
                     @endforeach
                     <th style="width:60px;">Total</th>
+                    <th style="width:50px;">Ranking</th>
                 </tr>
             </thead>
             <tbody>
@@ -155,6 +156,7 @@
                             <td class="text-center">{{ $v !== null ? $v : '' }}</td>
                         @endforeach
                         <td class="text-center">{{ $row['total'] ?: '' }}</td>
+                        <td class="text-center">{{ $row['ranking'] ?? '' }}</td>
                     </tr>
                 @endforeach
             </tbody>

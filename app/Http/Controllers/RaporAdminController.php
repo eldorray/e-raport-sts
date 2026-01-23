@@ -126,6 +126,9 @@ class RaporAdminController extends Controller
         $mapels = $this->getMapelsByKelas($kelas->id, $tahunId, $semester);
         $nilai = $this->calculateNilaiPerSiswa($siswas, $mapels, $tahunId, $semester);
 
+        // Calculate ranking based on total score (highest first)
+        $nilai = $this->calculateRanking($nilai);
+
         $school = SchoolProfile::first();
         $printSetting = PrintSetting::first();
 
@@ -289,6 +292,52 @@ class RaporAdminController extends Controller
         }
 
         return (int) round((($penilaian->nilai_sumatif * $bobotSumatif) + ($penilaian->nilai_sts * $bobotSts)) / self::TOTAL_BOBOT);
+    }
+
+    /**
+     * Menghitung ranking siswa berdasarkan total nilai.
+     *
+     * @param  array  $nilai  Array nilai per siswa
+     * @return array Array nilai dengan ranking
+     */
+    private function calculateRanking(array $nilai): array
+    {
+        // Sort by total descending to determine ranking
+        $sorted = $nilai;
+        usort($sorted, fn($a, $b) => $b['total'] <=> $a['total']);
+
+        // Assign ranking with same rank for same total
+        $rankings = [];
+        $currentRank = 1;
+        $previousTotal = null;
+        $skipCount = 0;
+
+        foreach ($sorted as $index => $row) {
+            $siswaId = $row['siswa']->id;
+            $total = $row['total'];
+
+            if ($total === 0 || $row['count'] === 0) {
+                // No ranking for students without grades
+                $rankings[$siswaId] = null;
+            } elseif ($previousTotal !== null && $total === $previousTotal) {
+                // Same total = same rank
+                $rankings[$siswaId] = $currentRank;
+                $skipCount++;
+            } else {
+                // New rank (accounting for skipped positions)
+                $currentRank += $skipCount;
+                $rankings[$siswaId] = $currentRank;
+                $skipCount = 1;
+                $previousTotal = $total;
+            }
+        }
+
+        // Add ranking to original array
+        foreach ($nilai as &$row) {
+            $row['ranking'] = $rankings[$row['siswa']->id] ?? null;
+        }
+
+        return $nilai;
     }
 
     /**
