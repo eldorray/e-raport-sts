@@ -8,7 +8,13 @@
     <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
     <link rel="apple-touch-icon" href="{{ asset('favicon.png') }}">
     <link rel="stylesheet" href="https://cdn.datatables.net/2.3.5/css/dataTables.dataTables.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Lato:wght@300;400;700&family=Montserrat:wght@300;400;500;600;700&family=Open+Sans:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap"
+        rel="stylesheet">
     <script>
+        // Apply appearance (theme) settings
         window.setAppearance = function(appearance) {
             let setDark = () => document.documentElement.classList.add('dark')
             let setLight = () => document.documentElement.classList.remove('dark')
@@ -35,6 +41,74 @@
             }
         }
         window.setAppearance(window.localStorage.getItem('appearance') || 'system')
+
+        // Apply font size settings
+        ;
+        (function() {
+            const fontSize = window.localStorage.getItem('fontSize') || 'normal';
+            const sizes = {
+                small: '14px',
+                normal: '16px',
+                large: '18px'
+            };
+            document.documentElement.style.fontSize = sizes[fontSize] || sizes.normal;
+        })();
+
+        // Apply primary color settings
+        ;
+        (function() {
+            const color = window.localStorage.getItem('primaryColor') || 'blue';
+            const colors = {
+                blue: {
+                    primary: '59 130 246',
+                    hover: '37 99 235',
+                    ring: '147 197 253'
+                },
+                green: {
+                    primary: '34 197 94',
+                    hover: '22 163 74',
+                    ring: '134 239 172'
+                },
+                red: {
+                    primary: '239 68 68',
+                    hover: '220 38 38',
+                    ring: '252 165 165'
+                },
+                purple: {
+                    primary: '168 85 247',
+                    hover: '147 51 234',
+                    ring: '216 180 254'
+                },
+                orange: {
+                    primary: '249 115 22',
+                    hover: '234 88 12',
+                    ring: '253 186 116'
+                },
+                teal: {
+                    primary: '20 184 166',
+                    hover: '13 148 136',
+                    ring: '94 234 212'
+                }
+            };
+            const selectedColor = colors[color] || colors.blue;
+            document.documentElement.style.setProperty('--color-primary', selectedColor.primary);
+            document.documentElement.style.setProperty('--color-primary-hover', selectedColor.hover);
+            document.documentElement.style.setProperty('--color-primary-ring', selectedColor.ring);
+        })();
+
+        // Apply font family settings
+        ;
+        (function() {
+            const fontFamily = window.localStorage.getItem('fontFamily') || 'inter';
+            const fonts = {
+                inter: '"Inter", sans-serif',
+                roboto: '"Roboto", sans-serif',
+                opensans: '"Open Sans", sans-serif',
+                lato: '"Lato", sans-serif',
+                montserrat: '"Montserrat", sans-serif'
+            };
+            document.documentElement.style.fontFamily = fonts[fontFamily] || fonts.inter;
+        })();
     </script>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
