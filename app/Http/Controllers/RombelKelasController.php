@@ -16,7 +16,7 @@ class RombelKelasController extends Controller
 
         $kelasList = Kelas::with(['guru'])
             ->when($tahunId, fn ($q) => $q->where('tahun_ajaran_id', $tahunId))
-            ->withCount('siswas')
+            ->withCount(['siswas' => fn ($q) => $q->where('tahun_ajaran_id', $tahunId)])
             ->orderBy('tingkat')
             ->orderBy('nama')
             ->get();
@@ -31,7 +31,10 @@ class RombelKelasController extends Controller
         $siswas = collect();
 
         if ($selectedKelas) {
+            // PENTING: Filter siswa berdasarkan tahun_ajaran_id yang sedang aktif
+            // agar tidak tercampur dengan siswa dari tahun ajaran lain
             $siswas = Siswa::with('kelas')
+                ->where('tahun_ajaran_id', $tahunId)
                 ->where(fn ($q) => $q->whereNull('kelas_id')->orWhere('kelas_id', $selectedKelas->id))
                 ->orderBy('nama')
                 ->get();
@@ -52,14 +55,21 @@ class RombelKelasController extends Controller
         ]);
 
         $selectedIds = $data['siswa_ids'] ?? [];
+        $tahunId = $kelas->tahun_ajaran_id;
 
         // Remove students no longer in this kelas
+        // PENTING: Filter juga berdasarkan tahun_ajaran_id untuk mencegah
+        // pengaruh ke siswa dari tahun ajaran lain
         Siswa::where('kelas_id', $kelas->id)
+            ->where('tahun_ajaran_id', $tahunId)
             ->whereNotIn('id', $selectedIds)
             ->update(['kelas_id' => null]);
 
         if (! empty($selectedIds)) {
-            Siswa::whereIn('id', $selectedIds)->update(['kelas_id' => $kelas->id]);
+            // Pastikan hanya update siswa dari tahun ajaran yang sama
+            Siswa::whereIn('id', $selectedIds)
+                ->where('tahun_ajaran_id', $tahunId)
+                ->update(['kelas_id' => $kelas->id]);
         }
 
         return redirect()->route('rombel.index', ['kelas_id' => $kelas->id])
@@ -87,7 +97,11 @@ class RombelKelasController extends Controller
         $sourceTahunId = $data['source_tahun_ajaran_id'];
 
         // Get kelas dari source tahun ajaran beserta siswanya
-        $sourceKelasWithSiswas = Kelas::with('siswas')
+        // PENTING: Filter siswas juga berdasarkan tahun_ajaran_id untuk mencegah
+        // siswas dari tahun ajaran lain ikut terhitung jika ada ketidaksesuaian data
+        $sourceKelasWithSiswas = Kelas::with(['siswas' => function ($query) use ($sourceTahunId) {
+                $query->where('tahun_ajaran_id', $sourceTahunId);
+            }])
             ->where('tahun_ajaran_id', $sourceTahunId)
             ->get();
 
