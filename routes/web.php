@@ -78,6 +78,7 @@ Route::middleware(['auth'])->group(function () {
         
         Route::get('rombel-kelas', [RombelKelasController::class, 'index'])->name('rombel.index');
         Route::put('rombel-kelas/{kelas}', [RombelKelasController::class, 'update'])->name('rombel.update');
+        Route::post('rombel-kelas/copy', [RombelKelasController::class, 'copy'])->name('rombel.copy');
         Route::get('siswa/import/template', [SiswaController::class, 'template'])->name('siswa.template');
         Route::post('siswa/import', [SiswaController::class, 'import'])->name('siswa.import');
         Route::patch('siswa/{siswa}/toggle-status', [SiswaController::class, 'toggleStatus'])->name('siswa.toggle');
