@@ -85,10 +85,17 @@ class AppServiceProvider extends ServiceProvider
                 ->when($tahunId, fn ($q) => $q->where('tahun_ajaran_id', $tahunId))
                 ->exists();
 
+            // Check apakah guru ada assignment tahfidz
+            $hasTahfidzAssignment = \App\Models\MengajarTahfidz::where('guru_id', $guru->id)
+                ->when($tahunId, fn ($q) => $q->where('tahun_ajaran_id', $tahunId))
+                ->when($semester, fn ($q) => $q->where('semester', $semester))
+                ->exists();
+
             $view->with('sidebarAssignments', $assignments);
             $view->with('sidebarMapelStatus', $mapelStatus);
             $view->with('sidebarEkskul', $ekskulAssignments);
             $view->with('isWaliKelas', $isWaliKelas);
+            $view->with('hasTahfidzAssignment', $hasTahfidzAssignment);
         });
     }
 }

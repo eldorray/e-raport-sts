@@ -20,6 +20,9 @@ use App\Http\Controllers\PrintSettingController;
 use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\BackupController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\TahfidzController;
+use App\Http\Controllers\TahfidzPrintController;
+use App\Http\Controllers\MengajarTahfidzController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -67,6 +70,12 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('mengajar/{mengajar}', [MengajarController::class, 'destroy'])->name('mengajar.destroy');
         Route::put('mengajar/{mengajar}', [MengajarController::class, 'update'])->name('mengajar.update');
         Route::post('mengajar/copy', [MengajarController::class, 'copy'])->name('mengajar.copy');
+        
+        // Mengajar Tahfidz
+        Route::get('mengajar-tahfidz', [MengajarTahfidzController::class, 'index'])->name('mengajar-tahfidz.index');
+        Route::post('mengajar-tahfidz', [MengajarTahfidzController::class, 'store'])->name('mengajar-tahfidz.store');
+        Route::delete('mengajar-tahfidz/{mengajarTahfidz}', [MengajarTahfidzController::class, 'destroy'])->name('mengajar-tahfidz.destroy');
+        
         Route::get('rombel-kelas', [RombelKelasController::class, 'index'])->name('rombel.index');
         Route::put('rombel-kelas/{kelas}', [RombelKelasController::class, 'update'])->name('rombel.update');
         Route::get('siswa/import/template', [SiswaController::class, 'template'])->name('siswa.template');
@@ -96,6 +105,13 @@ Route::middleware(['auth'])->group(function () {
         Route::post('rapor/prestasi', [RaporDataController::class, 'prestasiStore'])->name('rapor.prestasi.store');
         Route::get('rapor/catatan', [RaporDataController::class, 'catatan'])->name('rapor.catatan');
         Route::post('rapor/catatan', [RaporDataController::class, 'catatanStore'])->name('rapor.catatan.store');
+        
+        // Tahfidz
+        Route::get('tahfidz', [TahfidzController::class, 'index'])->name('tahfidz.index');
+        Route::get('tahfidz/{siswa}', [TahfidzController::class, 'show'])->whereNumber('siswa')->name('tahfidz.show');
+        Route::post('tahfidz/{siswa}', [TahfidzController::class, 'store'])->whereNumber('siswa')->name('tahfidz.store');
+        Route::get('tahfidz/{siswa}/print', [TahfidzPrintController::class, 'show'])->whereNumber('siswa')->name('tahfidz.print');
+        
         // Route dengan parameter dinamis harus di akhir
         Route::get('rapor/{siswa}', [RaportPrintController::class, 'show'])->whereNumber('siswa')->name('rapor.print');
     });

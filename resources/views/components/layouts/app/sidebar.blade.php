@@ -41,9 +41,11 @@
 
                     <x-layouts.sidebar-two-level-link-parent title="Guru" icon="fas-users" :active="$guruOpen">
                         <x-layouts.sidebar-two-level-link href="{{ route('guru.index') }}" icon='fas-user'
-                            :active="request()->routeIs('guru*')">Guru</x-layouts.sidebar-two-level-link>
+                            :active="request()->routeIs('guru.*')">Guru</x-layouts.sidebar-two-level-link>
                         <x-layouts.sidebar-two-level-link href="{{ route('mengajar.index') }}"
-                            icon='fas-person-chalkboard' :active="request()->routeIs('mengajar*')">Mengajar</x-layouts.sidebar-two-level-link>
+                            icon='fas-person-chalkboard' :active="request()->routeIs('mengajar.index')">Mengajar</x-layouts.sidebar-two-level-link>
+                        <x-layouts.sidebar-two-level-link href="{{ route('mengajar-tahfidz.index') }}"
+                            icon='fas-book-quran' :active="request()->routeIs('mengajar-tahfidz.*')">Mengajar Tahfidz</x-layouts.sidebar-two-level-link>
                     </x-layouts.sidebar-two-level-link-parent>
 
                     <x-layouts.sidebar-two-level-link-parent title="Siswa" icon="fas-users" :active="$siswaOpen">
@@ -65,6 +67,8 @@
                         :active="request()->routeIs('rapor.print-settings.*')">Pengaturan Cetak</x-layouts.sidebar-link>
                     <x-layouts.sidebar-link href="{{ route('rapor.index') }}" icon='fas-file-lines'
                         :active="request()->routeIs('rapor.index')">Cetak Rapor</x-layouts.sidebar-link>
+                    <x-layouts.sidebar-link href="{{ route('tahfidz.index') }}" icon='fas-book-quran'
+                        :active="request()->routeIs('tahfidz.*')">Raport Tahfidz</x-layouts.sidebar-link>
 
                     <li class="px-2 pt-4 pb-2">
                         <h2 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
@@ -84,6 +88,11 @@
 
                     <x-layouts.sidebar-link href="{{ route('guru.ekskul.index') }}" icon='fas-star'
                         :active="request()->routeIs('guru.ekskul.*')">Ekskul Saya</x-layouts.sidebar-link>
+
+                    @if ($hasTahfidzAssignment ?? false)
+                        <x-layouts.sidebar-link href="{{ route('tahfidz.index') }}" icon='fas-book-quran'
+                            :active="request()->routeIs('tahfidz.*')">Tahfidz Saya</x-layouts.sidebar-link>
+                    @endif
 
                     @if ($isWaliKelas ?? false)
                         <x-layouts.sidebar-link href="{{ route('rapor.index') }}" icon='fas-file-lines'
