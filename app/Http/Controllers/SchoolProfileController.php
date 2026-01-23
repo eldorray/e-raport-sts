@@ -51,6 +51,36 @@ class SchoolProfileController extends Controller
             return back()->with('status', __('Logo sekolah berhasil diperbarui.'));
         }
 
+        if ($intent === 'logo_right') {
+            if (! $schoolProfile->exists) {
+                return back()->withErrors([
+                    'logo_right' => __('Lengkapi identitas sekolah sebelum mengelola logo kanan.'),
+                ]);
+            }
+
+            $request->validate([
+                'logo_right' => ['nullable', 'image', 'max:2048'],
+                'remove_logo_right' => ['nullable', 'boolean'],
+            ]);
+
+            if ($request->boolean('remove_logo_right') && $schoolProfile->logo_right) {
+                Storage::disk('public')->delete($schoolProfile->logo_right);
+                $schoolProfile->logo_right = null;
+            }
+
+            if ($request->hasFile('logo_right')) {
+                if ($schoolProfile->logo_right) {
+                    Storage::disk('public')->delete($schoolProfile->logo_right);
+                }
+
+                $schoolProfile->logo_right = $request->file('logo_right')->store('logos', 'public');
+            }
+
+            $schoolProfile->save();
+
+            return back()->with('status', __('Logo kanan berhasil diperbarui.'));
+        }
+
         if ($intent === 'leadership') {
             if (! $schoolProfile->exists) {
                 return back()->withErrors([

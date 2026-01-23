@@ -8,6 +8,14 @@
                 : \Illuminate\Support\Facades\Storage::url($logoValue);
         }
 
+        $logoRightUrl = null;
+        if ($schoolProfile->logo_right) {
+            $logoRightValue = $schoolProfile->logo_right;
+            $logoRightUrl = filter_var($logoRightValue, FILTER_VALIDATE_URL)
+                ? $logoRightValue
+                : \Illuminate\Support\Facades\Storage::url($logoRightValue);
+        }
+
         $initials = $schoolProfile->name ? mb_strtoupper(mb_substr($schoolProfile->name, 0, 2)) : 'SP';
     @endphp
 
@@ -145,6 +153,89 @@
                         </button>
                     </form>
                     @error('logo')
+                        <p class="mt-3 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                    @enderror
+                </div>
+            </div>
+
+            {{-- Logo Kanan (Kop Raport) --}}
+            <div
+                class="relative overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                <div aria-hidden="true" class="pointer-events-none absolute inset-0">
+                    <div class="absolute -top-14 -right-16 h-36 w-36 rounded-full bg-green-100/70 dark:bg-green-900/30">
+                    </div>
+                    <div
+                        class="absolute -bottom-16 -left-10 h-40 w-40 rounded-full bg-teal-100/70 dark:bg-teal-900/30">
+                    </div>
+                </div>
+                <div class="relative p-8">
+                    <div class="flex items-start gap-4">
+                        <div
+                            class="relative h-24 w-24 overflow-hidden rounded-xl border border-white bg-white shadow-lg ring-2 ring-white/40 dark:border-gray-700 dark:bg-gray-900 dark:ring-gray-600/30">
+                            @if ($logoRightUrl)
+                                <img src="{{ $logoRightUrl }}" alt="{{ __('Logo Kanan') }}"
+                                    class="h-full w-full object-cover">
+                            @else
+                                <div
+                                    class="flex h-full w-full items-center justify-center bg-gradient-to-br from-green-500 to-teal-500 text-3xl font-semibold text-white">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                </div>
+                            @endif
+                        </div>
+                        <div>
+                            <p class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                                {{ __('Logo Kanan') }}</p>
+                            <h2 class="mt-1 text-lg font-semibold text-gray-900 dark:text-gray-100">
+                                {{ __('Logo Kop Raport') }}</h2>
+                            <p class="mt-2 text-sm text-gray-600 dark:text-gray-300">
+                                {{ __('Logo ini akan ditampilkan di sisi kanan kop cetak raport.') }}
+                            </p>
+                            <div
+                                class="mt-3 inline-flex items-center gap-2 rounded-full bg-green-50 px-3 py-1 text-xs font-medium text-green-700 dark:bg-green-900/40 dark:text-green-200">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <span>{{ __('Untuk Cetak Raport') }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="relative border-t border-gray-100 bg-gray-50 p-6 dark:border-gray-700 dark:bg-gray-900/40">
+                    <form action="{{ route('school-profile.update') }}" method="POST" enctype="multipart/form-data"
+                        class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-start">
+                        @csrf
+                        @method('PUT')
+                        <input type="hidden" name="intent" value="logo_right">
+                        <div class="flex items-center gap-3">
+                            <input id="logo_right" name="logo_right" type="file" accept="image/*" class="sr-only"
+                                onchange="this.form.submit()">
+                            <label for="logo_right"
+                                class="inline-flex cursor-pointer items-center gap-2 rounded-full bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-green-700 focus-within:outline-none focus-within:ring-4 focus-within:ring-green-500/40">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1M12 4v16m0-16l-3 3m3-3l3 3" />
+                                </svg>
+                                {{ __('Unggah Logo Kanan') }}
+                            </label>
+                            <button type="submit" name="remove_logo_right" value="1"
+                                class="inline-flex items-center gap-2 rounded-full border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-600 transition hover:border-red-300 hover:bg-red-100 dark:border-red-700/60 dark:bg-red-900/30 dark:text-red-300 dark:hover:border-red-600/60">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7h6m-7 0l1-3h4l1 3" />
+                                </svg>
+                                {{ __('Hapus') }}
+                            </button>
+                        </div>
+                    </form>
+                    @error('logo_right')
                         <p class="mt-3 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
                     @enderror
                 </div>

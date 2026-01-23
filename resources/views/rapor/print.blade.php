@@ -266,7 +266,7 @@
                 <p>{{ $school->district ?? '' }} {{ $school->city ? '• ' . $school->city : '' }}
                     {{ $school->province ? '• ' . $school->province : '' }}</p>
             </div>
-            <img src="{{ asset('images/logo-kemenag.png') }}" alt="Logo Kemenag" class="logo">
+            <img src="{{ $school?->logo_right ? asset('storage/' . $school->logo_right) : asset('images/logo-kemenag.png') }}" alt="Logo Kanan" class="logo">
         </header>
 
         <table class="info-table">

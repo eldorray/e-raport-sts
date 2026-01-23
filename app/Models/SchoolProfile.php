@@ -21,5 +21,6 @@ class SchoolProfile extends Model
         'headmaster',
         'nip_headmaster',
         'logo',
+        'logo_right',
     ];
 }
