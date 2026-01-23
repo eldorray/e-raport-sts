@@ -163,14 +163,6 @@
                     @empty
                         <p class="px-3 py-2 text-xs text-gray-500 dark:text-gray-400">Belum ada ekskul</p>
                     @endforelse
-
-                    <li class="px-2 pt-4 pb-2">
-                        <h2 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                            Pengaturan
-                        </h2>
-                    </li>
-                    <x-layouts.sidebar-link href="{{ route('settings.appearance.edit') }}" icon='fas-palette'
-                        :active="request()->routeIs('settings.appearance.*')">Setting Tampilan</x-layouts.sidebar-link>
                 @endif
 
                 {{-- @php
