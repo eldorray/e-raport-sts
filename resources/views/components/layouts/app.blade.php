@@ -54,60 +54,19 @@
             document.documentElement.style.fontSize = sizes[fontSize] || sizes.normal;
         })();
 
-        // Apply primary color settings
-        ;
-        (function() {
-            const color = window.localStorage.getItem('primaryColor') || 'blue';
-            const colors = {
-                blue: {
-                    primary: '59 130 246',
-                    hover: '37 99 235',
-                    ring: '147 197 253'
-                },
-                green: {
-                    primary: '34 197 94',
-                    hover: '22 163 74',
-                    ring: '134 239 172'
-                },
-                red: {
-                    primary: '239 68 68',
-                    hover: '220 38 38',
-                    ring: '252 165 165'
-                },
-                purple: {
-                    primary: '168 85 247',
-                    hover: '147 51 234',
-                    ring: '216 180 254'
-                },
-                orange: {
-                    primary: '249 115 22',
-                    hover: '234 88 12',
-                    ring: '253 186 116'
-                },
-                teal: {
-                    primary: '20 184 166',
-                    hover: '13 148 136',
-                    ring: '94 234 212'
-                }
-            };
-            const selectedColor = colors[color] || colors.blue;
-            document.documentElement.style.setProperty('--color-primary', selectedColor.primary);
-            document.documentElement.style.setProperty('--color-primary-hover', selectedColor.hover);
-            document.documentElement.style.setProperty('--color-primary-ring', selectedColor.ring);
-        })();
-
         // Apply font family settings
         ;
         (function() {
-            const fontFamily = window.localStorage.getItem('fontFamily') || 'inter';
+            const fontFamily = window.localStorage.getItem('fontFamily') || 'sfpro';
             const fonts = {
+                sfpro: '"SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif',
                 inter: '"Inter", sans-serif',
                 roboto: '"Roboto", sans-serif',
                 opensans: '"Open Sans", sans-serif',
                 lato: '"Lato", sans-serif',
                 montserrat: '"Montserrat", sans-serif'
             };
-            document.documentElement.style.fontFamily = fonts[fontFamily] || fonts.inter;
+            document.documentElement.style.fontFamily = fonts[fontFamily] || fonts.sfpro;
         })();
     </script>
 

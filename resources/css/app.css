@@ -41,31 +41,6 @@
     .hover\:text-sidebar-accent-foreground:hover {
         color: hsl(var(--sidebar-accent-foreground));
     }
-
-    /* Primary color utilities using CSS variables */
-    .bg-primary {
-        background-color: rgb(var(--color-primary, 59 130 246));
-    }
-
-    .bg-primary-hover:hover {
-        background-color: rgb(var(--color-primary-hover, 37 99 235));
-    }
-
-    .text-primary {
-        color: rgb(var(--color-primary, 59 130 246));
-    }
-
-    .border-primary {
-        border-color: rgb(var(--color-primary, 59 130 246));
-    }
-
-    .ring-primary {
-        --tw-ring-color: rgb(var(--color-primary-ring, 147 197 253));
-    }
-
-    .focus\:ring-primary:focus {
-        --tw-ring-color: rgb(var(--color-primary-ring, 147 197 253));
-    }
 }
 
 @layer base {

@@ -55,49 +55,6 @@
                     </div>
                 </div>
 
-                <!-- Primary Color Section -->
-                <div
-                    class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-                    <div class="p-6">
-                        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">{{ __('Warna Utama') }}
-                        </h3>
-                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                            {{ __('Pilih warna aksen untuk tampilan aplikasi') }}</p>
-                        <div class="flex flex-wrap gap-3">
-                            <button onclick="setPrimaryColor('blue')" data-color="blue"
-                                class="color-btn w-10 h-10 rounded-full bg-blue-500 hover:ring-4 hover:ring-blue-200 dark:hover:ring-blue-900 transition-all flex items-center justify-center"
-                                title="Biru">
-                                <i class="fas fa-check text-white hidden"></i>
-                            </button>
-                            <button onclick="setPrimaryColor('green')" data-color="green"
-                                class="color-btn w-10 h-10 rounded-full bg-green-500 hover:ring-4 hover:ring-green-200 dark:hover:ring-green-900 transition-all flex items-center justify-center"
-                                title="Hijau">
-                                <i class="fas fa-check text-white hidden"></i>
-                            </button>
-                            <button onclick="setPrimaryColor('red')" data-color="red"
-                                class="color-btn w-10 h-10 rounded-full bg-red-500 hover:ring-4 hover:ring-red-200 dark:hover:ring-red-900 transition-all flex items-center justify-center"
-                                title="Merah">
-                                <i class="fas fa-check text-white hidden"></i>
-                            </button>
-                            <button onclick="setPrimaryColor('purple')" data-color="purple"
-                                class="color-btn w-10 h-10 rounded-full bg-purple-500 hover:ring-4 hover:ring-purple-200 dark:hover:ring-purple-900 transition-all flex items-center justify-center"
-                                title="Ungu">
-                                <i class="fas fa-check text-white hidden"></i>
-                            </button>
-                            <button onclick="setPrimaryColor('orange')" data-color="orange"
-                                class="color-btn w-10 h-10 rounded-full bg-orange-500 hover:ring-4 hover:ring-orange-200 dark:hover:ring-orange-900 transition-all flex items-center justify-center"
-                                title="Oranye">
-                                <i class="fas fa-check text-white hidden"></i>
-                            </button>
-                            <button onclick="setPrimaryColor('teal')" data-color="teal"
-                                class="color-btn w-10 h-10 rounded-full bg-teal-500 hover:ring-4 hover:ring-teal-200 dark:hover:ring-teal-900 transition-all flex items-center justify-center"
-                                title="Teal">
-                                <i class="fas fa-check text-white hidden"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- Font Size Section -->
                 <div
                     class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
@@ -132,6 +89,15 @@
                         <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
                             {{ __('Pilih jenis font yang diinginkan') }}</p>
                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                            <button onclick="setFontFamily('sfpro')" id="font-family-sfpro"
+                                class="font-family-btn px-4 py-3 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg hover:bg-gray-100 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:bg-gray-600 text-left">
+                                <span
+                                    style="font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;">SF
+                                    Pro Display</span>
+                                <span class="block text-xs text-gray-500 dark:text-gray-400 mt-1"
+                                    style="font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;">The
+                                    quick brown fox</span>
+                            </button>
                             <button onclick="setFontFamily('inter')" id="font-family-inter"
                                 class="font-family-btn px-4 py-3 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg hover:bg-gray-100 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:bg-gray-600 text-left">
                                 <span style="font-family: 'Inter', sans-serif;">Inter</span>
@@ -216,11 +182,6 @@
             const currentTheme = localStorage.getItem('appearance') || 'system';
             updateThemeButtons(currentTheme);
 
-            // Primary Color
-            const currentColor = localStorage.getItem('primaryColor') || 'blue';
-            updateColorButtons(currentColor);
-            applyPrimaryColor(currentColor);
-
             // Font Size
             const currentFontSize = localStorage.getItem('fontSize') || 'normal';
             updateFontButtons(currentFontSize);
@@ -254,68 +215,6 @@
             originalSetAppearance(appearance);
             updateThemeButtons(appearance);
         };
-
-        // Primary Color functions
-        function setPrimaryColor(color) {
-            localStorage.setItem('primaryColor', color);
-            applyPrimaryColor(color);
-            updateColorButtons(color);
-        }
-
-        function applyPrimaryColor(color) {
-            const root = document.documentElement;
-            const colors = {
-                blue: {
-                    primary: '59 130 246',
-                    hover: '37 99 235',
-                    ring: '147 197 253'
-                },
-                green: {
-                    primary: '34 197 94',
-                    hover: '22 163 74',
-                    ring: '134 239 172'
-                },
-                red: {
-                    primary: '239 68 68',
-                    hover: '220 38 38',
-                    ring: '252 165 165'
-                },
-                purple: {
-                    primary: '168 85 247',
-                    hover: '147 51 234',
-                    ring: '216 180 254'
-                },
-                orange: {
-                    primary: '249 115 22',
-                    hover: '234 88 12',
-                    ring: '253 186 116'
-                },
-                teal: {
-                    primary: '20 184 166',
-                    hover: '13 148 136',
-                    ring: '94 234 212'
-                }
-            };
-
-            const selectedColor = colors[color] || colors.blue;
-            root.style.setProperty('--color-primary', selectedColor.primary);
-            root.style.setProperty('--color-primary-hover', selectedColor.hover);
-            root.style.setProperty('--color-primary-ring', selectedColor.ring);
-        }
-
-        function updateColorButtons(color) {
-            document.querySelectorAll('.color-btn').forEach(btn => {
-                const icon = btn.querySelector('i');
-                btn.classList.remove('ring-4', 'ring-offset-2');
-                if (icon) icon.classList.add('hidden');
-            });
-            const activeBtn = document.querySelector('.color-btn[data-color="' + color + '"]');
-            if (activeBtn) {
-                activeBtn.classList.add('ring-4', 'ring-offset-2');
-                const icon = activeBtn.querySelector('i');
-                if (icon) icon.classList.remove('hidden');
-            }
-        }
 
         // Font Size functions
         function setFontSize(size) {
@@ -353,13 +252,14 @@
 
         function applyFontFamily(family) {
             const fonts = {
+                sfpro: '"SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif',
                 inter: '"Inter", sans-serif',
                 roboto: '"Roboto", sans-serif',
                 opensans: '"Open Sans", sans-serif',
                 lato: '"Lato", sans-serif',
                 montserrat: '"Montserrat", sans-serif'
             };
-            document.documentElement.style.fontFamily = fonts[family] || fonts.inter;
+            document.documentElement.style.fontFamily = fonts[family] || fonts.sfpro;
         }
 
         function updateFontFamilyButtons(family) {
@@ -404,16 +304,14 @@
         function resetAllSettings() {
             if (confirm('Apakah Anda yakin ingin mengembalikan semua pengaturan ke default?')) {
                 localStorage.removeItem('appearance');
-                localStorage.removeItem('primaryColor');
                 localStorage.removeItem('fontSize');
                 localStorage.removeItem('fontFamily');
                 localStorage.setItem('sidebarOpen', 'true');
 
                 // Apply defaults
                 setAppearance('system');
-                applyPrimaryColor('blue');
                 applyFontSize('normal');
-                applyFontFamily('inter');
+                applyFontFamily('sfpro');
 
                 // Reload to apply all changes
                 location.reload();
