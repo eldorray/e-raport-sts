@@ -356,7 +356,7 @@
                         <tr>
                             <th style="width:8%">No</th>
                             <th style="width:42%">Kegiatan</th>
-                            <th style="width:15%">Nilai</th>
+                            <th style="width:15%">Predikat</th>
                             <th>Keterangan</th>
                         </tr>
                     </thead>
@@ -365,8 +365,8 @@
                             <tr>
                                 <td style="text-align:center">{{ $idx + 1 }}</td>
                                 <td>{{ $item->ekskul?->nama ?? '-' }}</td>
-                                <td style="text-align:center">{{ $item->nilai ?? '-' }}</td>
-                                <td>{{ $item->catatan ?? '' }}</td>
+                                <td style="text-align:center">{{ $item->predikat ?? '-' }}</td>
+                                <td>{{ $item->predikat_keterangan ?? '' }}</td>
                             </tr>
                         @empty
                             <tr>

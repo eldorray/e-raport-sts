@@ -39,4 +39,48 @@ class EkskulPenilaian extends Model
     {
         return $this->belongsTo(TahunAjaran::class);
     }
+
+    /**
+     * Mendapatkan predikat berdasarkan nilai.
+     * 
+     * A (Sangat Baik): >= 85
+     * B (Baik): 70 - 84
+     * C (Cukup): 50 - 69
+     * D (Kurang): < 50
+     */
+    public function getPredikatAttribute(): ?string
+    {
+        if ($this->nilai === null) {
+            return null;
+        }
+
+        $nilai = (float) $this->nilai;
+
+        if ($nilai >= 85) {
+            return 'A';
+        }
+        if ($nilai >= 70) {
+            return 'B';
+        }
+        if ($nilai >= 50) {
+            return 'C';
+        }
+        return 'D';
+    }
+
+    /**
+     * Mendapatkan keterangan predikat.
+     */
+    public function getPredikatKeteranganAttribute(): ?string
+    {
+        $predikat = $this->predikat;
+
+        return match ($predikat) {
+            'A' => 'Sangat Baik',
+            'B' => 'Baik',
+            'C' => 'Cukup',
+            'D' => 'Kurang',
+            default => null,
+        };
+    }
 }
