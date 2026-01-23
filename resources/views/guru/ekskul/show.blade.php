@@ -35,6 +35,7 @@
                         <th class="px-3 py-3">Nama Siswa</th>
                         <th class="px-3 py-3">Kelas</th>
                         <th class="px-3 py-3">Nilai</th>
+                        <th class="px-3 py-3">Predikat</th>
                         <th class="px-3 py-3">Catatan</th>
                         <th class="px-3 py-3 text-center">Aksi</th>
                     </tr>
@@ -52,6 +53,19 @@
                                     class="w-28 rounded-md border border-gray-300 px-2 py-1 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
                             </td>
                             <td class="px-3 py-3">
+                                @if ($record?->predikat)
+                                    <span class="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold
+                                        {{ $record->predikat === 'A' ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300' : '' }}
+                                        {{ $record->predikat === 'B' ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300' : '' }}
+                                        {{ $record->predikat === 'C' ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300' : '' }}
+                                        {{ $record->predikat === 'D' ? 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300' : '' }}">
+                                        {{ $record->predikat }} - {{ $record->predikat_keterangan }}
+                                    </span>
+                                @else
+                                    <span class="text-gray-400">—</span>
+                                @endif
+                            </td>
+                            <td class="px-3 py-3">
                                 <input type="text" name="catatan[{{ $siswa->id }}]"
                                     value="{{ $record?->catatan }}"
                                     class="w-full rounded-md border border-gray-300 px-2 py-1 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
@@ -66,7 +80,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-3 py-6 text-center text-sm text-gray-500">Belum ada siswa
+                            <td colspan="7" class="px-3 py-6 text-center text-sm text-gray-500">Belum ada siswa
                                 peserta ekskul ini.</td>
                         </tr>
                     @endforelse
