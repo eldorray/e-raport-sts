@@ -55,6 +55,11 @@ class RaporAdminController extends Controller
 
         $kelasQuery = Kelas::query()->orderBy('nama');
 
+        // Filter kelas berdasarkan tahun ajaran yang dipilih
+        if ($tahunId) {
+            $kelasQuery->where('tahun_ajaran_id', $tahunId);
+        }
+
         if ($tingkat) {
             $kelasQuery->where('tingkat', $tingkat);
         }
@@ -75,6 +80,7 @@ class RaporAdminController extends Controller
         $tingkatOptions = Kelas::query()
             ->select('tingkat')
             ->whereNotNull('tingkat')
+            ->when($tahunId, fn ($q) => $q->where('tahun_ajaran_id', $tahunId))
             ->distinct()
             ->orderBy('tingkat')
             ->pluck('tingkat');
