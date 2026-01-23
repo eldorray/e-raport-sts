@@ -64,6 +64,7 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('kelas', KelasController::class)->except(['show'])->parameters([
             'kelas' => 'kelas',
         ]);
+        Route::post('kelas/copy', [KelasController::class, 'copy'])->name('kelas.copy');
         Route::resource('ekskul', EkskulController::class)->except(['create', 'edit', 'show']);
         Route::get('mengajar', [MengajarController::class, 'index'])->name('mengajar.index');
         Route::post('mengajar', [MengajarController::class, 'store'])->name('mengajar.store');

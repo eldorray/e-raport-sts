@@ -171,4 +171,64 @@ class KelasController extends Controller
             Guru::whereKey($previousGuruId)->update(['wali_kelas' => null]);
         }
     }
+
+    /**
+     * Menyalin kelas dari tahun ajaran sebelumnya.
+     */
+    public function copy(Request $request): RedirectResponse
+    {
+        $targetTahunId = session('selected_tahun_ajaran_id');
+
+        if (! $targetTahunId) {
+            return back()->withErrors(['error' => __('Pilih tahun ajaran terlebih dahulu.')]);
+        }
+
+        $data = $request->validate([
+            'source_tahun_ajaran_id' => ['required', 'exists:tahun_ajarans,id'],
+        ]);
+
+        $sourceTahunId = $data['source_tahun_ajaran_id'];
+
+        // Get kelas dari source tahun ajaran
+        $sourceKelasList = Kelas::where('tahun_ajaran_id', $sourceTahunId)->get();
+
+        if ($sourceKelasList->isEmpty()) {
+            return back()->with('warning', __('Tidak ada kelas di tahun ajaran sumber.'));
+        }
+
+        $copiedCount = 0;
+        $skippedCount = 0;
+
+        foreach ($sourceKelasList as $sourceKelas) {
+            // Cek apakah kelas dengan nama sama sudah ada di target tahun ajaran
+            $exists = Kelas::where('tahun_ajaran_id', $targetTahunId)
+                ->where('nama', $sourceKelas->nama)
+                ->exists();
+
+            if ($exists) {
+                $skippedCount++;
+                continue;
+            }
+
+            // Copy kelas tanpa guru_id (akan di-assign manual)
+            Kelas::create([
+                'nama' => $sourceKelas->nama,
+                'tingkat' => $sourceKelas->tingkat,
+                'jurusan' => $sourceKelas->jurusan,
+                'jenis' => $sourceKelas->jenis,
+                'guru_id' => null, // Wali kelas akan di-assign manual
+                'tahun_ajaran_id' => $targetTahunId,
+            ]);
+
+            $copiedCount++;
+        }
+
+        $message = __('Berhasil menyalin :count kelas.', ['count' => $copiedCount]);
+        if ($skippedCount > 0) {
+            $message .= ' ' . __(':count kelas dilewati karena sudah ada.', ['count' => $skippedCount]);
+        }
+
+        return back()->with('status', $message);
+    }
 }
+

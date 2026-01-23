@@ -1,10 +1,20 @@
 <x-layouts.app>
+    @php
+        $tahunAjarans = \App\Models\TahunAjaran::orderByDesc('is_active')->orderByDesc('tahun_mulai')->get();
+        $currentTahunId = session('selected_tahun_ajaran_id');
+    @endphp
+
     <div class="mb-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div>
             <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100">{{ __('Data Kelas') }}</h1>
             <p class="text-gray-600 dark:text-gray-400 mt-1">{{ __('Kelola daftar kelas dan wali kelas.') }}</p>
         </div>
         <div class="flex flex-wrap gap-2">
+            <button type="button" onclick="document.getElementById('copyKelasModal').classList.remove('hidden')"
+                class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700">
+                <i class="fas fa-copy"></i>
+                {{ __('Salin dari TA Lain') }}
+            </button>
             <button type="button" id="openCreateKelas"
                 class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-500/30">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
@@ -157,4 +167,61 @@
             });
         })();
     </script>
+
+    {{-- Copy Kelas Modal --}}
+    <div id="copyKelasModal" class="hidden fixed inset-0 z-50 overflow-y-auto" aria-modal="true">
+        <div class="flex min-h-screen items-center justify-center p-4">
+            <div class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm" onclick="document.getElementById('copyKelasModal').classList.add('hidden')"></div>
+            
+            <div class="relative w-full max-w-md rounded-2xl bg-white p-6 shadow-xl dark:bg-gray-800">
+                <div class="mb-4 flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                        <i class="fas fa-copy mr-2 text-emerald-600"></i>
+                        {{ __('Salin Kelas') }}
+                    </h3>
+                    <button type="button" onclick="document.getElementById('copyKelasModal').classList.add('hidden')"
+                        class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <form action="{{ route('kelas.copy') }}" method="POST">
+                    @csrf
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            {{ __('Salin dari Tahun Ajaran:') }}
+                        </label>
+                        <select name="source_tahun_ajaran_id" required
+                            class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100">
+                            <option value="">-- {{ __('Pilih Tahun Ajaran Sumber') }} --</option>
+                            @foreach ($tahunAjarans as $tahun)
+                                @if ($tahun->id != $currentTahunId)
+                                    <option value="{{ $tahun->id }}">
+                                        {{ $tahun->nama }} - {{ $tahun->semester }}
+                                        @if ($tahun->is_active) (Aktif) @endif
+                                    </option>
+                                @endif
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="mb-4 rounded-lg bg-amber-50 p-3 text-sm text-amber-700 dark:bg-amber-900/50 dark:text-amber-200">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        {{ __('Kelas yang sudah ada tidak akan di-overwrite. Wali kelas harus di-assign manual.') }}
+                    </div>
+
+                    <div class="flex justify-end gap-3">
+                        <button type="button" onclick="document.getElementById('copyKelasModal').classList.add('hidden')"
+                            class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
+                            {{ __('Batal') }}
+                        </button>
+                        <button type="submit"
+                            class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700">
+                            <i class="fas fa-copy mr-1"></i> {{ __('Salin Kelas') }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 </x-layouts.app>
