@@ -46,6 +46,15 @@
         </div>
     @endif
 
+    @if (!$canEdit)
+        <div class="mb-4 rounded-lg border border-amber-300 bg-amber-50 p-4 dark:border-amber-700 dark:bg-amber-900/30">
+            <div class="flex items-center gap-2 text-sm font-semibold text-amber-700 dark:text-amber-300">
+                <i class="fas fa-exclamation-triangle"></i>
+                {{ __('Tahun ajaran yang dipilih tidak aktif. Anda hanya dapat melihat data, tidak dapat mengubah data.') }}
+            </div>
+        </div>
+    @endif
+
     <form action="{{ route('tahfidz.store', $siswa->id) }}" method="POST">
         @csrf
 
@@ -53,8 +62,8 @@
             <!-- Pembimbing Tahfidz -->
             <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
                 <h3 class="mb-4 text-lg font-bold text-gray-800 dark:text-gray-100">Pembimbing Tahfidz</h3>
-                <select name="pembimbing_id"
-                    class="w-full max-w-md rounded-lg border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100">
+                <select name="pembimbing_id" @disabled(!$canEdit)
+                    class="w-full max-w-md rounded-lg border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 disabled:opacity-60 disabled:cursor-not-allowed">
                     <option value="">-- Pilih Pembimbing --</option>
                     @foreach ($pembimbingList as $guru)
                         <option value="{{ $guru->id }}" @selected(($penilaian->pembimbing_id ?? null) == $guru->id)>{{ $guru->nama }}</option>
@@ -82,8 +91,8 @@
                             <tr>
                                 <td class="px-4 py-3 font-medium">Adab</td>
                                 <td class="px-4 py-3">
-                                    <select name="predikat_adab"
-                                        class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100">
+                                    <select name="predikat_adab" @disabled(!$canEdit)
+                                        class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 disabled:opacity-60 disabled:cursor-not-allowed">
                                         <option value="">-</option>
                                         @foreach ($predikatList as $key => $label)
                                             <option value="{{ $key }}" @selected(($penilaian->predikat_adab ?? '') == $key)>
@@ -92,9 +101,9 @@
                                     </select>
                                 </td>
                                 <td class="px-4 py-3">
-                                    <input type="text" name="deskripsi_adab"
+                                    <input type="text" name="deskripsi_adab" @disabled(!$canEdit)
                                         value="{{ $penilaian->deskripsi_adab ?? 'Baik' }}"
-                                        class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
+                                        class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 disabled:opacity-60 disabled:cursor-not-allowed"
                                         placeholder="Deskripsi...">
                                 </td>
                             </tr>
@@ -102,8 +111,8 @@
                             <tr>
                                 <td class="px-4 py-3 font-medium">Tajwid</td>
                                 <td class="px-4 py-3">
-                                    <select name="predikat_tajwid"
-                                        class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100">
+                                    <select name="predikat_tajwid" @disabled(!$canEdit)
+                                        class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 disabled:opacity-60 disabled:cursor-not-allowed">
                                         <option value="">-</option>
                                         @foreach ($predikatList as $key => $label)
                                             <option value="{{ $key }}" @selected(($penilaian->predikat_tajwid ?? '') == $key)>
@@ -112,9 +121,9 @@
                                     </select>
                                 </td>
                                 <td class="px-4 py-3">
-                                    <input type="text" name="deskripsi_tajwid"
+                                    <input type="text" name="deskripsi_tajwid" @disabled(!$canEdit)
                                         value="{{ $penilaian->deskripsi_tajwid ?? 'Baik' }}"
-                                        class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
+                                        class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 disabled:opacity-60 disabled:cursor-not-allowed"
                                         placeholder="Deskripsi...">
                                 </td>
                             </tr>
@@ -122,8 +131,8 @@
                             <tr>
                                 <td class="px-4 py-3 font-medium">Makhorijul Huruf</td>
                                 <td class="px-4 py-3">
-                                    <select name="predikat_makhorijul"
-                                        class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100">
+                                    <select name="predikat_makhorijul" @disabled(!$canEdit)
+                                        class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 disabled:opacity-60 disabled:cursor-not-allowed">
                                         <option value="">-</option>
                                         @foreach ($predikatList as $key => $label)
                                             <option value="{{ $key }}" @selected(($penilaian->predikat_makhorijul ?? '') == $key)>
@@ -132,9 +141,9 @@
                                     </select>
                                 </td>
                                 <td class="px-4 py-3">
-                                    <input type="text" name="deskripsi_makhorijul"
+                                    <input type="text" name="deskripsi_makhorijul" @disabled(!$canEdit)
                                         value="{{ $penilaian->deskripsi_makhorijul ?? 'Cukup' }}"
-                                        class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
+                                        class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 disabled:opacity-60 disabled:cursor-not-allowed"
                                         placeholder="Deskripsi...">
                                 </td>
                             </tr>
@@ -157,9 +166,10 @@
                     @php $surahHafalan = $penilaian->surah_hafalan ?? []; @endphp
                     @foreach ($surahList as $key => $nama)
                         <label
-                            class="flex cursor-pointer items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 transition-colors hover:bg-gray-100 has-[:checked]:border-green-500 has-[:checked]:bg-green-50 dark:border-gray-700 dark:bg-gray-900/50 dark:hover:bg-gray-800 dark:has-[:checked]:border-green-600 dark:has-[:checked]:bg-green-900/30">
+                            class="flex cursor-pointer items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 transition-colors hover:bg-gray-100 has-[:checked]:border-green-500 has-[:checked]:bg-green-50 dark:border-gray-700 dark:bg-gray-900/50 dark:hover:bg-gray-800 dark:has-[:checked]:border-green-600 dark:has-[:checked]:bg-green-900/30 {{ !$canEdit ? 'opacity-60 cursor-not-allowed' : '' }}">
                             <input type="checkbox" name="surah_hafalan[]" value="{{ $key }}"
-                                class="surah-checkbox h-4 w-4 rounded border-gray-300 text-green-600 focus:ring-green-500 dark:border-gray-600 dark:bg-gray-800"
+                                @disabled(!$canEdit)
+                                class="surah-checkbox h-4 w-4 rounded border-gray-300 text-green-600 focus:ring-green-500 dark:border-gray-600 dark:bg-gray-800 disabled:cursor-not-allowed"
                                 @checked(in_array($key, $surahHafalan))>
                             <span
                                 class="text-xs font-medium text-gray-700 dark:text-gray-300">{{ $nama }}</span>
@@ -172,24 +182,26 @@
             <div class="flex justify-end gap-3">
                 <a href="{{ route('tahfidz.index', ['kelas_id' => $siswa->kelas_id]) }}"
                     class="rounded-lg border border-gray-300 bg-white px-6 py-2.5 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700">
-                    Batal
+                    {{ $canEdit ? 'Batal' : 'Kembali' }}
                 </a>
-                @if ($penilaian->exists)
-                    <button type="button" id="reset-trigger"
-                        class="rounded-lg border border-red-300 bg-white px-6 py-2.5 text-sm font-semibold text-red-600 shadow-sm hover:bg-red-50 dark:border-red-600 dark:bg-gray-800 dark:text-red-400 dark:hover:bg-red-900/20">
-                        <i class="fas fa-undo mr-1"></i> Reset
+                @if ($canEdit)
+                    @if ($penilaian->exists)
+                        <button type="button" id="reset-trigger"
+                            class="rounded-lg border border-red-300 bg-white px-6 py-2.5 text-sm font-semibold text-red-600 shadow-sm hover:bg-red-50 dark:border-red-600 dark:bg-gray-800 dark:text-red-400 dark:hover:bg-red-900/20">
+                            <i class="fas fa-undo mr-1"></i> Reset
+                        </button>
+                    @endif
+                    <button type="submit"
+                        class="rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                        <i class="fas fa-save mr-1"></i> Simpan
                     </button>
                 @endif
-                <button type="submit"
-                    class="rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-                    <i class="fas fa-save mr-1"></i> Simpan
-                </button>
             </div>
         </div>
     </form>
 
     {{-- Hidden reset form --}}
-    @if ($penilaian->exists)
+    @if ($canEdit && $penilaian->exists)
         <form id="reset-form" method="POST" action="{{ route('tahfidz.reset', $siswa->id) }}" class="hidden">
             @csrf
             @method('DELETE')
@@ -214,7 +226,7 @@
                 resetTrigger.addEventListener('click', function() {
                     if (confirm(
                             '{{ __('Yakin ingin mereset semua penilaian tahfidz? Tindakan ini tidak dapat dibatalkan.') }}'
-                            )) {
+                        )) {
                         document.getElementById('reset-form').submit();
                     }
                 });

@@ -5,7 +5,8 @@
             <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Raport Tahfidz Al-Qur'an</h1>
             @if ($guru)
                 <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                    Selamat datang, <span class="font-semibold text-gray-800 dark:text-gray-200">{{ $guru->nama }}</span>
+                    Selamat datang, <span
+                        class="font-semibold text-gray-800 dark:text-gray-200">{{ $guru->nama }}</span>
                 </p>
             @endif
         </div>
@@ -32,7 +33,17 @@
         </div>
     @endif
 
-    <div class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+    @if (!$canEdit)
+        <div class="mb-4 rounded-lg border border-amber-300 bg-amber-50 p-4 dark:border-amber-700 dark:bg-amber-900/30">
+            <div class="flex items-center gap-2 text-sm font-semibold text-amber-700 dark:text-amber-300">
+                <i class="fas fa-exclamation-triangle"></i>
+                {{ __('Tahun ajaran yang dipilih tidak aktif. Anda hanya dapat melihat data, tidak dapat mengubah atau menambah data.') }}
+            </div>
+        </div>
+    @endif
+
+    <div
+        class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
         <div class="overflow-x-auto">
             <table
                 class="p-6 min-w-full divide-y divide-gray-200 text-sm text-gray-700 dark:divide-gray-700 dark:text-gray-200">
@@ -55,17 +66,25 @@
                             <td class="px-3 py-3 font-medium">{{ $siswa->nama }}</td>
                             <td class="px-3 py-3">{{ strtoupper(substr($siswa->jenis_kelamin ?? '-', 0, 1)) }}</td>
                             <td class="px-3 py-3 text-center">
-                                <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold
+                                <span
+                                    class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold
                                     {{ $siswa->jumlah_surah > 0 ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400' }}">
                                     {{ $siswa->jumlah_surah }} / 38
                                 </span>
                             </td>
                             <td class="px-3 py-3">
                                 <div class="flex flex-wrap items-center gap-2 justify-center">
-                                    <a href="{{ route('tahfidz.show', $siswa->id) }}"
-                                        class="inline-flex items-center gap-1 rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700 hover:bg-amber-100 dark:bg-amber-900/40 dark:text-amber-100">
-                                        <i class="fas fa-edit text-[11px]"></i> Input
-                                    </a>
+                                    @if ($canEdit)
+                                        <a href="{{ route('tahfidz.show', $siswa->id) }}"
+                                            class="inline-flex items-center gap-1 rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700 hover:bg-amber-100 dark:bg-amber-900/40 dark:text-amber-100">
+                                            <i class="fas fa-edit text-[11px]"></i> Input
+                                        </a>
+                                    @else
+                                        <a href="{{ route('tahfidz.show', $siswa->id) }}"
+                                            class="inline-flex items-center gap-1 rounded-full bg-gray-50 px-3 py-1 text-xs font-semibold text-gray-600 hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-300">
+                                            <i class="fas fa-eye text-[11px]"></i> Lihat
+                                        </a>
+                                    @endif
                                     @if ($siswa->tahfidz)
                                         <a href="{{ route('tahfidz.print', ['siswa' => $siswa->id, 'tahun_ajaran_id' => $tahunId, 'semester' => $semester]) }}"
                                             target="_blank"

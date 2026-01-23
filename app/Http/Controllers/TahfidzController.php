@@ -7,6 +7,7 @@ use App\Models\Kelas;
 use App\Models\MengajarTahfidz;
 use App\Models\Siswa;
 use App\Models\TahfidzPenilaian;
+use App\Models\TahunAjaran;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -90,6 +91,10 @@ class TahfidzController extends Controller
 
         $pembimbingList = Guru::where('is_active', true)->orderBy('nama')->get();
 
+        // Check if tahun ajaran is active (guru can only edit on active tahun ajaran)
+        $tahunAjaran = TahunAjaran::find($tahunId);
+        $canEdit = $isAdmin || ($tahunAjaran && $tahunAjaran->is_active);
+
         return view('tahfidz.index', compact(
             'kelasList',
             'siswas',
@@ -99,7 +104,8 @@ class TahfidzController extends Controller
             'tahunId',
             'semester',
             'isAdmin',
-            'guru'
+            'guru',
+            'canEdit'
         ));
     }
 
@@ -138,6 +144,11 @@ class TahfidzController extends Controller
         $surahList = TahfidzPenilaian::SURAH_LIST;
         $predikatList = TahfidzPenilaian::PREDIKAT_MAP;
 
+        // Check if tahun ajaran is active (guru can only edit on active tahun ajaran)
+        $isAdmin = $user->role === 'admin';
+        $tahunAjaran = TahunAjaran::find($tahunId);
+        $canEdit = $isAdmin || ($tahunAjaran && $tahunAjaran->is_active);
+
         return view('tahfidz.input', compact(
             'siswa',
             'penilaian',
@@ -145,7 +156,8 @@ class TahfidzController extends Controller
             'surahList',
             'predikatList',
             'tahunId',
-            'semester'
+            'semester',
+            'canEdit'
         ));
     }
 
@@ -163,6 +175,15 @@ class TahfidzController extends Controller
 
         // Authorize access
         $this->authorizeAccess($request, $siswa, $tahunId, $semester);
+
+        // Block guru from editing inactive tahun ajaran
+        $user = $request->user();
+        if ($user->role !== 'admin') {
+            $tahunAjaran = TahunAjaran::find($tahunId);
+            if (! $tahunAjaran || ! $tahunAjaran->is_active) {
+                return back()->withErrors(['tahun_ajaran' => __('Tidak dapat menyimpan data pada tahun ajaran yang tidak aktif.')]);
+            }
+        }
 
         $validated = $request->validate([
             'pembimbing_id' => 'nullable|exists:gurus,id',
@@ -207,6 +228,15 @@ class TahfidzController extends Controller
 
         // Authorize access
         $this->authorizeAccess($request, $siswa, $tahunId, $semester);
+
+        // Block guru from resetting inactive tahun ajaran
+        $user = $request->user();
+        if ($user->role !== 'admin') {
+            $tahunAjaran = TahunAjaran::find($tahunId);
+            if (! $tahunAjaran || ! $tahunAjaran->is_active) {
+                return back()->withErrors(['tahun_ajaran' => __('Tidak dapat mereset data pada tahun ajaran yang tidak aktif.')]);
+            }
+        }
 
         TahfidzPenilaian::where('siswa_id', $siswa->id)
             ->where('tahun_ajaran_id', $tahunId)
