@@ -3,6 +3,11 @@
         <div>
             <p class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">Rapor</p>
             <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Raport Tahfidz Al-Qur'an</h1>
+            @if ($guru)
+                <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                    Selamat datang, <span class="font-semibold text-gray-800 dark:text-gray-200">{{ $guru->nama }}</span>
+                </p>
+            @endif
         </div>
     </div>
 
