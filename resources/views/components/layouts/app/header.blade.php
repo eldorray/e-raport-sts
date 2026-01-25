@@ -1,6 +1,6 @@
 <!-- Header -->
 <header class="bg-white dark:bg-gray-800 shadow-sm z-20 border-b border-gray-200 dark:border-gray-700">
-    <div class="flex items-center justify-between h-16 px-4">
+    <div class="flex items-center justify-between h-20 px-4">
         <!-- Left side: Logo and toggle -->
         <div class="flex items-center">
             <button @click="toggleSidebar"
@@ -10,7 +10,7 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
             </button>
-            <img src="{{ asset('images/eraport-logo.png') }}" alt="eraport" class="ml-4 h-8">
+            <img src="{{ asset('images/eraport-logo-full.png') }}" alt="E-Raport STS" class="ml-4 h-14">
         </div>
 
         <!-- Right side: Search, notifications, profile -->
