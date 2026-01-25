@@ -13,6 +13,15 @@
                 <h1 class="text-xl font-semibold text-emerald-700 dark:text-emerald-300 mt-1">
                     Selamat datang, {{ $guruModel->nama ?? auth()->user()->name }} • Wali Kelas {{ $waliKelasNama }}
                 </h1>
+                <a href="{{ route('wali-kelas.siswa.index') }}"
+                    class="inline-flex items-center gap-2 mt-2 text-sm text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                    {{ __('Kelola Siswa Kelas Saya') }}
+                </a>
             @endif
         </div>
         @if ($selectedTahunAjaran)
@@ -50,7 +59,8 @@
                             class="rounded-lg border border-blue-200 bg-white px-2 py-1 text-xs font-semibold text-blue-700 shadow-sm focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-300/50 dark:border-blue-700 dark:bg-blue-900/60 dark:text-blue-100">
                             @foreach ($tahunAjaranOptions as $option)
                                 <option value="{{ $option->id }}" @selected($option->id === $selectedTahunAjaran)>
-                                    {{ $option->nama }} - {{ $option->semester }} {{ $option->is_active ? '• Aktif' : '' }}
+                                    {{ $option->nama }} - {{ $option->semester }}
+                                    {{ $option->is_active ? '• Aktif' : '' }}
                                 </option>
                             @endforeach
                         </select>
@@ -150,7 +160,8 @@
                     </div>
                 </div>
             </div>
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 border border-gray-200 dark:border-gray-700">
+            <div
+                class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 border border-gray-200 dark:border-gray-700">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Siswa</p>
@@ -229,6 +240,41 @@
                         style="width: {{ $progress }}%"></div>
                 </div>
             </div>
+
+            {{-- Wali Kelas Card --}}
+            @if ($waliKelasNama ?? false)
+                <div
+                    class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 border border-gray-200 dark:border-gray-700 col-span-1 md:col-span-2">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                            <div class="bg-emerald-100 dark:bg-emerald-900 p-4 rounded-xl">
+                                <svg xmlns="http://www.w3.org/2000/svg"
+                                    class="h-8 w-8 text-emerald-600 dark:text-emerald-300" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ __('Wali Kelas') }}
+                                </p>
+                                <p class="text-2xl font-bold text-gray-800 dark:text-gray-100">{{ $waliKelasNama }}
+                                </p>
+                                <p class="text-sm text-gray-500 mt-1">{{ __('Kelola data siswa di kelas Anda') }}</p>
+                            </div>
+                        </div>
+                        <a href="{{ route('wali-kelas.siswa.index') }}"
+                            class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700 focus:outline-none focus:ring-4 focus:ring-emerald-500/30">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
+                            {{ __('Kelola Siswa') }}
+                        </a>
+                    </div>
+                </div>
+            @endif
         @endif
     </div>
 

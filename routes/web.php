@@ -23,6 +23,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\TahfidzController;
 use App\Http\Controllers\TahfidzPrintController;
 use App\Http\Controllers\MengajarTahfidzController;
+use App\Http\Controllers\WaliKelasSiswaController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -129,6 +130,14 @@ Route::middleware(['auth'])->group(function () {
         Route::get('penilaian/{mengajar}', [PenilaianController::class, 'show'])->name('guru.penilaian.show');
         Route::post('penilaian/{mengajar}', [PenilaianController::class, 'store'])->name('guru.penilaian.store');
         Route::delete('penilaian/{mengajar}/reset', [PenilaianController::class, 'reset'])->name('guru.penilaian.reset');
+
+        // Wali Kelas: kelola siswa di kelas
+        Route::get('wali-kelas/siswa', [WaliKelasSiswaController::class, 'index'])->name('wali-kelas.siswa.index');
+        Route::post('wali-kelas/siswa', [WaliKelasSiswaController::class, 'store'])->name('wali-kelas.siswa.store');
+        Route::get('wali-kelas/siswa/{siswa}', [WaliKelasSiswaController::class, 'show'])->name('wali-kelas.siswa.show');
+        Route::put('wali-kelas/siswa/{siswa}', [WaliKelasSiswaController::class, 'update'])->name('wali-kelas.siswa.update');
+        Route::delete('wali-kelas/siswa/{siswa}', [WaliKelasSiswaController::class, 'destroy'])->name('wali-kelas.siswa.destroy');
+        Route::patch('wali-kelas/siswa/{siswa}/toggle-status', [WaliKelasSiswaController::class, 'toggleStatus'])->name('wali-kelas.siswa.toggle');
     });
 });
 
