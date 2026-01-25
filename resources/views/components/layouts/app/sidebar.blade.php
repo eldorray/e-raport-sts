@@ -1,5 +1,5 @@
 <aside :class="{ 'w-full md:w-64': sidebarOpen, 'w-0 md:w-16 hidden md:block': !sidebarOpen }"
-    class="bg-sidebar text-sidebar-foreground border-r border-gray-200 dark:border-gray-700 sidebar-transition overflow-hidden">
+    class="bg-sidebar text-sidebar-foreground border-r border-slate-200 dark:border-slate-700 sidebar-transition overflow-hidden">
     <div class="h-full flex flex-col">
         <nav class="flex-1 overflow-y-auto custom-scrollbar py-4">
             <ul class="space-y-1 px-2">
@@ -14,7 +14,7 @@
                     <x-layouts.sidebar-link href="{{ route('school-profile.index') }}" icon='fas-school'
                         :active="request()->routeIs('school-profile*')">Profil Sekolah</x-layouts.sidebar-link>
                     <li class="px-2 pt-4 pb-2">
-                        <h2 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        <h2 class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                             Pengaturan
                         </h2>
                     </li>
@@ -59,7 +59,7 @@
                         :active="request()->routeIs('users.*')">Manajemen User</x-layouts.sidebar-link>
 
                     <li class="px-2 pt-4 pb-2">
-                        <h2 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        <h2 class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                             Rapor
                         </h2>
                     </li>
@@ -71,7 +71,7 @@
                         :active="request()->routeIs('tahfidz.*')">Raport Tahfidz</x-layouts.sidebar-link>
 
                     <li class="px-2 pt-4 pb-2">
-                        <h2 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        <h2 class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                             Sistem
                         </h2>
                     </li>
@@ -81,7 +81,7 @@
                         :active="request()->routeIs('settings.appearance.*')">Setting Tampilan</x-layouts.sidebar-link>
                 @else
                     <li class="px-2 pt-4 pb-2">
-                        <h2 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        <h2 class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                             Guru
                         </h2>
                     </li>
@@ -108,7 +108,7 @@
                     @endif
 
                     <li class="px-2 pt-4 pb-2">
-                        <h2 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        <h2 class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                             {{ __('Mapel Saya') }}
                         </h2>
                     </li>
@@ -125,7 +125,7 @@
                         <details class="group"
                             {{ request()->routeIs('guru.penilaian.show') && optional($items->first())->id === optional(request()->route('mengajar'))->id ? 'open' : '' }}>
                             <summary
-                                class="flex cursor-pointer items-center justify-between rounded-lg px-3 py-2 text-sm font-semibold text-gray-800 hover:bg-gray-100 dark:text-gray-100 dark:hover:bg-gray-800">
+                                class="flex cursor-pointer items-center justify-between rounded-lg px-3 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-100 dark:text-slate-100 dark:hover:bg-slate-800">
                                 <span class="flex items-center gap-2"><i class="fa-solid fa-book text-xs"></i>
                                     {{ $mapel->kode ?? ($mapel->nama_mapel ?? '-') }}
                                     <span
@@ -138,7 +138,7 @@
                                     <li>
                                         <a href="{{ route('guru.penilaian.show', $assignment) }}"
                                             @click="closeSidebarOnMobile()"
-                                            class="block rounded-md px-3 py-2 text-sm {{ request()->routeIs('guru.penilaian.show') && optional(request()->route('mengajar'))->id === $assignment->id ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-gray-100 dark:text-gray-200 dark:hover:bg-gray-800' }}">
+                                            class="block rounded-md px-3 py-2 text-sm {{ request()->routeIs('guru.penilaian.show') && optional(request()->route('mengajar'))->id === $assignment->id ? 'bg-blue-600 text-white' : 'text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800' }}">
                                             <span>{{ $assignment->kelas->nama ?? '-' }}</span>
                                         </a>
                                     </li>
@@ -146,12 +146,12 @@
                             </ul>
                         </details>
                     @empty
-                        <p class="px-3 py-2 text-xs text-gray-500 dark:text-gray-400">
+                        <p class="px-3 py-2 text-xs text-slate-500 dark:text-slate-400">
                             {{ __('Mapel Belum diinput oleh admin') }}</p>
                     @endforelse
 
                     <li class="px-2 pt-4 pb-2">
-                        <h2 class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                        <h2 class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                             Ekskul</h2>
                     </li>
                     @forelse(($sidebarEkskul ?? collect()) as $ex)
@@ -161,7 +161,7 @@
                             {{ $ex->nama }}
                         </x-layouts.sidebar-link>
                     @empty
-                        <p class="px-3 py-2 text-xs text-gray-500 dark:text-gray-400">Belum ada ekskul</p>
+                        <p class="px-3 py-2 text-xs text-slate-500 dark:text-slate-400">Belum ada ekskul</p>
                     @endforelse
                 @endif
 

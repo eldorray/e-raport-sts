@@ -45,14 +45,14 @@
 
 @layer base {
     :root {
-        --sidebar-background: 210 20% 98%;
+        --sidebar-background: 210 40% 98%;
         --sidebar-foreground: 215 25% 27%;
         --sidebar-accent: 217 33% 17%;
         --sidebar-accent-foreground: 210 40% 98%;
         --sidebar-border: 214 32% 91%;
         --sidebar-ring: 221 83% 53%;
-        --font-color-light: #1f2937;
-        --font-color-dark: #e5e7eb;
+        --font-color-light: #1e293b;
+        --font-color-dark: #e2e8f0;
     }
 
     .dark {

@@ -112,7 +112,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 antialiased" x-data="{
+<body class="bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-200 antialiased" x-data="{
     sidebarOpen: localStorage.getItem('sidebarOpen') === null ? window.innerWidth >= 1024 : localStorage.getItem('sidebarOpen') === 'true',
     toggleSidebar() {
         this.sidebarOpen = !this.sidebarOpen;
@@ -144,7 +144,7 @@
             <x-layouts.app.sidebar />
 
             <!-- Main Content -->
-            <main class="flex-1 overflow-auto bg-gray-100 dark:bg-gray-900 content-transition">
+            <main class="flex-1 overflow-auto bg-slate-100 dark:bg-slate-900 content-transition">
                 <div class="p-6">
                     <!-- Success Message -->
                     @session('status')

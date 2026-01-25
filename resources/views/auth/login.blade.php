@@ -7,29 +7,35 @@
         $school = \App\Models\SchoolProfile::first();
     @endphp
 
-    <div class="relative overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-xl">
-        <div class="absolute inset-0 bg-gradient-to-br from-blue-50 via-white to-indigo-50"></div>
+    <div
+        class="relative overflow-hidden rounded-3xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-xl">
+        <div
+            class="absolute inset-0 bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:from-slate-800 dark:via-slate-900 dark:to-slate-800">
+        </div>
         <div class="relative p-8 sm:p-10 lg:p-12">
             <div class="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
                 <div class="space-y-3">
-                    <p class="text-sm font-semibold tracking-wide text-gray-700 uppercase">
+                    <p class="text-sm font-semibold tracking-wide text-slate-700 dark:text-slate-300 uppercase">
                         {{ __('E-Raport Kurikulum Merdeka') }}</p>
-                    <h1 class="text-3xl font-extrabold leading-tight text-gray-900 lg:text-4xl">
+                    <h1 class="text-3xl font-extrabold leading-tight text-slate-900 dark:text-slate-50 lg:text-4xl">
                         {{ $school?->name }}
                     </h1>
-                    <p class="text-sm text-gray-600">{{ __('Silahkan login menggunakan akun Anda') }}</p>
+                    <p class="text-sm text-slate-600 dark:text-slate-400">
+                        {{ __('Silahkan login menggunakan akun Anda') }}</p>
 
                 </div>
 
                 <div class="w-full max-w-xl">
-                    <div class="space-y-4 rounded-2xl bg-white/80 p-6 shadow-inner ring-1 ring-gray-200 backdrop-blur">
+                    <div
+                        class="space-y-4 rounded-2xl bg-white/80 dark:bg-slate-800/80 p-6 shadow-inner ring-1 ring-slate-200 dark:ring-slate-700 backdrop-blur">
                         <form method="POST" action="{{ route('login') }}" class="space-y-4">
                             @csrf
                             <div class="space-y-1">
-                                <label class="text-sm font-semibold text-gray-700">{{ __('Nomor Akun') }}</label>
+                                <label
+                                    class="text-sm font-semibold text-slate-700 dark:text-slate-300">{{ __('Nomor Akun') }}</label>
                                 <div
-                                    class="flex items-center gap-2 rounded-xl border border-gray-300 bg-blue-50 px-3 py-2.5 ring-1 ring-transparent focus-within:border-blue-500 focus-within:ring-blue-200">
-                                    <span class="text-gray-500">
+                                    class="flex items-center gap-2 rounded-xl border border-slate-300 dark:border-slate-600 bg-blue-50 dark:bg-slate-700/50 px-3 py-2.5 ring-1 ring-transparent focus-within:border-blue-500 focus-within:ring-blue-200 dark:focus-within:ring-blue-500/30">
+                                    <span class="text-slate-500 dark:text-slate-400">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
                                             viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"
@@ -38,7 +44,7 @@
                                     </span>
                                     <input type="text" name="login" value="{{ old('login') }}" required
                                         autocomplete="username"
-                                        class="w-full bg-transparent text-base font-semibold text-gray-900 placeholder-gray-400 focus:outline-none"
+                                        class="w-full bg-transparent text-base font-semibold text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none"
                                         placeholder="Masukan email anda">
                                 </div>
                                 @error('login')
@@ -47,10 +53,11 @@
                             </div>
 
                             <div class="space-y-1">
-                                <label class="text-sm font-semibold text-gray-700">{{ __('Kata Sandi') }}</label>
+                                <label
+                                    class="text-sm font-semibold text-slate-700 dark:text-slate-300">{{ __('Kata Sandi') }}</label>
                                 <div
-                                    class="flex items-center gap-2 rounded-xl border border-gray-300 bg-blue-50 px-3 py-2.5 ring-1 ring-transparent focus-within:border-blue-500 focus-within:ring-blue-200">
-                                    <span class="text-gray-500">
+                                    class="flex items-center gap-2 rounded-xl border border-slate-300 dark:border-slate-600 bg-blue-50 dark:bg-slate-700/50 px-3 py-2.5 ring-1 ring-transparent focus-within:border-blue-500 focus-within:ring-blue-200 dark:focus-within:ring-blue-500/30">
+                                    <span class="text-slate-500 dark:text-slate-400">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
                                             viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"
@@ -59,10 +66,10 @@
                                     </span>
                                     <input id="password" name="password" type="password" required
                                         autocomplete="current-password"
-                                        class="w-full bg-transparent text-base font-semibold text-gray-900 placeholder-gray-400 focus:outline-none"
+                                        class="w-full bg-transparent text-base font-semibold text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none"
                                         placeholder="••••••••">
                                     <button type="button" id="togglePassword"
-                                        class="text-gray-500 transition hover:text-gray-700">
+                                        class="text-slate-500 dark:text-slate-400 transition hover:text-slate-700 dark:hover:text-slate-200">
                                         <svg id="eyeIcon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5"
                                             fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"
@@ -78,10 +85,11 @@
                             </div>
 
                             <div class="space-y-1">
-                                <label class="text-sm font-semibold text-gray-700">{{ __('Tahun Ajaran & Semester') }}</label>
+                                <label
+                                    class="text-sm font-semibold text-slate-700 dark:text-slate-300">{{ __('Tahun Ajaran & Semester') }}</label>
                                 <div
-                                    class="flex items-center gap-2 rounded-xl border border-gray-300 bg-white px-3 py-2.5 ring-1 ring-transparent focus-within:border-blue-500 focus-within:ring-blue-200">
-                                    <span class="text-gray-500">
+                                    class="flex items-center gap-2 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700/50 px-3 py-2.5 ring-1 ring-transparent focus-within:border-blue-500 focus-within:ring-blue-200 dark:focus-within:ring-blue-500/30">
+                                    <span class="text-slate-500 dark:text-slate-400">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
                                             viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"
@@ -89,11 +97,12 @@
                                         </svg>
                                     </span>
                                     <select name="tahun_ajaran_id"
-                                        class="w-full bg-transparent text-base font-semibold text-gray-900 focus:outline-none">
+                                        class="w-full bg-transparent text-base font-semibold text-slate-900 dark:text-slate-100 focus:outline-none">
                                         <option value="" disabled {{ $defaultTahunAjaran ? '' : 'selected' }}>
                                             {{ __('Pilih tahun ajaran') }}</option>
                                         @foreach ($tahunAjaranOptions as $tahun)
-                                            <option value="{{ $tahun->id }}" data-semester="{{ $tahun->semester }}" @selected($defaultTahunAjaran == $tahun->id)>
+                                            <option value="{{ $tahun->id }}" data-semester="{{ $tahun->semester }}"
+                                                @selected($defaultTahunAjaran == $tahun->id)>
                                                 {{ $tahun->nama }} - Semester {{ $tahun->semester }}
                                             </option>
                                         @endforeach
@@ -107,30 +116,31 @@
                             <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
                                 <div class="flex items-center gap-2">
                                     <input id="remember" name="remember" type="checkbox" value="1"
-                                        class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                        class="h-4 w-4 rounded border-slate-300 dark:border-slate-600 text-blue-600 focus:ring-blue-500 dark:focus:ring-blue-400"
                                         @checked(old('remember'))>
                                     <label for="remember"
-                                        class="text-sm font-medium text-gray-700">{{ __('Ingat saya') }}</label>
+                                        class="text-sm font-medium text-slate-700 dark:text-slate-300">{{ __('Ingat saya') }}</label>
                                 </div>
                                 @if (Route::has('password.request'))
                                     <a href="{{ route('password.request') }}"
-                                        class="text-sm font-semibold text-blue-600 hover:underline">{{ __('Lupa Password Admin?') }}</a>
+                                        class="text-sm font-semibold text-blue-600 dark:text-blue-400 hover:underline">{{ __('Lupa Password Admin?') }}</a>
                                 @endif
                             </div>
 
                             <div class="pt-2">
                                 <button type="submit"
-                                    class="inline-flex w-full items-center justify-center rounded-xl bg-blue-600 px-4 py-3 text-lg font-semibold text-white shadow-lg transition hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-500/30">
+                                    class="inline-flex w-full items-center justify-center rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 px-4 py-3 text-lg font-semibold text-white shadow-lg transition focus:outline-none focus:ring-4 focus:ring-blue-500/30">
                                     {{ __('Login') }}
                                 </button>
                             </div>
                         </form>
 
-                        <div class="pt-3 text-sm text-gray-600">
+                        <div class="pt-3 text-sm text-slate-600 dark:text-slate-400">
                             <p>{{ __('Aplikasi E-Raport Kurikulum Merdeka') }}</p>
                             <p>{{ __('Masih dalam pengembangan') }}
                             </p>
-                            <p class="pt-1 text-gray-500">E-Raport Versi 1.0 ({{ now()->format('YmdHis') }})</p>
+                            <p class="pt-1 text-slate-500 dark:text-slate-500">E-Raport Versi 1.0
+                                ({{ now()->format('YmdHis') }})</p>
                         </div>
                     </div>
                 </div>

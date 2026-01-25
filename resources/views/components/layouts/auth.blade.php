@@ -29,7 +29,7 @@
     </script>
 </head>
 
-<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 antialiased" x-data="{
+<body class="bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-200 antialiased" x-data="{
     darkMode: localStorage.getItem('darkMode') === 'true',
     toggleDarkMode() {
         this.darkMode = !this.darkMode;
