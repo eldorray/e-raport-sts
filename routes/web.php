@@ -138,6 +138,10 @@ Route::middleware(['auth'])->group(function () {
         Route::put('wali-kelas/siswa/{siswa}', [WaliKelasSiswaController::class, 'update'])->name('wali-kelas.siswa.update');
         Route::delete('wali-kelas/siswa/{siswa}', [WaliKelasSiswaController::class, 'destroy'])->name('wali-kelas.siswa.destroy');
         Route::patch('wali-kelas/siswa/{siswa}/toggle-status', [WaliKelasSiswaController::class, 'toggleStatus'])->name('wali-kelas.siswa.toggle');
+
+        // Wali Kelas: claim siswa yang belum memiliki kelas
+        Route::get('wali-kelas/claim-siswa', [WaliKelasSiswaController::class, 'unassigned'])->name('wali-kelas.siswa.unassigned');
+        Route::post('wali-kelas/claim-siswa', [WaliKelasSiswaController::class, 'claim'])->name('wali-kelas.siswa.claim');
     });
 });
 

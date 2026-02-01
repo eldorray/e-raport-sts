@@ -303,4 +303,100 @@ class WaliKelasSiswaController extends Controller
             Storage::disk(self::PHOTO_DISK)->delete($path);
         }
     }
+
+    /**
+     * Menampilkan daftar siswa yang belum di-assign ke kelas manapun.
+     *
+     * @param  Request  $request  HTTP request
+     * @return View|RedirectResponse Halaman daftar siswa belum ter-assign
+     */
+    public function unassigned(Request $request): View|RedirectResponse
+    {
+        $tahunId = session('selected_tahun_ajaran_id');
+
+        if (! $tahunId) {
+            return redirect()->route('dashboard')
+                ->with('error', __('Pilih tahun ajaran terlebih dahulu.'));
+        }
+
+        $guru = Guru::where('user_id', $request->user()->id)->first();
+
+        if (! $guru) {
+            return redirect()->route('dashboard')
+                ->with('error', __('Data guru tidak ditemukan.'));
+        }
+
+        // Cari kelas di mana guru ini adalah wali kelas
+        $kelas = Kelas::where('guru_id', $guru->id)
+            ->where('tahun_ajaran_id', $tahunId)
+            ->first();
+
+        if (! $kelas) {
+            return redirect()->route('dashboard')
+                ->with('error', __('Anda bukan wali kelas pada tahun ajaran ini.'));
+        }
+
+        // Ambil siswa yang belum di-assign ke kelas manapun
+        $unassignedSiswas = Siswa::where('tahun_ajaran_id', $tahunId)
+            ->whereNull('kelas_id')
+            ->orderBy('nama')
+            ->get();
+
+        return view('guru.wali-kelas.siswa.unassigned', [
+            'kelas' => $kelas,
+            'guru' => $guru,
+            'unassignedSiswas' => $unassignedSiswas,
+        ]);
+    }
+
+    /**
+     * Meng-claim/assign siswa ke kelas wali kelas.
+     *
+     * @param  Request  $request  HTTP request dengan siswa_ids
+     * @return RedirectResponse Redirect ke halaman sebelumnya dengan pesan status
+     */
+    public function claim(Request $request): RedirectResponse
+    {
+        $tahunId = session('selected_tahun_ajaran_id');
+
+        if (! $tahunId) {
+            return back()->withErrors(['tahun_ajaran' => __('Pilih tahun ajaran terlebih dahulu.')]);
+        }
+
+        $guru = Guru::where('user_id', $request->user()->id)->first();
+
+        if (! $guru) {
+            return back()->with('error', __('Data guru tidak ditemukan.'));
+        }
+
+        $kelas = Kelas::where('guru_id', $guru->id)
+            ->where('tahun_ajaran_id', $tahunId)
+            ->first();
+
+        if (! $kelas) {
+            return back()->with('error', __('Anda bukan wali kelas pada tahun ajaran ini.'));
+        }
+
+        $data = $request->validate([
+            'siswa_ids' => ['required', 'array', 'min:1'],
+            'siswa_ids.*' => ['exists:siswas,id'],
+        ]);
+
+        $selectedIds = $data['siswa_ids'];
+
+        // Hanya claim siswa yang belum punya kelas dan dari tahun ajaran yang sama
+        $claimedCount = Siswa::whereIn('id', $selectedIds)
+            ->where('tahun_ajaran_id', $tahunId)
+            ->whereNull('kelas_id')
+            ->update(['kelas_id' => $kelas->id]);
+
+        if ($claimedCount === 0) {
+            return back()->with('warning', __('Tidak ada siswa yang berhasil di-claim. Pastikan siswa belum memiliki kelas.'));
+        }
+
+        return back()->with('status', __(':count siswa berhasil di-claim ke kelas :kelas.', [
+            'count' => $claimedCount,
+            'kelas' => $kelas->nama,
+        ]));
+    }
 }

@@ -97,6 +97,8 @@
                     @endif
 
                     @if ($isWaliKelas ?? false)
+                        <x-layouts.sidebar-link href="{{ route('wali-kelas.siswa.index') }}" icon='fas-user-graduate'
+                            :active="request()->routeIs('wali-kelas.siswa.*')">Siswa Kelas Saya</x-layouts.sidebar-link>
                         <x-layouts.sidebar-link href="{{ route('rapor.index') }}" icon='fas-file-lines'
                             :active="request()->routeIs('rapor.index')">Cetak Rapor</x-layouts.sidebar-link>
                         <x-layouts.sidebar-link href="{{ route('rapor.absen') }}" icon='fas-calendar-check'
