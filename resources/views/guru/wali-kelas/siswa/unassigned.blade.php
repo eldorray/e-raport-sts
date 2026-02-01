@@ -125,6 +125,7 @@
                                 <th class="px-4 py-3">NISN</th>
                                 <th class="px-4 py-3">{{ __('Nama') }}</th>
                                 <th class="px-4 py-3">{{ __('Jenis Kelamin') }}</th>
+                                <th class="px-4 py-3">{{ __('Kelas Saat Ini') }}</th>
                                 <th class="px-4 py-3">{{ __('Kelas Tujuan') }}</th>
                             </tr>
                         </thead>
@@ -146,6 +147,11 @@
                                         <span
                                             class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium {{ $siswa->jenis_kelamin === 'L' ? 'bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-200' : 'bg-pink-100 text-pink-700 dark:bg-pink-900/40 dark:text-pink-200' }}">
                                             {{ $siswa->jenis_kelamin === 'L' ? 'Laki-laki' : 'Perempuan' }}
+                                        </span>
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        <span class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-500 dark:bg-gray-700 dark:text-gray-400">
+                                            {{ __('Belum ada kelas') }}
                                         </span>
                                     </td>
                                     <td class="px-4 py-3">
