@@ -240,7 +240,7 @@ class GuruController extends Controller
     public function export()
     {
         $gurus = Guru::orderBy('nama')->get();
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('guru.export-pdf', ['gurus' => $gurus]);
+        $pdf = app('dompdf.wrapper')->loadView('guru.export-pdf', ['gurus' => $gurus]);
 
         return $pdf->download('data-guru.pdf');
     }
