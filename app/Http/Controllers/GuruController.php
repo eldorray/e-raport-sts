@@ -233,6 +233,16 @@ class GuruController extends Controller
     }
 
     /**
+     * Export data guru ke Excel (NIP/NUPTK, Nama, Password).
+     *
+     * @return \Symfony\Component\HttpFoundation\BinaryFileResponse File Excel
+     */
+    public function export()
+    {
+        return Excel::download(new \App\Exports\GuruExport(), 'data-guru.xlsx');
+    }
+
+    /**
      * Sync guru data dari API eksternal.
      *
      * @param  Request  $request  HTTP request dengan source (guru-mi atau guru-smp)

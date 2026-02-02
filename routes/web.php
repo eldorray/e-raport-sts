@@ -60,6 +60,7 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('guru', GuruController::class)->except(['show']);
         Route::patch('guru/{guru}/toggle-status', [GuruController::class, 'toggleStatus'])->name('guru.toggle');
         Route::post('guru/sync', [GuruController::class, 'syncFromApi'])->name('guru.sync');
+        Route::get('guru/export', [GuruController::class, 'export'])->name('guru.export');
         Route::post('siswa/sync', [SiswaController::class, 'syncFromApi'])->name('siswa.sync');
         Route::post('mata-pelajaran/sync', [MataPelajaranController::class, 'syncFromApi'])->name('mata-pelajaran.sync');
         Route::resource('kelas', KelasController::class)->except(['show'])->parameters([
