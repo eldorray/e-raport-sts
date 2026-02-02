@@ -233,13 +233,16 @@ class GuruController extends Controller
     }
 
     /**
-     * Export data guru ke Excel (NIP/NUPTK, Nama, Password).
+     * Export data guru ke PDF (NIP/NUPTK, Nama, Password).
      *
-     * @return \Symfony\Component\HttpFoundation\BinaryFileResponse File Excel
+     * @return \Illuminate\Http\Response File PDF
      */
     public function export()
     {
-        return Excel::download(new \App\Exports\GuruExport(), 'data-guru.xlsx');
+        $gurus = Guru::orderBy('nama')->get();
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('guru.export-pdf', ['gurus' => $gurus]);
+
+        return $pdf->download('data-guru.pdf');
     }
 
     /**
