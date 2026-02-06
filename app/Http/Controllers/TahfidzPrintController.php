@@ -49,6 +49,7 @@ class TahfidzPrintController extends Controller
         }
 
         $surahList = TahfidzPenilaian::SURAH_LIST;
+        $surahListJuz29 = TahfidzPenilaian::SURAH_LIST_JUZ29;
         $predikatMap = TahfidzPenilaian::PREDIKAT_MAP;
 
         $printPlace = $printSetting?->tempat_cetak ?? $school?->city ?? 'Tangerang';
@@ -62,6 +63,7 @@ class TahfidzPrintController extends Controller
             'semester',
             'penilaian',
             'surahList',
+            'surahListJuz29',
             'predikatMap',
             'printPlace',
             'raporDate'

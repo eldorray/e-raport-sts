@@ -152,12 +152,13 @@
                 </div>
             </div>
 
-            <!-- Hafalan Surah -->
+            <!-- Hafalan Surah Juz 30 -->
             <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
                 <div class="mb-4 flex items-center justify-between">
-                    <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100">Pencapaian Target Hafalan (Juz 'Amma)
+                    <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100">Pencapaian Target Hafalan — Juz 30
+                        (Juz 'Amma)
                     </h3>
-                    <span id="surah-count"
+                    <span id="surah-count-30"
                         class="rounded-full bg-blue-100 px-3 py-1 text-sm font-semibold text-blue-700 dark:bg-blue-900 dark:text-blue-200">
                         {{ count($penilaian->surah_hafalan ?? []) }} / 38
                     </span>
@@ -169,8 +170,35 @@
                             class="flex cursor-pointer items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 transition-colors hover:bg-gray-100 has-[:checked]:border-green-500 has-[:checked]:bg-green-50 dark:border-gray-700 dark:bg-gray-900/50 dark:hover:bg-gray-800 dark:has-[:checked]:border-green-600 dark:has-[:checked]:bg-green-900/30 {{ !$canEdit ? 'opacity-60 cursor-not-allowed' : '' }}">
                             <input type="checkbox" name="surah_hafalan[]" value="{{ $key }}"
                                 @disabled(!$canEdit)
-                                class="surah-checkbox h-4 w-4 rounded border-gray-300 text-green-600 focus:ring-green-500 dark:border-gray-600 dark:bg-gray-800 disabled:cursor-not-allowed"
+                                class="surah-checkbox surah-checkbox-30 h-4 w-4 rounded border-gray-300 text-green-600 focus:ring-green-500 dark:border-gray-600 dark:bg-gray-800 disabled:cursor-not-allowed"
                                 @checked(in_array($key, $surahHafalan))>
+                            <span
+                                class="text-xs font-medium text-gray-700 dark:text-gray-300">{{ $nama }}</span>
+                        </label>
+                    @endforeach
+                </div>
+            </div>
+
+            <!-- Hafalan Surah Juz 29 -->
+            <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                <div class="mb-4 flex items-center justify-between">
+                    <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100">Pencapaian Target Hafalan — Juz 29
+                        (Juz Tabarak)
+                    </h3>
+                    <span id="surah-count-29"
+                        class="rounded-full bg-purple-100 px-3 py-1 text-sm font-semibold text-purple-700 dark:bg-purple-900 dark:text-purple-200">
+                        {{ count($penilaian->surah_hafalan_29 ?? []) }} / 11
+                    </span>
+                </div>
+                <div class="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                    @php $surahHafalan29 = $penilaian->surah_hafalan_29 ?? []; @endphp
+                    @foreach ($surahListJuz29 as $key => $nama)
+                        <label
+                            class="flex cursor-pointer items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 transition-colors hover:bg-gray-100 has-[:checked]:border-purple-500 has-[:checked]:bg-purple-50 dark:border-gray-700 dark:bg-gray-900/50 dark:hover:bg-gray-800 dark:has-[:checked]:border-purple-600 dark:has-[:checked]:bg-purple-900/30 {{ !$canEdit ? 'opacity-60 cursor-not-allowed' : '' }}">
+                            <input type="checkbox" name="surah_hafalan_29[]" value="{{ $key }}"
+                                @disabled(!$canEdit)
+                                class="surah-checkbox surah-checkbox-29 h-4 w-4 rounded border-gray-300 text-purple-600 focus:ring-purple-500 dark:border-gray-600 dark:bg-gray-800 disabled:cursor-not-allowed"
+                                @checked(in_array($key, $surahHafalan29))>
                             <span
                                 class="text-xs font-medium text-gray-700 dark:text-gray-300">{{ $nama }}</span>
                         </label>
@@ -210,15 +238,23 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const checkboxes = document.querySelectorAll('.surah-checkbox');
-            const countDisplay = document.getElementById('surah-count');
+            const checkboxes30 = document.querySelectorAll('.surah-checkbox-30');
+            const checkboxes29 = document.querySelectorAll('.surah-checkbox-29');
+            const countDisplay30 = document.getElementById('surah-count-30');
+            const countDisplay29 = document.getElementById('surah-count-29');
 
-            function updateCount() {
-                const checked = document.querySelectorAll('.surah-checkbox:checked').length;
-                countDisplay.textContent = checked + ' / 38';
+            function updateCount30() {
+                const checked = document.querySelectorAll('.surah-checkbox-30:checked').length;
+                countDisplay30.textContent = checked + ' / 38';
             }
 
-            checkboxes.forEach(cb => cb.addEventListener('change', updateCount));
+            function updateCount29() {
+                const checked = document.querySelectorAll('.surah-checkbox-29:checked').length;
+                countDisplay29.textContent = checked + ' / 11';
+            }
+
+            checkboxes30.forEach(cb => cb.addEventListener('change', updateCount30));
+            checkboxes29.forEach(cb => cb.addEventListener('change', updateCount29));
 
             // Reset button handler
             const resetTrigger = document.getElementById('reset-trigger');

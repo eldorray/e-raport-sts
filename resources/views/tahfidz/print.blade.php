@@ -26,7 +26,8 @@
             margin: 10mm;
         }
 
-        html, body {
+        html,
+        body {
             width: 210mm;
             margin: 0;
             padding: 0;
@@ -315,72 +316,156 @@
                 <tr>
                     <td class="center">4</td>
                     <td>Pencapaian Target Hafalan</td>
-                    <td colspan="2" style="padding: 0;">
-                        <!-- Surah Grid -->
-                        <div class="surah-section">
-                            <table style="width: 100%; border-collapse: collapse;">
-                                <tr>
-                                    <td style="vertical-align: top; padding: 4px; width: 33%; border-right: 1px solid #000;">
-                                        @php 
-                                            $surahArray = array_keys($surahList);
-                                            $surahHafalan = $penilaian->surah_hafalan ?? [];
-                                        @endphp
-                                        <table style="width: 100%; font-size: 11px;">
-                                            <tr><td colspan="2" style="font-weight: bold; text-align: center; padding: 4px;">Surah</td></tr>
-                                            @for ($i = 0; $i < 13; $i++)
-                                                @php $key = $surahArray[$i] ?? null; @endphp
-                                                @if ($key)
-                                                    <tr>
-                                                        <td style="width: 18px; padding: 2px;">
-                                                            <span class="surah-checkbox {{ in_array($key, $surahHafalan) ? 'checked' : '' }}">
-                                                                {{ in_array($key, $surahHafalan) ? '✓' : '' }}
-                                                            </span>
-                                                        </td>
-                                                        <td style="padding: 2px;">{{ ($i + 1) }}. {{ $surahList[$key] }}</td>
-                                                    </tr>
-                                                @endif
-                                            @endfor
-                                        </table>
-                                    </td>
-                                    <td style="vertical-align: top; padding: 4px; width: 33%; border-right: 1px solid #000;">
-                                        <table style="width: 100%; font-size: 11px;">
-                                            <tr><td colspan="2">&nbsp;</td></tr>
-                                            @for ($i = 13; $i < 26; $i++)
-                                                @php $key = $surahArray[$i] ?? null; @endphp
-                                                @if ($key)
-                                                    <tr>
-                                                        <td style="width: 18px; padding: 2px;">
-                                                            <span class="surah-checkbox {{ in_array($key, $surahHafalan) ? 'checked' : '' }}">
-                                                                {{ in_array($key, $surahHafalan) ? '✓' : '' }}
-                                                            </span>
-                                                        </td>
-                                                        <td style="padding: 2px;">{{ ($i + 1) }}. {{ $surahList[$key] }}</td>
-                                                    </tr>
-                                                @endif
-                                            @endfor
-                                        </table>
-                                    </td>
-                                    <td style="vertical-align: top; padding: 4px; width: 33%;">
-                                        <table style="width: 100%; font-size: 11px;">
-                                            <tr><td colspan="2">&nbsp;</td></tr>
-                                            @for ($i = 26; $i < 38; $i++)
-                                                @php $key = $surahArray[$i] ?? null; @endphp
-                                                @if ($key)
-                                                    <tr>
-                                                        <td style="width: 18px; padding: 2px;">
-                                                            <span class="surah-checkbox {{ in_array($key, $surahHafalan) ? 'checked' : '' }}">
-                                                                {{ in_array($key, $surahHafalan) ? '✓' : '' }}
-                                                            </span>
-                                                        </td>
-                                                        <td style="padding: 2px;">{{ ($i + 1) }}. {{ $surahList[$key] }}</td>
-                                                    </tr>
-                                                @endif
-                                            @endfor
-                                        </table>
-                                    </td>
-                                </tr>
-                            </table>
-                        </div>
+                    <td class="center">
+                        <strong>{{ count($penilaian->surah_hafalan ?? []) + count($penilaian->surah_hafalan_29 ?? []) }}</strong>
+                    </td>
+                    <td><strong>Surah</strong></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Juz 30 Surah Grid -->
+        <table class="penilaian-table" style="margin-top: -1px;">
+            <thead>
+                <tr>
+                    <th colspan="3">Juz 30 — Juz 'Amma ({{ count($penilaian->surah_hafalan ?? []) }} / 38 Surah)
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td style="vertical-align: top; padding: 4px; width: 33%; border-right: 1px solid #000;">
+                        @php
+                            $surahArray = array_keys($surahList);
+                            $surahHafalan = $penilaian->surah_hafalan ?? [];
+                        @endphp
+                        <table style="width: 100%; font-size: 11px;">
+                            @for ($i = 0; $i < 13; $i++)
+                                @php $key = $surahArray[$i] ?? null; @endphp
+                                @if ($key)
+                                    <tr>
+                                        <td style="width: 18px; padding: 2px;">
+                                            <span
+                                                class="surah-checkbox {{ in_array($key, $surahHafalan) ? 'checked' : '' }}">
+                                                {{ in_array($key, $surahHafalan) ? '✓' : '' }}
+                                            </span>
+                                        </td>
+                                        <td style="padding: 2px;">{{ $i + 1 }}. {{ $surahList[$key] }}</td>
+                                    </tr>
+                                @endif
+                            @endfor
+                        </table>
+                    </td>
+                    <td style="vertical-align: top; padding: 4px; width: 33%; border-right: 1px solid #000;">
+                        <table style="width: 100%; font-size: 11px;">
+                            @for ($i = 13; $i < 26; $i++)
+                                @php $key = $surahArray[$i] ?? null; @endphp
+                                @if ($key)
+                                    <tr>
+                                        <td style="width: 18px; padding: 2px;">
+                                            <span
+                                                class="surah-checkbox {{ in_array($key, $surahHafalan) ? 'checked' : '' }}">
+                                                {{ in_array($key, $surahHafalan) ? '✓' : '' }}
+                                            </span>
+                                        </td>
+                                        <td style="padding: 2px;">{{ $i + 1 }}. {{ $surahList[$key] }}</td>
+                                    </tr>
+                                @endif
+                            @endfor
+                        </table>
+                    </td>
+                    <td style="vertical-align: top; padding: 4px; width: 33%;">
+                        <table style="width: 100%; font-size: 11px;">
+                            @for ($i = 26; $i < 38; $i++)
+                                @php $key = $surahArray[$i] ?? null; @endphp
+                                @if ($key)
+                                    <tr>
+                                        <td style="width: 18px; padding: 2px;">
+                                            <span
+                                                class="surah-checkbox {{ in_array($key, $surahHafalan) ? 'checked' : '' }}">
+                                                {{ in_array($key, $surahHafalan) ? '✓' : '' }}
+                                            </span>
+                                        </td>
+                                        <td style="padding: 2px;">{{ $i + 1 }}. {{ $surahList[$key] }}</td>
+                                    </tr>
+                                @endif
+                            @endfor
+                        </table>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Juz 29 Surah Grid -->
+        <table class="penilaian-table" style="margin-top: -1px;">
+            <thead>
+                <tr>
+                    <th colspan="3">Juz 29 — Juz Tabarak ({{ count($penilaian->surah_hafalan_29 ?? []) }} / 11
+                        Surah)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td style="vertical-align: top; padding: 4px; width: 33%; border-right: 1px solid #000;">
+                        @php
+                            $surahArray29 = array_keys($surahListJuz29);
+                            $surahHafalan29 = $penilaian->surah_hafalan_29 ?? [];
+                        @endphp
+                        <table style="width: 100%; font-size: 11px;">
+                            @for ($i = 0; $i < 5; $i++)
+                                @php $key = $surahArray29[$i] ?? null; @endphp
+                                @if ($key)
+                                    <tr>
+                                        <td style="width: 18px; padding: 2px;">
+                                            <span
+                                                class="surah-checkbox {{ in_array($key, $surahHafalan29) ? 'checked' : '' }}">
+                                                {{ in_array($key, $surahHafalan29) ? '✓' : '' }}
+                                            </span>
+                                        </td>
+                                        <td style="padding: 2px;">{{ $i + 1 }}. {{ $surahListJuz29[$key] }}
+                                        </td>
+                                    </tr>
+                                @endif
+                            @endfor
+                        </table>
+                    </td>
+                    <td style="vertical-align: top; padding: 4px; width: 33%; border-right: 1px solid #000;">
+                        <table style="width: 100%; font-size: 11px;">
+                            @for ($i = 5; $i < 10; $i++)
+                                @php $key = $surahArray29[$i] ?? null; @endphp
+                                @if ($key)
+                                    <tr>
+                                        <td style="width: 18px; padding: 2px;">
+                                            <span
+                                                class="surah-checkbox {{ in_array($key, $surahHafalan29) ? 'checked' : '' }}">
+                                                {{ in_array($key, $surahHafalan29) ? '✓' : '' }}
+                                            </span>
+                                        </td>
+                                        <td style="padding: 2px;">{{ $i + 1 }}. {{ $surahListJuz29[$key] }}
+                                        </td>
+                                    </tr>
+                                @endif
+                            @endfor
+                        </table>
+                    </td>
+                    <td style="vertical-align: top; padding: 4px; width: 33%;">
+                        <table style="width: 100%; font-size: 11px;">
+                            @for ($i = 10; $i < 11; $i++)
+                                @php $key = $surahArray29[$i] ?? null; @endphp
+                                @if ($key)
+                                    <tr>
+                                        <td style="width: 18px; padding: 2px;">
+                                            <span
+                                                class="surah-checkbox {{ in_array($key, $surahHafalan29) ? 'checked' : '' }}">
+                                                {{ in_array($key, $surahHafalan29) ? '✓' : '' }}
+                                            </span>
+                                        </td>
+                                        <td style="padding: 2px;">{{ $i + 1 }}. {{ $surahListJuz29[$key] }}
+                                        </td>
+                                    </tr>
+                                @endif
+                            @endfor
+                        </table>
                     </td>
                 </tr>
             </tbody>

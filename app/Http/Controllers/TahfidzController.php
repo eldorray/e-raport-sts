@@ -142,6 +142,7 @@ class TahfidzController extends Controller
 
         $pembimbingList = Guru::where('is_active', true)->orderBy('nama')->get();
         $surahList = TahfidzPenilaian::SURAH_LIST;
+        $surahListJuz29 = TahfidzPenilaian::SURAH_LIST_JUZ29;
         $predikatList = TahfidzPenilaian::PREDIKAT_MAP;
 
         // Check if tahun ajaran is active (guru can only edit on active tahun ajaran)
@@ -154,6 +155,7 @@ class TahfidzController extends Controller
             'penilaian',
             'pembimbingList',
             'surahList',
+            'surahListJuz29',
             'predikatList',
             'tahunId',
             'semester',
@@ -195,10 +197,13 @@ class TahfidzController extends Controller
             'deskripsi_makhorijul' => 'nullable|string|max:100',
             'surah_hafalan' => 'nullable|array',
             'surah_hafalan.*' => 'string|in:' . implode(',', array_keys(TahfidzPenilaian::SURAH_LIST)),
+            'surah_hafalan_29' => 'nullable|array',
+            'surah_hafalan_29.*' => 'string|in:' . implode(',', array_keys(TahfidzPenilaian::SURAH_LIST_JUZ29)),
         ]);
 
         // Ensure surah_hafalan is always an array (empty array if no checkboxes selected)
         $validated['surah_hafalan'] = $validated['surah_hafalan'] ?? [];
+        $validated['surah_hafalan_29'] = $validated['surah_hafalan_29'] ?? [];
 
         TahfidzPenilaian::updateOrCreate(
             [

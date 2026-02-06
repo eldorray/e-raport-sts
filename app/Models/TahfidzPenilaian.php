@@ -78,6 +78,23 @@ class TahfidzPenilaian extends Model
     ];
 
     /**
+     * Daftar 11 Surah Juz 29 (Juz Tabarak)
+     */
+    public const SURAH_LIST_JUZ29 = [
+        'al-mulk' => 'Q.S. Al Mulk',
+        'al-qalam' => 'Q.S. Al Qalam',
+        'al-haqqah' => 'Q.S. Al Haqqah',
+        'al-maarij' => 'Q.S. Al Ma\'arij',
+        'nuh' => 'Q.S. Nuh',
+        'al-jin' => 'Q.S. Al Jin',
+        'al-muzzammil' => 'Q.S. Al Muzzammil',
+        'al-muddatsir' => 'Q.S. Al Mudatsir',
+        'al-qiyamah' => 'Q.S. Al Qiyamah',
+        'al-insan' => 'Q.S. Al Insan',
+        'al-mursalat' => 'Q.S. Al Mursalat',
+    ];
+
+    /**
      * Mapping predikat ke deskripsi
      */
     public const PREDIKAT_MAP = [
@@ -104,6 +121,7 @@ class TahfidzPenilaian extends Model
         'predikat_makhorijul',
         'deskripsi_makhorijul',
         'surah_hafalan',
+        'surah_hafalan_29',
     ];
 
     /**
@@ -113,6 +131,7 @@ class TahfidzPenilaian extends Model
      */
     protected $casts = [
         'surah_hafalan' => 'array',
+        'surah_hafalan_29' => 'array',
     ];
 
     /**
@@ -152,9 +171,24 @@ class TahfidzPenilaian extends Model
      */
     public function getDeskripsiAttribute(): string
     {
-        $count = count($this->surah_hafalan ?? []);
+        $count30 = count($this->surah_hafalan ?? []);
+        $count29 = count($this->surah_hafalan_29 ?? []);
 
-        return "Alhamdulillah saat ini sebanyak {$count} Surah di Juz 30 sudah Ananda hafal. Tingkatkan terus semangat menghafalnya. Untuk beberapa surah yang diceklis masih perlu diperbaiki kelancaran dan fahohahdnya. Seringlah muroja'ah hafalannya dengan disimak orang tua supaya bacaannya lebih baik. Semoga Allah mudahkan. Aamiin.";
+        $parts = [];
+        if ($count30 > 0) {
+            $parts[] = "{$count30} Surah di Juz 30";
+        }
+        if ($count29 > 0) {
+            $parts[] = "{$count29} Surah di Juz 29";
+        }
+
+        if (empty($parts)) {
+            return "Ananda belum memiliki hafalan surah yang tercatat. Tingkatkan terus semangat menghafalnya. Semoga Allah mudahkan. Aamiin.";
+        }
+
+        $surahInfo = implode(' dan ', $parts);
+
+        return "Alhamdulillah saat ini sebanyak {$surahInfo} sudah Ananda hafal. Tingkatkan terus semangat menghafalnya. Untuk beberapa surah yang diceklis masih perlu diperbaiki kelancaran dan fahohahdnya. Seringlah muroja'ah hafalannya dengan disimak orang tua supaya bacaannya lebih baik. Semoga Allah mudahkan. Aamiin.";
     }
 
     /**
@@ -164,7 +198,23 @@ class TahfidzPenilaian extends Model
      */
     public function getJumlahSurahAttribute(): int
     {
+        return count($this->surah_hafalan ?? []) + count($this->surah_hafalan_29 ?? []);
+    }
+
+    /**
+     * Mendapatkan jumlah surah Juz 30 yang dihafal.
+     */
+    public function getJumlahSurahJuz30Attribute(): int
+    {
         return count($this->surah_hafalan ?? []);
+    }
+
+    /**
+     * Mendapatkan jumlah surah Juz 29 yang dihafal.
+     */
+    public function getJumlahSurahJuz29Attribute(): int
+    {
+        return count($this->surah_hafalan_29 ?? []);
     }
 
     /**
@@ -176,5 +226,13 @@ class TahfidzPenilaian extends Model
     public function hasSurah(string $surahKey): bool
     {
         return in_array($surahKey, $this->surah_hafalan ?? []);
+    }
+
+    /**
+     * Mengecek apakah surah Juz 29 tertentu sudah dihafal.
+     */
+    public function hasSurahJuz29(string $surahKey): bool
+    {
+        return in_array($surahKey, $this->surah_hafalan_29 ?? []);
     }
 }
