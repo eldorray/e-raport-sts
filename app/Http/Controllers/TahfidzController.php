@@ -84,7 +84,8 @@ class TahfidzController extends Controller
                         ->where('semester', $semester)
                         ->first();
                     $siswa->tahfidz = $penilaian;
-                    $siswa->jumlah_surah = $penilaian?->jumlah_surah ?? 0;
+                    $siswa->jumlah_surah_30 = $penilaian?->jumlah_surah_juz30 ?? 0;
+                    $siswa->jumlah_surah_29 = $penilaian?->jumlah_surah_juz29 ?? 0;
                     return $siswa;
                 });
         }
@@ -145,6 +146,12 @@ class TahfidzController extends Controller
         $surahListJuz29 = TahfidzPenilaian::SURAH_LIST_JUZ29;
         $predikatList = TahfidzPenilaian::PREDIKAT_MAP;
 
+        // Determine which juz is being edited (default: 30)
+        $juz = (int) $request->input('juz', 30);
+        if (! in_array($juz, [29, 30])) {
+            $juz = 30;
+        }
+
         // Check if tahun ajaran is active (guru can only edit on active tahun ajaran)
         $isAdmin = $user->role === 'admin';
         $tahunAjaran = TahunAjaran::find($tahunId);
@@ -159,7 +166,8 @@ class TahfidzController extends Controller
             'predikatList',
             'tahunId',
             'semester',
-            'canEdit'
+            'canEdit',
+            'juz'
         ));
     }
 
@@ -187,7 +195,13 @@ class TahfidzController extends Controller
             }
         }
 
-        $validated = $request->validate([
+        $juz = (int) $request->input('juz', 30);
+        if (! in_array($juz, [29, 30])) {
+            $juz = 30;
+        }
+
+        // Common validation rules
+        $rules = [
             'pembimbing_id' => 'nullable|exists:gurus,id',
             'predikat_adab' => 'nullable|in:A,B,C,D',
             'deskripsi_adab' => 'nullable|string|max:100',
@@ -195,15 +209,25 @@ class TahfidzController extends Controller
             'deskripsi_tajwid' => 'nullable|string|max:100',
             'predikat_makhorijul' => 'nullable|in:A,B,C,D',
             'deskripsi_makhorijul' => 'nullable|string|max:100',
-            'surah_hafalan' => 'nullable|array',
-            'surah_hafalan.*' => 'string|in:' . implode(',', array_keys(TahfidzPenilaian::SURAH_LIST)),
-            'surah_hafalan_29' => 'nullable|array',
-            'surah_hafalan_29.*' => 'string|in:' . implode(',', array_keys(TahfidzPenilaian::SURAH_LIST_JUZ29)),
-        ]);
+        ];
+
+        // Add juz-specific validation
+        if ($juz === 30) {
+            $rules['surah_hafalan'] = 'nullable|array';
+            $rules['surah_hafalan.*'] = 'string|in:' . implode(',', array_keys(TahfidzPenilaian::SURAH_LIST));
+        } else {
+            $rules['surah_hafalan_29'] = 'nullable|array';
+            $rules['surah_hafalan_29.*'] = 'string|in:' . implode(',', array_keys(TahfidzPenilaian::SURAH_LIST_JUZ29));
+        }
+
+        $validated = $request->validate($rules);
 
         // Ensure surah_hafalan is always an array (empty array if no checkboxes selected)
-        $validated['surah_hafalan'] = $validated['surah_hafalan'] ?? [];
-        $validated['surah_hafalan_29'] = $validated['surah_hafalan_29'] ?? [];
+        if ($juz === 30) {
+            $validated['surah_hafalan'] = $validated['surah_hafalan'] ?? [];
+        } else {
+            $validated['surah_hafalan_29'] = $validated['surah_hafalan_29'] ?? [];
+        }
 
         TahfidzPenilaian::updateOrCreate(
             [
@@ -216,7 +240,7 @@ class TahfidzController extends Controller
 
         return redirect()
             ->route('tahfidz.index', ['kelas_id' => $siswa->kelas_id])
-            ->with('success', __('Penilaian tahfidz berhasil disimpan.'));
+            ->with('success', __('Penilaian tahfidz Juz :juz berhasil disimpan.', ['juz' => $juz]));
     }
 
     /**

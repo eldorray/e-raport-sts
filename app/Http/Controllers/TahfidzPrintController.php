@@ -52,6 +52,12 @@ class TahfidzPrintController extends Controller
         $surahListJuz29 = TahfidzPenilaian::SURAH_LIST_JUZ29;
         $predikatMap = TahfidzPenilaian::PREDIKAT_MAP;
 
+        // Determine which juz to print (default: 30)
+        $juz = (int) $request->input('juz', 30);
+        if (! in_array($juz, [29, 30])) {
+            $juz = 30;
+        }
+
         $printPlace = $printSetting?->tempat_cetak ?? $school?->city ?? 'Tangerang';
         $raporDate = $printSetting?->tanggal_cetak_rapor ?? now();
 
@@ -66,7 +72,8 @@ class TahfidzPrintController extends Controller
             'surahListJuz29',
             'predikatMap',
             'printPlace',
-            'raporDate'
+            'raporDate',
+            'juz'
         ));
     }
 }

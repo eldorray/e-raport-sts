@@ -54,7 +54,8 @@
                         <th class="px-3 py-3">NISN</th>
                         <th class="px-3 py-3">Nama</th>
                         <th class="px-3 py-3">L/P</th>
-                        <th class="px-3 py-3 text-center">Jml Surah</th>
+                        <th class="px-3 py-3 text-center">Juz 30</th>
+                        <th class="px-3 py-3 text-center">Juz 29</th>
                         <th class="px-3 py-3 text-center">Aksi</th>
                     </tr>
                 </thead>
@@ -68,28 +69,56 @@
                             <td class="px-3 py-3 text-center">
                                 <span
                                     class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold
-                                    {{ $siswa->jumlah_surah > 0 ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400' }}">
-                                    {{ $siswa->jumlah_surah }} / 49
+                                    {{ $siswa->jumlah_surah_30 > 0 ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400' }}">
+                                    {{ $siswa->jumlah_surah_30 }} / 38
+                                </span>
+                            </td>
+                            <td class="px-3 py-3 text-center">
+                                <span
+                                    class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold
+                                    {{ $siswa->jumlah_surah_29 > 0 ? 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200' : 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400' }}">
+                                    {{ $siswa->jumlah_surah_29 }} / 11
                                 </span>
                             </td>
                             <td class="px-3 py-3">
                                 <div class="flex flex-wrap items-center gap-2 justify-center">
+                                    {{-- Juz 30 buttons --}}
                                     @if ($canEdit)
-                                        <a href="{{ route('tahfidz.show', $siswa->id) }}"
+                                        <a href="{{ route('tahfidz.show', ['siswa' => $siswa->id, 'juz' => 30]) }}"
                                             class="inline-flex items-center gap-1 rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700 hover:bg-amber-100 dark:bg-amber-900/40 dark:text-amber-100">
-                                            <i class="fas fa-edit text-[11px]"></i> Input
+                                            <i class="fas fa-edit text-[11px]"></i> Juz 30
                                         </a>
                                     @else
-                                        <a href="{{ route('tahfidz.show', $siswa->id) }}"
+                                        <a href="{{ route('tahfidz.show', ['siswa' => $siswa->id, 'juz' => 30]) }}"
                                             class="inline-flex items-center gap-1 rounded-full bg-gray-50 px-3 py-1 text-xs font-semibold text-gray-600 hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-300">
-                                            <i class="fas fa-eye text-[11px]"></i> Lihat
+                                            <i class="fas fa-eye text-[11px]"></i> Juz 30
                                         </a>
                                     @endif
+
+                                    {{-- Juz 29 buttons --}}
+                                    @if ($canEdit)
+                                        <a href="{{ route('tahfidz.show', ['siswa' => $siswa->id, 'juz' => 29]) }}"
+                                            class="inline-flex items-center gap-1 rounded-full bg-purple-50 px-3 py-1 text-xs font-semibold text-purple-700 hover:bg-purple-100 dark:bg-purple-900/40 dark:text-purple-100">
+                                            <i class="fas fa-edit text-[11px]"></i> Juz 29
+                                        </a>
+                                    @else
+                                        <a href="{{ route('tahfidz.show', ['siswa' => $siswa->id, 'juz' => 29]) }}"
+                                            class="inline-flex items-center gap-1 rounded-full bg-gray-50 px-3 py-1 text-xs font-semibold text-gray-600 hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-300">
+                                            <i class="fas fa-eye text-[11px]"></i> Juz 29
+                                        </a>
+                                    @endif
+
+                                    {{-- Print buttons --}}
                                     @if ($siswa->tahfidz)
-                                        <a href="{{ route('tahfidz.print', ['siswa' => $siswa->id, 'tahun_ajaran_id' => $tahunId, 'semester' => $semester]) }}"
+                                        <a href="{{ route('tahfidz.print', ['siswa' => $siswa->id, 'tahun_ajaran_id' => $tahunId, 'semester' => $semester, 'juz' => 30]) }}"
                                             target="_blank"
                                             class="inline-flex items-center gap-1 rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700 hover:bg-blue-100 dark:bg-blue-900/40 dark:text-blue-100">
-                                            <i class="fas fa-print text-[11px]"></i> Cetak
+                                            <i class="fas fa-print text-[11px]"></i> Cetak 30
+                                        </a>
+                                        <a href="{{ route('tahfidz.print', ['siswa' => $siswa->id, 'tahun_ajaran_id' => $tahunId, 'semester' => $semester, 'juz' => 29]) }}"
+                                            target="_blank"
+                                            class="inline-flex items-center gap-1 rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-900/40 dark:text-indigo-100">
+                                            <i class="fas fa-print text-[11px]"></i> Cetak 29
                                         </a>
                                     @endif
                                 </div>
@@ -97,7 +126,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-3 py-6 text-center text-sm text-gray-500 dark:text-gray-400">
+                            <td colspan="7" class="px-3 py-6 text-center text-sm text-gray-500 dark:text-gray-400">
                                 @if ($kelasId)
                                     Belum ada siswa di kelas ini.
                                 @else
