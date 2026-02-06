@@ -21,6 +21,27 @@
         @endphp
 
         <div class="flex items-center space-x-4">
+            <!-- Digital Clock -->
+            <div x-data="digitalClock()" x-init="start()"
+                class="hidden sm:flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-3 py-2 shadow-sm dark:border-emerald-800 dark:bg-emerald-900/50">
+                <div
+                    class="flex h-9 w-9 items-center justify-center rounded-xl bg-white/80 text-emerald-600 shadow-sm dark:bg-emerald-800/70 dark:text-emerald-100">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <div class="flex flex-col leading-tight">
+                    <span class="text-[11px] uppercase tracking-wide text-emerald-500 dark:text-emerald-200"
+                        x-text="dayName"></span>
+                    <span class="text-sm font-bold tabular-nums text-emerald-800 dark:text-emerald-100"
+                        x-text="time"></span>
+                    <span class="text-[11px] font-medium text-emerald-500/80 dark:text-emerald-200/80"
+                        x-text="date"></span>
+                </div>
+            </div>
+
             @if ($headerYear)
                 <div
                     class="hidden sm:flex items-center gap-3 rounded-2xl border border-blue-200 bg-blue-50 px-3 py-2 text-xs font-semibold text-blue-800 shadow-sm dark:border-blue-800 dark:bg-blue-900/50 dark:text-blue-100">
@@ -102,3 +123,38 @@
         </div>
     </div>
 </header>
+
+<script>
+    function digitalClock() {
+        return {
+            time: '',
+            date: '',
+            dayName: '',
+            start() {
+                this.update();
+                setInterval(() => this.update(), 1000);
+            },
+            update() {
+                const now = new Date(new Date().toLocaleString('en-US', {
+                    timeZone: 'Asia/Jakarta'
+                }));
+                const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+                const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September',
+                    'Oktober', 'November', 'Desember'
+                ];
+
+                this.dayName = days[now.getDay()];
+
+                const h = String(now.getHours()).padStart(2, '0');
+                const m = String(now.getMinutes()).padStart(2, '0');
+                const s = String(now.getSeconds()).padStart(2, '0');
+                this.time = `${h}:${m}:${s} WIB`;
+
+                const d = now.getDate();
+                const mo = months[now.getMonth()];
+                const y = now.getFullYear();
+                this.date = `${d} ${mo} ${y}`;
+            }
+        }
+    }
+</script>
