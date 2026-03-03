@@ -278,6 +278,100 @@
         @endif
     </div>
 
+    {{-- Status Pengisian Nilai per Mapel --}}
+    @if ($penilaianStatus->isNotEmpty())
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 mb-6">
+            <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-500" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                        </svg>
+                        <h2 class="text-lg font-semibold text-gray-800 dark:text-gray-100">
+                            {{ __('Status Pengisian Nilai per Mapel') }}
+                        </h2>
+                    </div>
+                    @if ($isAdmin)
+                        <div class="flex items-center gap-2">
+                            <label class="text-xs font-medium text-gray-500 dark:text-gray-400">{{ __('Filter Kelas:') }}</label>
+                            <select id="filterKelas"
+                                class="rounded-lg border border-gray-200 bg-white px-2 py-1 text-xs text-gray-700 shadow-sm focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-300/50 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200">
+                                <option value="">{{ __('Semua Kelas') }}</option>
+                                @foreach ($penilaianStatus->pluck('kelas')->unique()->sort() as $kls)
+                                    <option value="{{ $kls }}">{{ $kls }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    @endif
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm" id="penilaianStatusTable">
+                    <thead class="bg-gray-50 dark:bg-gray-700">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
+                                {{ __('Mata Pelajaran') }}</th>
+                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
+                                {{ __('Guru Pengampu') }}</th>
+                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
+                                {{ __('Kelas') }}</th>
+                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
+                                {{ __('Status') }}</th>
+                            <th class="px-6 py-3 text-center text-xs font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider">
+                                {{ __('Terisi') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                        @foreach ($penilaianStatus as $status)
+                            @php
+                                $pColor = $status->progress < 50 ? 'red' : ($status->progress < 80 ? 'amber' : 'emerald');
+                                $barBg = ['red' => 'bg-red-500', 'amber' => 'bg-amber-500', 'emerald' => 'bg-emerald-500'][$pColor];
+                                $textColor = ['red' => 'text-red-600 dark:text-red-400', 'amber' => 'text-amber-600 dark:text-amber-400', 'emerald' => 'text-emerald-600 dark:text-emerald-400'][$pColor];
+                                $badgeBg = ['red' => 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300', 'amber' => 'bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300', 'emerald' => 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300'][$pColor];
+                                $label = $status->progress >= 100 ? 'Selesai' : ($status->progress == 0 ? 'Belum Diisi' : $status->progress . '%');
+                            @endphp
+                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition penilaian-row"
+                                data-kelas="{{ $status->kelas }}">
+                                <td class="px-6 py-3 font-medium text-gray-900 dark:text-gray-100">{{ $status->mapel }}</td>
+                                <td class="px-6 py-3 text-gray-600 dark:text-gray-400">{{ $status->guru }}</td>
+                                <td class="px-6 py-3 text-gray-600 dark:text-gray-400">{{ $status->kelas }}</td>
+                                <td class="px-6 py-3">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-24 bg-gray-200 dark:bg-gray-600 rounded-full h-2 overflow-hidden">
+                                            <div class="{{ $barBg }} h-2 rounded-full transition-all duration-500"
+                                                style="width: {{ $status->progress }}%"></div>
+                                        </div>
+                                        <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold {{ $badgeBg }}">
+                                            {{ $label }}
+                                        </span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-3 text-center">
+                                    <span class="font-semibold {{ $textColor }}">{{ $status->filled }}</span>
+                                    <span class="text-gray-400">/</span>
+                                    <span class="text-gray-500">{{ $status->total_siswa }}</span>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        @if ($isAdmin)
+            <script>
+                document.getElementById('filterKelas')?.addEventListener('change', function() {
+                    const val = this.value;
+                    document.querySelectorAll('.penilaian-row').forEach(row => {
+                        row.style.display = (!val || row.dataset.kelas === val) ? '' : 'none';
+                    });
+                });
+            </script>
+        @endif
+    @endif
+
     {{-- Recent Login Logs (Admin Only) --}}
     @if ($isAdmin && $recentLogins->isNotEmpty())
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
