@@ -12,7 +12,11 @@
             </button>
             <button type="button" id="openCopyMengajar"
                 class="inline-flex items-center gap-2 rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-orange-600 focus:outline-none focus:ring-4 focus:ring-orange-500/30">
-                {{ __('Salin Mengajar') }}
+                {{ __('Salin dari TA Lain') }}
+            </button>
+            <button type="button" id="openCopyKelasMengajar"
+                class="inline-flex items-center gap-2 rounded-lg bg-emerald-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-600 focus:outline-none focus:ring-4 focus:ring-emerald-500/30">
+                {{ __('Salin dari Kelas Lain') }}
             </button>
         </div>
     </div>
@@ -251,6 +255,48 @@
         </div>
     </div>
 
+    {{-- Modal: Salin dari Kelas Lain --}}
+    <div id="copyKelasModalOverlay" class="fixed inset-0 z-40 hidden items-center justify-center bg-gray-900/60 px-4">
+        <div id="copyKelasModal"
+            class="w-full max-w-md overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-900">
+            <div class="border-b border-gray-100 bg-gray-50 px-6 py-4 dark:border-gray-700 dark:bg-gray-900/40">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ __('Salin dari Kelas Lain') }}</h3>
+            </div>
+            <form action="{{ route('mengajar.copy-kelas') }}" method="POST" class="space-y-4 px-6 py-6">
+                @csrf
+                <input type="hidden" name="target_kelas_id" value="{{ $selectedKelasId }}">
+                <div class="space-y-2">
+                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Kelas Tujuan') }}</label>
+                    <div class="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300">
+                        {{ $selectedKelas?->nama ?? '-' }}
+                    </div>
+                </div>
+                <div class="space-y-2">
+                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Salin dari Kelas') }}</label>
+                    <select name="source_kelas_id" required
+                        class="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+                        <option value="">- {{ __('Pilih Kelas Sumber') }} -</option>
+                        @foreach ($kelasList as $kelas)
+                            @continue($kelas->id == $selectedKelasId)
+                            <option value="{{ $kelas->id }}">{{ $kelas->nama }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <p class="text-xs text-gray-500 dark:text-gray-400">
+                    {{ __('Data mengajar (guru & JTM) dari kelas sumber akan disalin ke kelas tujuan. Data yang sudah ada akan di-update.') }}
+                </p>
+                <div class="mt-4 flex items-center justify-end gap-3 border-t border-gray-100 pt-4 dark:border-gray-700">
+                    <button type="button" data-close-copy-kelas
+                        class="rounded-lg border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-600 transition hover:border-gray-300 hover:text-gray-800 dark:border-gray-700 dark:text-gray-300">{{ __('Batal') }}</button>
+                    <button type="submit"
+                        class="inline-flex items-center gap-2 rounded-lg bg-emerald-500 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-600 focus:outline-none focus:ring-4 focus:ring-emerald-500/30">
+                        {{ __('Salin') }}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
         (function() {
             const overlay = document.getElementById('mengajarModalOverlay');
@@ -258,6 +304,10 @@
             const copyModal = document.getElementById('copyMengajarModal');
             const openAdd = document.getElementById('openAddMengajar');
             const openCopy = document.getElementById('openCopyMengajar');
+
+            // Copy Kelas modal
+            const copyKelasOverlay = document.getElementById('copyKelasModalOverlay');
+            const openCopyKelas = document.getElementById('openCopyKelasMengajar');
 
             function openModal(modal) {
                 overlay.classList.remove('hidden');
@@ -274,17 +324,39 @@
                 document.body.classList.remove('overflow-hidden');
             }
 
+            function openCopyKelasModal() {
+                copyKelasOverlay.classList.remove('hidden');
+                copyKelasOverlay.classList.add('flex');
+                document.body.classList.add('overflow-hidden');
+            }
+
+            function closeCopyKelasModal() {
+                copyKelasOverlay.classList.remove('flex');
+                copyKelasOverlay.classList.add('hidden');
+                document.body.classList.remove('overflow-hidden');
+            }
+
             openAdd?.addEventListener('click', () => openModal(addModal));
             openCopy?.addEventListener('click', () => openModal(copyModal));
+            openCopyKelas?.addEventListener('click', () => openCopyKelasModal());
 
             overlay?.addEventListener('click', (event) => {
                 if (event.target === overlay) closeModal();
             });
+            copyKelasOverlay?.addEventListener('click', (event) => {
+                if (event.target === copyKelasOverlay) closeCopyKelasModal();
+            });
             document.querySelectorAll('[data-close-modal]').forEach((button) => {
                 button.addEventListener('click', () => closeModal());
             });
+            document.querySelectorAll('[data-close-copy-kelas]').forEach((button) => {
+                button.addEventListener('click', () => closeCopyKelasModal());
+            });
             document.addEventListener('keydown', (event) => {
-                if (event.key === 'Escape') closeModal();
+                if (event.key === 'Escape') {
+                    closeModal();
+                    closeCopyKelasModal();
+                }
             });
         })();
     </script>

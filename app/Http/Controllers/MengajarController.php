@@ -200,6 +200,55 @@ class MengajarController extends Controller
     }
 
     /**
+     * Menyalin jadwal mengajar dari kelas lain di tahun ajaran yang sama.
+     *
+     * @param  Request  $request  HTTP request dengan data sumber
+     * @return RedirectResponse Redirect ke halaman sebelumnya dengan pesan status
+     */
+    public function copyFromKelas(Request $request): RedirectResponse
+    {
+        $targetYear = session('selected_tahun_ajaran_id');
+        $targetSemester = session('selected_semester');
+
+        if (! $targetYear) {
+            return back()->withErrors(['tahun_ajaran' => __('Pilih tahun ajaran terlebih dahulu.')]);
+        }
+
+        $data = $request->validate([
+            'source_kelas_id' => ['required', 'exists:kelas,id'],
+            'target_kelas_id' => ['required', 'exists:kelas,id', 'different:source_kelas_id'],
+        ]);
+
+        $sourceRecords = Mengajar::where('tahun_ajaran_id', $targetYear)
+            ->when($targetSemester, fn ($q) => $q->where('semester', $targetSemester))
+            ->where('kelas_id', $data['source_kelas_id'])
+            ->get();
+
+        if ($sourceRecords->isEmpty()) {
+            return back()->with('status', __('Tidak ada jadwal mengajar di kelas sumber.'));
+        }
+
+        DB::transaction(function () use ($sourceRecords, $targetYear, $targetSemester, $data) {
+            foreach ($sourceRecords as $record) {
+                Mengajar::updateOrCreate(
+                    [
+                        'tahun_ajaran_id' => $targetYear,
+                        'semester' => $targetSemester,
+                        'kelas_id' => $data['target_kelas_id'],
+                        'mata_pelajaran_id' => $record->mata_pelajaran_id,
+                    ],
+                    [
+                        'guru_id' => $record->guru_id,
+                        'jtm' => $record->jtm,
+                    ]
+                );
+            }
+        });
+
+        return back()->with('status', __('Jadwal mengajar berhasil disalin dari kelas lain.'));
+    }
+
+    /**
      * Menampilkan mata pelajaran yang diajar oleh guru yang login.
      *
      * @param  Request  $request  HTTP request

@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\View\View;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -240,7 +241,7 @@ class GuruController extends Controller
     public function export()
     {
         $gurus = Guru::orderBy('nama')->get();
-        $pdf = app('dompdf.wrapper')->loadView('guru.export-pdf', ['gurus' => $gurus]);
+        $pdf = Pdf::loadView('guru.export-pdf', ['gurus' => $gurus]);
 
         return $pdf->download('data-guru.pdf');
     }

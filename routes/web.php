@@ -73,6 +73,7 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('mengajar/{mengajar}', [MengajarController::class, 'destroy'])->name('mengajar.destroy');
         Route::put('mengajar/{mengajar}', [MengajarController::class, 'update'])->name('mengajar.update');
         Route::post('mengajar/copy', [MengajarController::class, 'copy'])->name('mengajar.copy');
+        Route::post('mengajar/copy-kelas', [MengajarController::class, 'copyFromKelas'])->name('mengajar.copy-kelas');
 
         // Mengajar Tahfidz
         Route::get('mengajar-tahfidz', [MengajarTahfidzController::class, 'index'])->name('mengajar-tahfidz.index');
