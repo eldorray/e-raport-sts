@@ -189,7 +189,7 @@ class WaliKelasSiswaController extends Controller
     }
 
     /**
-     * Menghapus siswa dari database.
+     * Mengeluarkan siswa dari kelas (unassign, bukan hapus dari database).
      *
      * @param  Request  $request  HTTP request
      * @param  Siswa    $siswa    Instance siswa dari route model binding
@@ -212,10 +212,9 @@ class WaliKelasSiswaController extends Controller
             return back()->with('error', __('Siswa ini bukan dari kelas Anda.'));
         }
 
-        $this->deletePhotoIfExists($siswa->photo_path);
-        $siswa->delete();
+        $siswa->update(['kelas_id' => null]);
 
-        return back()->with('status', __('Siswa dihapus.'));
+        return back()->with('status', __('Siswa dikeluarkan dari kelas.'));
     }
 
     /**
