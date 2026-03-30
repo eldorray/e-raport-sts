@@ -225,7 +225,7 @@
                 <footer class="border-t border-gray-200 dark:border-gray-700 bg-white/50 dark:bg-gray-800/50 px-6 py-4">
                     <p class="text-center text-s text-gray-400 dark:text-gray-500">
                         Dibuat dengan <span class="text-red-400">❤️</span> oleh
-                        <a href="https://github.com/eldorray" target="_blank"
+                        <a href="https://fahmiealkhudhorie.site" target="_blank"
                             class="font-medium text-gray-500 hover:text-blue-500 dark:text-gray-400 dark:hover:text-blue-400 transition">F.A.K</a>
                     </p>
                 </footer>
