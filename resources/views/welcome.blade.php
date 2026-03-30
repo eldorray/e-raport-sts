@@ -486,8 +486,7 @@
                         © {{ date('Y') }} <span class="text-slate-900 dark:text-white">{{ $schoolName }}</span>
                         • Dibuat dengan <span class="text-red-400">❤️</span> oleh
                         <a href="https://github.com/eldorray" target="_blank"
-                            class="text-blue-600 transition hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300">Fahmie
-                            al Khudhorie</a>
+                            class="text-blue-600 transition hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300">F.A.K</a>
                     </p>
                 </div>
             </div>
