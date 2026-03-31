@@ -65,6 +65,7 @@ class RaportPrintController extends Controller
         $printPlace = $this->resolvePrintPlace($printSetting, $school);
         $raporDate = $this->resolveRaporDate($printSetting, $meta);
         $watermarkDataUrl = $this->buildWatermarkDataUrl($printSetting, $school);
+        $namaYayasan = $printSetting?->nama_yayasan;
 
         return view('rapor.print', compact(
             'school',
@@ -81,6 +82,7 @@ class RaportPrintController extends Controller
             'printPlace',
             'raporDate',
             'watermarkDataUrl',
+            'namaYayasan',
         ));
     }
 

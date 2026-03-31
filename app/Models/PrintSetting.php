@@ -10,6 +10,7 @@ class PrintSetting extends Model
     use HasFactory;
 
     protected $fillable = [
+        'nama_yayasan',
         'tempat_cetak',
         'tanggal_cetak',
         'tanggal_cetak_rapor',

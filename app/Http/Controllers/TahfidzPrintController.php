@@ -60,6 +60,7 @@ class TahfidzPrintController extends Controller
 
         $printPlace = $printSetting?->tempat_cetak ?? $school?->city ?? 'Tangerang';
         $raporDate = $printSetting?->tanggal_cetak_rapor ?? now();
+        $namaYayasan = $printSetting?->nama_yayasan;
 
         return view('tahfidz.print', compact(
             'school',
@@ -73,7 +74,8 @@ class TahfidzPrintController extends Controller
             'predikatMap',
             'printPlace',
             'raporDate',
-            'juz'
+            'juz',
+            'namaYayasan'
         ));
     }
 }

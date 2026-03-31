@@ -240,6 +240,9 @@
             <img src="{{ $school?->logo ? asset('storage/' . $school->logo) : asset('images/default-school.png') }}"
                 alt="logo" class="logo">
             <div class="title-block">
+                @if ($namaYayasan)
+                    <h1 style="font-size: 14px; margin-bottom: 2px;">{{ $namaYayasan }}</h1>
+                @endif
                 <h1>{{ $school->name ?? 'MI DAARUL HIKMAH' }}</h1>
                 <h2>RAPORT TAHFIDZ AL-QUR'AN</h2>
             </div>

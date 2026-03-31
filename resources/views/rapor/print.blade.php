@@ -264,7 +264,9 @@
             <img src="{{ $school?->logo ? asset('storage/' . $school->logo) : asset('images/default-school.png') }}"
                 alt="logo" class="logo">
             <div class="title-block">
-                <h1>YAYASAN PENDIDIKAN DAARUL HIKMAH AL MADANI</h1>
+                @if ($namaYayasan)
+                    <h1>{{ $namaYayasan }}</h1>
+                @endif
                 <h2>{{ $school->name ?? 'Nama Madrasah' }}</h2>
                 <p>{{ $school->address ?? '-' }}</p>
                 <p>{{ $school->district ?? '' }} {{ $school->city ? '• ' . $school->city : '' }}

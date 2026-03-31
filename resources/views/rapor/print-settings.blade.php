@@ -9,6 +9,16 @@
         class="space-y-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
         @csrf
         <div class="space-y-2">
+            <label for="nama_yayasan" class="text-sm font-semibold text-gray-800 dark:text-gray-100">Nama
+                Yayasan / Lembaga (Kop Surat)</label>
+            <input type="text" id="nama_yayasan" name="nama_yayasan"
+                value="{{ old('nama_yayasan', optional($setting)->nama_yayasan) }}"
+                class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
+                placeholder="Contoh: YAYASAN PENDIDIKAN DAARUL HIKMAH AL MADANI">
+            <p class="text-xs text-gray-500 dark:text-gray-400">Teks yang ditampilkan pada baris pertama kop rapor. Kosongkan jika tidak ingin menampilkan nama yayasan.</p>
+        </div>
+
+        <div class="space-y-2">
             <label for="tempat_cetak" class="text-sm font-semibold text-gray-800 dark:text-gray-100">Tempat
                 Cetak</label>
             <input type="text" id="tempat_cetak" name="tempat_cetak"

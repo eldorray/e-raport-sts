@@ -24,6 +24,7 @@ class PrintSettingController extends Controller
     public function update(Request $request): RedirectResponse
     {
         $data = $request->validate([
+            'nama_yayasan' => ['nullable', 'string', 'max:255'],
             'tempat_cetak' => ['nullable', 'string', 'max:255'],
             'tanggal_cetak' => ['nullable', 'date'],
             'tanggal_cetak_rapor' => ['nullable', 'date'],
