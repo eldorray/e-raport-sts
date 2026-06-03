@@ -496,7 +496,7 @@
                 <div class="name">___________________</div>
             </div>
             <div class="signature right">
-                <div class="title">{{ $printPlace }}, {{ optional($raporDate)->translatedFormat('F Y') }}</div>
+                <div class="title">{{ $printPlace }}, {{ optional($raporDate)->translatedFormat('d F Y') }}</div>
                 <div>Pembimbing Tahfizh</div>
                 <div class="name">{{ $penilaian->pembimbing?->nama ?? '___________________' }}</div>
             </div>
