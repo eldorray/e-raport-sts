@@ -37,7 +37,6 @@ class TahfidzPenilaian extends Model
      * Daftar 38 Surah Juz 'Amma (Juz 30)
      */
     public const SURAH_LIST = [
-        'al-fatihah' => 'Q.S. Al-Fatihah',
         'an-nas' => 'Q.S. An-Nas',
         'al-falaq' => 'Q.S. Al-Falaq',
         'al-ikhlas' => 'Q.S. Al-Ikhlas',

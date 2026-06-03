@@ -266,7 +266,7 @@
                 <td>{{ $school->address ?? '-' }}</td>
                 <td class="label">Semester</td>
                 <td class="separator">:</td>
-                <td>{{ $semester == 'ganjil' ? '1 (Satu)' : '2 (Dua)' }}</td>
+                <td>{{ $semester == 'ganjil' ? 'ganjil' : 'genap' }}</td>
             </tr>
             <tr>
                 <td class="label">Nama Peserta Didik</td>
