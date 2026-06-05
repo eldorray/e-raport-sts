@@ -212,7 +212,7 @@
         .signature .sig-inner {
             display: inline-block;
             text-align: center;
-            width: 60%;
+            width: 70%;
         }
 
         .signature .title {
@@ -223,6 +223,7 @@
             margin-top: 40px;
             font-weight: bold;
             text-decoration: underline;
+            white-space: nowrap;
         }
 
         .signature .role {
