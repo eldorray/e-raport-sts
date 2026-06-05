@@ -212,6 +212,7 @@
         .signature .sig-inner {
             display: inline-block;
             text-align: center;
+            width: 60%;
         }
 
         .signature .title {
