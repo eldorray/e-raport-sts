@@ -177,10 +177,10 @@
 
         .deskripsi-content {
             border: 1px solid #000;
-            padding: 10px 12px;
+            padding: 8px 12px;
             text-align: justify;
-            line-height: 1.6;
-            min-height: 80px;
+            line-height: 1.5;
+            min-height: 50px;
         }
 
         .note {
@@ -194,7 +194,7 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 20px;
-            margin-top: 24px;
+            margin-top: 14px;
         }
 
         .signature {
@@ -214,7 +214,7 @@
         }
 
         .signature .name {
-            margin-top: 60px;
+            margin-top: 40px;
             font-weight: bold;
             text-decoration: underline;
         }
@@ -502,11 +502,11 @@
             </div>
         </div>
 
-        <div style="text-align: center; margin-top: 24px;">
+        <div style="text-align: center; margin-top: 12px;">
             <div>Mengetahui,</div>
             <div>Kepala {{ $school->name ?? 'MI Daarul Hikmah' }}</div>
             <div class="signature">
-                <div class="name" style="margin-top: 60px;">{{ $school->headmaster ?? '-' }}</div>
+                <div class="name" style="margin-top: 40px;">{{ $school->headmaster ?? '-' }}</div>
             </div>
         </div>
     </div>
