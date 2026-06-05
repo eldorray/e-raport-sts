@@ -203,7 +203,7 @@ class TahfidzPenilaian extends Model
             return "Ananda belum memiliki hafalan surah di Juz {$juz} yang tercatat. Tingkatkan terus semangat menghafalnya. Semoga Allah mudahkan. Aamiin.";
         }
 
-        return "Alhamdulillah saat ini sebanyak {$count} Surah di Juz {$juz} sudah Ananda hafal. Tingkatkan terus semangat menghafalnya. Untuk beberapa surah yang diceklis masih perlu diperbaiki kelancaran dan fahohahdnya. Seringlah muroja'ah hafalannya dengan disimak orang tua supaya bacaannya lebih baik. Semoga Allah mudahkan. Aamiin.";
+        return "Alhamdulillah saat ini sebanyak {$count} Surah di Juz {$juz} sudah Ananda hafal. Tingkatkan terus semangat menghafalnya. Untuk beberapa surah yang diceklis masih perlu diperbaiki kelancaran dan fashohahnya. Seringlah muroja'ah hafalannya dengan disimak orang tua supaya bacaannya lebih baik. Semoga Allah mudahkan. Aamiin.";
     }
 
     /**

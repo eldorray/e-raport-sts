@@ -202,11 +202,11 @@
         }
 
         .signature.left {
-            text-align: left;
+            text-align: center;
         }
 
         .signature.right {
-            text-align: right;
+            text-align: center;
         }
 
         .signature .title {
@@ -263,7 +263,7 @@
             <tr>
                 <td class="label">Alamat</td>
                 <td class="separator">:</td>
-                <td>{{ $school->address ?? '-' }}</td>
+                <td>{{ preg_replace('/\bRt\b/i', 'RT', $school->address ?? '-') }}</td>
                 <td class="label">Semester</td>
                 <td class="separator">:</td>
                 <td>{{ $semester == 'ganjil' ? 'Ganjil' : 'Genap' }}</td>
@@ -332,7 +332,7 @@
             <table class="penilaian-table" style="margin-top: -1px;">
                 <thead>
                     <tr>
-                        <th colspan="3">Juz 30 — Juz 'Amma ({{ count($penilaian->surah_hafalan ?? []) }} / 38 Surah)
+                        <th colspan="3">Juz 30 — Juz 'Amma ({{ count($penilaian->surah_hafalan ?? []) }} / 37 Surah)
                         </th>
                     </tr>
                 </thead>
@@ -507,9 +507,6 @@
             <div>Kepala {{ $school->name ?? 'MI Daarul Hikmah' }}</div>
             <div class="signature">
                 <div class="name" style="margin-top: 60px;">{{ $school->headmaster ?? '-' }}</div>
-                @if ($school->nip_headmaster ?? null)
-                    <div>NIP. {{ $school->nip_headmaster }}</div>
-                @endif
             </div>
         </div>
     </div>
