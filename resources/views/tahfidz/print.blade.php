@@ -202,10 +202,15 @@
         }
 
         .signature.left {
-            text-align: center;
+            text-align: left;
         }
 
         .signature.right {
+            text-align: right;
+        }
+
+        .signature .sig-inner {
+            display: inline-block;
             text-align: center;
         }
 
@@ -491,14 +496,18 @@
         <!-- Tanda Tangan -->
         <div class="signature-row">
             <div class="signature left">
-                <div class="title">Mengetahui</div>
-                <div>Orang Tua/Wali</div>
-                <div class="name">___________________</div>
+                <div class="sig-inner">
+                    <div class="title">Mengetahui</div>
+                    <div>Orang Tua/Wali</div>
+                    <div class="name">___________________</div>
+                </div>
             </div>
             <div class="signature right">
-                <div class="title">{{ $printPlace }}, {{ optional($raporDate)->translatedFormat('d F Y') }}</div>
-                <div>Pembimbing Tahfizh</div>
-                <div class="name">{{ $penilaian->pembimbing?->nama ?? '___________________' }}</div>
+                <div class="sig-inner">
+                    <div class="title">{{ $printPlace }}, {{ optional($raporDate)->translatedFormat('d F Y') }}</div>
+                    <div>Pembimbing Tahfizh</div>
+                    <div class="name">{{ $penilaian->pembimbing?->nama ?? '___________________' }}</div>
+                </div>
             </div>
         </div>
 
