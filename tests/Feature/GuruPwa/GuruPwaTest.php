@@ -8,6 +8,7 @@ use App\Models\MataPelajaran;
 use App\Models\Mengajar;
 use App\Models\Penilaian;
 use App\Models\Siswa;
+use App\Models\TahfidzPenilaian;
 use App\Models\TahunAjaran;
 use App\Models\User;
 
@@ -439,4 +440,128 @@ it('memakai menu bawah aplikasi guru untuk ekskul dan akun versi PWA', function 
         ->assertOk()
         ->assertSee(route('guru.pwa.ekskul'), false)
         ->assertSee(route('guru.pwa.akun'), false);
+});
+
+it('menampilkan halaman wali kelas dengan daftar siswa dan tautan cetak', function () {
+    $kelas = Kelas::create([
+        'nama' => '6A',
+        'tingkat' => 'VI',
+        'tahun_ajaran_id' => $this->tahun->id,
+        'guru_id' => $this->guru->id,
+    ]);
+
+    $lengkap = Siswa::factory()->create([
+        'kelas_id' => $kelas->id,
+        'tahun_ajaran_id' => $this->tahun->id,
+        'nama' => 'Hafiz Alfatih',
+        'nis' => '9001',
+    ]);
+
+    Siswa::factory()->create([
+        'kelas_id' => $kelas->id,
+        'tahun_ajaran_id' => $this->tahun->id,
+        'nama' => 'Nadia Salsabila',
+        'nis' => '9002',
+    ]);
+
+    $mengajar = buatJadwalPwa($this->tahun->id, $kelas->id, $this->mapel->id, $this->guru->id);
+
+    Penilaian::create([
+        'tahun_ajaran_id' => $this->tahun->id,
+        'semester' => 'Ganjil',
+        'kelas_id' => $kelas->id,
+        'siswa_id' => $lengkap->id,
+        'mata_pelajaran_id' => $this->mapel->id,
+        'guru_id' => $this->guru->id,
+        'mengajar_id' => $mengajar->id,
+        'nilai_sumatif' => 90,
+        'nilai_sts' => 88,
+    ]);
+
+    $this->actingAs($this->userGuru)
+        ->withSession($this->sesi)
+        ->get(route('guru.pwa.wali'))
+        ->assertOk()
+        ->assertSee('6A')
+        ->assertSee('Wali kelas')
+        ->assertSee('Hafiz Alfatih')
+        ->assertSee('Nadia Salsabila')
+        ->assertSee('Siap cetak')
+        ->assertSee('Kosong')
+        ->assertSee('Cetak Leger Kelas')
+        ->assertSee(route('rapor.ledger', ['kelas' => $kelas->id]), false)
+        ->assertSee(route('rapor.print', ['siswa' => $lengkap->id]), false);
+});
+
+it('hanya menautkan cetak raport tahfidz bila penilaian tahfidz sudah ada', function () {
+    $kelas = Kelas::create([
+        'nama' => '5B',
+        'tingkat' => 'V',
+        'tahun_ajaran_id' => $this->tahun->id,
+        'guru_id' => $this->guru->id,
+    ]);
+
+    $adaTahfidz = Siswa::factory()->create([
+        'kelas_id' => $kelas->id,
+        'tahun_ajaran_id' => $this->tahun->id,
+        'nama' => 'Yusuf Hamdan',
+        'nis' => '9101',
+    ]);
+
+    $tanpaTahfidz = Siswa::factory()->create([
+        'kelas_id' => $kelas->id,
+        'tahun_ajaran_id' => $this->tahun->id,
+        'nama' => 'Sekar Ayu',
+        'nis' => '9102',
+    ]);
+
+    TahfidzPenilaian::create([
+        'siswa_id' => $adaTahfidz->id,
+        'tahun_ajaran_id' => $this->tahun->id,
+        'semester' => 'Ganjil',
+        'pembimbing_id' => $this->guru->id,
+        'predikat_adab' => 'A',
+    ]);
+
+    $this->actingAs($this->userGuru)
+        ->withSession($this->sesi)
+        ->get(route('guru.pwa.wali'))
+        ->assertOk()
+        ->assertSee('Cetak Raport Tahfidz')
+        ->assertSee(route('tahfidz.print', ['siswa' => $adaTahfidz->id]), false)
+        ->assertDontSee(route('tahfidz.print', ['siswa' => $tanpaTahfidz->id]), false);
+});
+
+it('menampilkan keterangan bila guru bukan wali kelas', function () {
+    $this->actingAs($this->userGuru)
+        ->withSession($this->sesi)
+        ->get(route('guru.pwa.wali'))
+        ->assertOk()
+        ->assertSee('Anda bukan wali kelas pada tahun ajaran ini')
+        ->assertDontSee('Cetak Leger Kelas');
+});
+
+it('menampilkan kartu wali kelas di beranda dan menu bawah PWA', function () {
+    Kelas::create([
+        'nama' => '4C',
+        'tingkat' => 'IV',
+        'tahun_ajaran_id' => $this->tahun->id,
+        'guru_id' => $this->guru->id,
+    ]);
+
+    $this->actingAs($this->userGuru)
+        ->withSession($this->sesi)
+        ->get(route('guru.pwa.beranda'))
+        ->assertOk()
+        ->assertSee('Wali kelas 4C')
+        ->assertSee(route('guru.pwa.wali'), false);
+});
+
+it('menolak admin membuka halaman wali kelas aplikasi guru', function () {
+    $admin = User::factory()->create(['role' => 'admin']);
+
+    $this->actingAs($admin)
+        ->withSession($this->sesi)
+        ->get(route('guru.pwa.wali'))
+        ->assertForbidden();
 });

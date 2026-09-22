@@ -59,6 +59,26 @@
     @endif
 
     @if ($guru && $tahunAjaran)
+        @if ($kelasWali)
+            {{-- Kartu wali kelas --}}
+            <a href="{{ route('guru.pwa.wali') }}"
+                class="mt-4 flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50/80 p-3 shadow-sm transition active:scale-[0.99] dark:border-emerald-900/60 dark:bg-emerald-950/40">
+                <span
+                    class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white text-emerald-600 shadow-sm dark:bg-slate-900 dark:text-emerald-300">
+                    <i class="fas fa-user-graduate"></i>
+                </span>
+
+                <span class="min-w-0 flex-1">
+                    <span class="block text-sm font-semibold">{{ __('Wali kelas :kelas', ['kelas' => $kelasWali->nama]) }}</span>
+                    <span class="mt-0.5 block text-[11px] text-emerald-800/80 dark:text-emerald-200/80">
+                        {{ __('Cetak rapor siswa dan leger kelas') }}
+                    </span>
+                </span>
+
+                <i class="fas fa-chevron-right shrink-0 text-emerald-500"></i>
+            </a>
+        @endif
+
         {{-- Ringkasan progres --}}
         <section class="mt-4 rounded-3xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <div class="flex items-center justify-between">

@@ -153,6 +153,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('nilai/{mengajar}', [PwaGuruController::class, 'formNilai'])->name('nilai.form');
             Route::get('ekskul', [PwaGuruController::class, 'ekskul'])->name('ekskul');
             Route::get('ekskul/{ekskul}', [PwaGuruController::class, 'formEkskul'])->name('ekskul.form');
+            Route::get('wali', [PwaGuruController::class, 'wali'])->name('wali');
             Route::get('akun', [PwaGuruController::class, 'akun'])->name('akun');
         });
     });

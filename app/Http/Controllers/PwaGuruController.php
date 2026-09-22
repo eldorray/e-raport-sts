@@ -5,9 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\Ekskul;
 use App\Models\EkskulPenilaian;
 use App\Models\Guru;
+use App\Models\Kelas;
 use App\Models\Mengajar;
 use App\Models\Penilaian;
 use App\Models\Siswa;
+use App\Models\TahfidzPenilaian;
 use App\Models\TahunAjaran;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -37,6 +39,7 @@ class PwaGuruController extends Controller
                 'penugasan' => collect(),
                 'ringkasan' => $this->ringkasanKosong(),
                 'lanjutkan' => collect(),
+                'kelasWali' => null,
             ]);
         }
 
@@ -48,6 +51,7 @@ class PwaGuruController extends Controller
             'penugasan' => $penugasan,
             'ringkasan' => $ringkasan,
             'lanjutkan' => $lanjutkan,
+            'kelasWali' => $this->kelasWali($konteks),
         ]);
     }
 
@@ -203,6 +207,115 @@ class PwaGuruController extends Controller
             'bobotSumatif' => (float) ($user->bobot_sumatif ?? config('rapor.bobot_sumatif', 50)),
             'bobotSts' => (float) ($user->bobot_sts ?? config('rapor.bobot_sts', 50)),
         ]);
+    }
+
+    /**
+     * Halaman wali kelas: kelas yang diampu, kelengkapan nilai, dan cetak dokumen.
+     *
+     * @param  Request  $request  HTTP request
+     * @return View Halaman wali kelas
+     */
+    public function wali(Request $request): View
+    {
+        $konteks = $this->konteks($request);
+        $kelas = $this->kelasWali($konteks);
+
+        $siswas = collect();
+        $progresSiswa = [];
+        $tahfidzSiap = [];
+        $ringkasan = ['siswa' => 0, 'siapCetak' => 0, 'mapel' => 0];
+
+        if ($kelas && $konteks['tahunId']) {
+            $siswas = Siswa::where('kelas_id', $kelas->id)->orderBy('nama')->get();
+
+            $mengajars = Mengajar::where('kelas_id', $kelas->id)
+                ->where('tahun_ajaran_id', $konteks['tahunId'])
+                ->when($konteks['semester'], fn ($query) => $query->where('semester', $konteks['semester']))
+                ->get(['id', 'mata_pelajaran_id']);
+
+            $jumlahMapel = $mengajars->pluck('mata_pelajaran_id')->unique()->count();
+            $progresSiswa = $this->progresPerSiswa($mengajars->pluck('id'), $siswas, $konteks);
+
+            $siapCetak = collect($progresSiswa)
+                ->filter(fn (array $baris): bool => $jumlahMapel > 0 && $baris['lengkap'] >= $jumlahMapel)
+                ->count();
+
+            $ringkasan = [
+                'siswa' => $siswas->count(),
+                'siapCetak' => $siapCetak,
+                'mapel' => $jumlahMapel,
+            ];
+
+            if ($siswas->isNotEmpty()) {
+                $tahfidzSiap = TahfidzPenilaian::where('tahun_ajaran_id', $konteks['tahunId'])
+                    ->when($konteks['semester'], fn ($query) => $query->where('semester', $konteks['semester']))
+                    ->whereIn('siswa_id', $siswas->pluck('id'))
+                    ->pluck('siswa_id')
+                    ->map(fn (int|string $id): int => (int) $id)
+                    ->all();
+            }
+        }
+
+        return view('guru.pwa.wali', $konteks + [
+            'kelas' => $kelas,
+            'siswas' => $siswas,
+            'progresSiswa' => $progresSiswa,
+            'tahfidzSiap' => $tahfidzSiap,
+            'ringkasan' => $ringkasan,
+        ]);
+    }
+
+    /**
+     * Menghitung kelengkapan nilai tiap siswa pada penugasan satu kelas.
+     *
+     * @param  Collection<int, int>  $mengajarIds  ID penugasan mengajar kelas
+     * @param  Collection<int, Siswa>  $siswas  Siswa kelas tersebut
+     * @param  array{guru: Guru|null, tahunId: int|null, semester: string|null, tahunAjaran: TahunAjaran|null}  $konteks
+     * @return array<int, array{terisi: int, lengkap: int}> Progres per ID siswa
+     */
+    private function progresPerSiswa(Collection $mengajarIds, Collection $siswas, array $konteks): array
+    {
+        if ($mengajarIds->isEmpty() || $siswas->isEmpty()) {
+            return [];
+        }
+
+        return Penilaian::whereIn('mengajar_id', $mengajarIds)
+            ->where('tahun_ajaran_id', $konteks['tahunId'])
+            ->when($konteks['semester'], fn ($query) => $query->where('semester', $konteks['semester']))
+            ->whereIn('siswa_id', $siswas->pluck('id'))
+            ->selectRaw('siswa_id')
+            ->selectRaw('SUM(CASE WHEN nilai_sumatif IS NOT NULL OR nilai_sts IS NOT NULL THEN 1 ELSE 0 END) as terisi')
+            ->selectRaw('SUM(CASE WHEN nilai_sumatif IS NOT NULL AND nilai_sts IS NOT NULL THEN 1 ELSE 0 END) as lengkap')
+            ->groupBy('siswa_id')
+            ->get()
+            ->mapWithKeys(function (Penilaian $baris): array {
+                $atribut = $baris->getAttributes();
+
+                return [
+                    (int) $atribut['siswa_id'] => [
+                        'terisi' => (int) $atribut['terisi'],
+                        'lengkap' => (int) $atribut['lengkap'],
+                    ],
+                ];
+            })
+            ->all();
+    }
+
+    /**
+     * Kelas yang diampu guru sebagai wali kelas pada tahun ajaran aktif.
+     *
+     * @param  array{guru: Guru|null, tahunId: int|null, semester: string|null, tahunAjaran: TahunAjaran|null}  $konteks
+     */
+    private function kelasWali(array $konteks): ?Kelas
+    {
+        if (! $konteks['guru'] || ! $konteks['tahunId']) {
+            return null;
+        }
+
+        return Kelas::with('guru')
+            ->where('guru_id', $konteks['guru']->id)
+            ->where('tahun_ajaran_id', $konteks['tahunId'])
+            ->first();
     }
 
     /**

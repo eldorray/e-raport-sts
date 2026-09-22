@@ -218,7 +218,7 @@
         {{-- Navigasi bawah --}}
         <nav
             class="safe-bawah fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white/95 backdrop-blur dark:border-slate-800 dark:bg-slate-900/95">
-            <div class="mx-auto grid max-w-lg grid-cols-4">
+            <div class="mx-auto grid max-w-lg grid-cols-5">
                 @php
                     $menu = [
                         [
@@ -232,6 +232,12 @@
                             'ikon' => 'fa-pen-to-square',
                             'url' => route('guru.pwa.nilai'),
                             'aktif' => request()->routeIs('guru.pwa.nilai*'),
+                        ],
+                        [
+                            'label' => __('Wali'),
+                            'ikon' => 'fa-user-graduate',
+                            'url' => route('guru.pwa.wali'),
+                            'aktif' => request()->routeIs('guru.pwa.wali'),
                         ],
                         [
                             'label' => __('Ekskul'),
