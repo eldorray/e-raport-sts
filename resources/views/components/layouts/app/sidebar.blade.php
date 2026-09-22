@@ -85,6 +85,20 @@
                             Guru
                         </h2>
                     </li>
+                    <li class="px-1 pt-1 pb-2">
+                        <a href="{{ route('guru.pwa.beranda') }}" @click="closeSidebarOnMobile()"
+                            class="flex items-center rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-800 transition-colors duration-200 hover:bg-emerald-100 dark:border-emerald-900/70 dark:bg-emerald-950/40 dark:text-emerald-200">
+                            @svg('fas-mobile-screen-button', 'w-5 h-5 text-emerald-600 dark:text-emerald-300')
+                            <span x-show="sidebarOpen" x-transition:enter="transition-all duration-300"
+                                x-transition:enter-start="opacity-0 transform -translate-x-2"
+                                x-transition:enter-end="opacity-100 transform translate-x-0"
+                                x-transition:leave="transition-all duration-300"
+                                x-transition:leave-start="opacity-100 transform translate-x-0"
+                                x-transition:leave-end="opacity-0 transform -translate-x-2"
+                                class="ml-3 whitespace-nowrap">{{ __('Aplikasi Guru (HP)') }}</span>
+                        </a>
+                    </li>
+
                     <x-layouts.sidebar-link href="{{ route('guru.pelajaran') }}" icon='fas-book-open'
                         :active="request()->routeIs('guru.pelajaran')">{{ __('Pelajaran Saya') }}</x-layouts.sidebar-link>
 

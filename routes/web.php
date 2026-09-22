@@ -12,6 +12,7 @@ use App\Http\Controllers\MengajarController;
 use App\Http\Controllers\MengajarTahfidzController;
 use App\Http\Controllers\PenilaianController;
 use App\Http\Controllers\PrintSettingController;
+use App\Http\Controllers\PwaGuruController;
 use App\Http\Controllers\RaporAdminController;
 use App\Http\Controllers\RaporDataController;
 use App\Http\Controllers\RaportPrintController;
@@ -144,6 +145,13 @@ Route::middleware(['auth'])->group(function () {
         // Wali Kelas: claim siswa yang belum memiliki kelas
         Route::get('wali-kelas/claim-siswa', [WaliKelasSiswaController::class, 'unassigned'])->name('wali-kelas.siswa.unassigned');
         Route::post('wali-kelas/claim-siswa', [WaliKelasSiswaController::class, 'claim'])->name('wali-kelas.siswa.claim');
+
+        // Aplikasi guru (PWA, mobile-first) — only role guru
+        Route::prefix('guru-app')->name('guru.pwa.')->group(function () {
+            Route::get('/', [PwaGuruController::class, 'beranda'])->name('beranda');
+            Route::get('nilai', [PwaGuruController::class, 'nilai'])->name('nilai');
+            Route::get('nilai/{mengajar}', [PwaGuruController::class, 'formNilai'])->name('nilai.form');
+        });
     });
 });
 
