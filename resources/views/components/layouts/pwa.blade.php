@@ -29,17 +29,28 @@
 
     <script>
         (function() {
+            const samakanWarnaTema = () => {
+                const gelap = document.documentElement.classList.contains('dark');
+
+                document.querySelectorAll('meta[name="theme-color"]').forEach((meta) => meta.remove());
+
+                const meta = document.createElement('meta');
+                meta.setAttribute('name', 'theme-color');
+                meta.setAttribute('content', gelap ? '#020617' : '#047857');
+                document.head.appendChild(meta);
+            };
+
             const terapkan = (mode) => {
                 if (mode === 'dark') {
                     document.documentElement.classList.add('dark');
-                    return;
-                }
-                if (mode === 'light') {
+                } else if (mode === 'light') {
                     document.documentElement.classList.remove('dark');
-                    return;
+                } else {
+                    document.documentElement.classList.toggle('dark', window.matchMedia(
+                        '(prefers-color-scheme: dark)').matches);
                 }
-                document.documentElement.classList.toggle('dark', window.matchMedia(
-                    '(prefers-color-scheme: dark)').matches);
+
+                samakanWarnaTema();
             };
 
             window.pwaAppearance = () => window.localStorage.getItem('appearance') || 'system';
@@ -55,10 +66,30 @@
             };
 
             terapkan(window.pwaAppearance());
+
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+                if (window.pwaAppearance() === 'system') {
+                    terapkan('system');
+                }
+            });
         })();
     </script>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    {{-- Pra-muat halaman aplikasi agar perpindahan menu terasa instan --}}
+    <script type="speculationrules">
+        {
+            "prefetch": [
+                {
+                    "where": {
+                        "href_matches": "/guru-app*"
+                    },
+                    "eagerness": "moderate"
+                }
+            ]
+        }
+    </script>
 
     <style>
         [x-cloak] {
@@ -205,14 +236,14 @@
                         [
                             'label' => __('Ekskul'),
                             'ikon' => 'fa-medal',
-                            'url' => route('guru.ekskul.index'),
-                            'aktif' => request()->routeIs('guru.ekskul.*'),
+                            'url' => route('guru.pwa.ekskul'),
+                            'aktif' => request()->routeIs('guru.pwa.ekskul*'),
                         ],
                         [
                             'label' => __('Akun'),
                             'ikon' => 'fa-user-gear',
-                            'url' => route('settings.profile.edit'),
-                            'aktif' => request()->routeIs('settings.*'),
+                            'url' => route('guru.pwa.akun'),
+                            'aktif' => request()->routeIs('guru.pwa.akun') || request()->routeIs('settings.*'),
                         ],
                     ];
                 @endphp

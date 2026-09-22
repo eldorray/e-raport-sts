@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Ekskul;
+use App\Models\EkskulPenilaian;
 use App\Models\Guru;
 use App\Models\Mengajar;
 use App\Models\Penilaian;
@@ -117,6 +119,125 @@ class PwaGuruController extends Controller
             'materiTp' => $nilaiBySiswa->first()?->materi_tp,
             'canEdit' => (bool) $konteks['tahunAjaran']?->is_active,
         ] + $konteks);
+    }
+
+    /**
+     * Daftar ekskul yang diampu guru beserta progres penilaiannya.
+     *
+     * @param  Request  $request  HTTP request
+     * @return View Halaman daftar ekskul
+     */
+    public function ekskul(Request $request): View
+    {
+        $konteks = $this->konteks($request);
+        $daftar = collect();
+        $progres = [];
+
+        if ($konteks['guru']) {
+            $daftar = Ekskul::where('guru_id', $konteks['guru']->id)
+                ->orderBy('nama')
+                ->get();
+
+            $progres = $this->progresEkskul($daftar, $konteks);
+        }
+
+        return view('guru.pwa.ekskul', $konteks + [
+            'daftar' => $daftar,
+            'progres' => $progres,
+        ]);
+    }
+
+    /**
+     * Form penilaian ekskul untuk satu ekskul yang diampu guru.
+     *
+     * @param  Request  $request  HTTP request
+     * @param  Ekskul  $ekskul  Ekskul dari route model binding
+     * @return View Halaman penilaian ekskul
+     */
+    public function formEkskul(Request $request, Ekskul $ekskul): View
+    {
+        $konteks = $this->konteks($request);
+
+        if (! $konteks['guru'] || $ekskul->guru_id !== $konteks['guru']->id) {
+            abort(403, __('Anda tidak memiliki akses ke penilaian ekskul ini.'));
+        }
+
+        $nilaiBySiswa = EkskulPenilaian::where('ekskul_id', $ekskul->id)
+            ->where('guru_id', $konteks['guru']->id)
+            ->when($konteks['tahunId'], fn ($query) => $query->where('tahun_ajaran_id', $konteks['tahunId']))
+            ->when($konteks['semester'], fn ($query) => $query->where('semester', $konteks['semester']))
+            ->get()
+            ->keyBy('siswa_id');
+
+        $peserta = $nilaiBySiswa->isNotEmpty()
+            ? Siswa::with('kelas')->whereIn('id', $nilaiBySiswa->keys())->orderBy('nama')->get()
+            : collect();
+
+        $tersedia = Siswa::with('kelas')
+            ->whereNotIn('id', $nilaiBySiswa->keys())
+            ->orderBy('nama')
+            ->get();
+
+        return view('guru.pwa.ekskul-form', [
+            'ekskul' => $ekskul,
+            'peserta' => $peserta,
+            'nilaiBySiswa' => $nilaiBySiswa,
+            'tersedia' => $tersedia,
+            'canEdit' => (bool) $konteks['tahunAjaran']?->is_active,
+        ] + $konteks);
+    }
+
+    /**
+     * Halaman akun guru: identitas, bobot nilai, tema, sandi, dan keluar.
+     *
+     * @param  Request  $request  HTTP request
+     * @return View Halaman akun
+     */
+    public function akun(Request $request): View
+    {
+        $konteks = $this->konteks($request);
+        $user = $request->user();
+
+        return view('guru.pwa.akun', $konteks + [
+            'user' => $user,
+            'bobotSumatif' => (float) ($user->bobot_sumatif ?? config('rapor.bobot_sumatif', 50)),
+            'bobotSts' => (float) ($user->bobot_sts ?? config('rapor.bobot_sts', 50)),
+        ]);
+    }
+
+    /**
+     * Menghitung jumlah peserta dan yang sudah dinilai per ekskul.
+     *
+     * @param  Collection<int, Ekskul>  $daftar
+     * @param  array{guru: Guru|null, tahunId: int|null, semester: string|null, tahunAjaran: TahunAjaran|null}  $konteks
+     * @return array<int, array{peserta: int, dinilai: int}>
+     */
+    private function progresEkskul(Collection $daftar, array $konteks): array
+    {
+        if ($daftar->isEmpty()) {
+            return [];
+        }
+
+        return EkskulPenilaian::whereIn('ekskul_id', $daftar->pluck('id'))
+            ->where('guru_id', $konteks['guru']?->id)
+            ->when($konteks['tahunId'], fn ($query) => $query->where('tahun_ajaran_id', $konteks['tahunId']))
+            ->when($konteks['semester'], fn ($query) => $query->where('semester', $konteks['semester']))
+            ->selectRaw('ekskul_id')
+            ->selectRaw('COUNT(*) as peserta')
+            ->selectRaw('SUM(CASE WHEN nilai IS NOT NULL THEN 1 ELSE 0 END) as dinilai')
+            ->groupBy('ekskul_id')
+            ->get()
+            ->mapWithKeys(function (EkskulPenilaian $baris): array {
+                $atribut = $baris->getAttributes();
+
+                return [
+                    (int) $atribut['ekskul_id'] => [
+                        'peserta' => (int) $atribut['peserta'],
+                        'dinilai' => (int) $atribut['dinilai'],
+                    ],
+                ];
+            })
+            ->all();
     }
 
     /**

@@ -140,12 +140,12 @@
 
         {{-- Pintasan --}}
         <section class="mt-4 grid grid-cols-2 gap-2">
-            <a href="{{ route('guru.ekskul.index') }}"
+            <a href="{{ route('guru.pwa.ekskul') }}"
                 class="flex flex-col gap-2 rounded-2xl border border-slate-200 bg-white p-3 text-sm font-semibold shadow-sm transition active:scale-[0.99] dark:border-slate-800 dark:bg-slate-900">
                 <i class="fas fa-medal text-lg text-amber-500"></i>
                 {{ __('Nilai Ekskul') }}
             </a>
-            <a href="{{ route('penilaian.bobot.edit') }}"
+            <a href="{{ route('guru.pwa.akun') }}#bobot"
                 class="flex flex-col gap-2 rounded-2xl border border-slate-200 bg-white p-3 text-sm font-semibold shadow-sm transition active:scale-[0.99] dark:border-slate-800 dark:bg-slate-900">
                 <i class="fas fa-scale-balanced text-lg text-blue-500"></i>
                 {{ __('Bobot Nilai') }}

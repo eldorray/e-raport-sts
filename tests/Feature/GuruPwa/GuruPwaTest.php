@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\Ekskul;
+use App\Models\EkskulPenilaian;
 use App\Models\Guru;
 use App\Models\Kelas;
 use App\Models\MataPelajaran;
@@ -281,4 +283,160 @@ it('menampilkan tautan aplikasi guru pada sidebar guru', function () {
         ->assertOk()
         ->assertSee('Aplikasi Guru (HP)')
         ->assertSee(route('guru.pwa.beranda'), false);
+});
+
+it('hanya menampilkan ekskul yang diampu guru pada aplikasi guru', function () {
+    $ekskulSaya = Ekskul::create(['nama' => 'Pramuka', 'guru_id' => $this->guru->id]);
+    Ekskul::create(['nama' => 'Futsal', 'guru_id' => $this->guruLain->id]);
+
+    $siswa = Siswa::factory()->create([
+        'kelas_id' => $this->kelas->id,
+        'tahun_ajaran_id' => $this->tahun->id,
+        'nama' => 'Aisyah Nur',
+    ]);
+
+    EkskulPenilaian::create([
+        'ekskul_id' => $ekskulSaya->id,
+        'guru_id' => $this->guru->id,
+        'siswa_id' => $siswa->id,
+        'tahun_ajaran_id' => $this->tahun->id,
+        'semester' => 'Ganjil',
+        'nilai' => 90,
+        'catatan' => 'Sangat aktif',
+    ]);
+
+    $this->actingAs($this->userGuru)
+        ->withSession($this->sesi)
+        ->get(route('guru.pwa.ekskul'))
+        ->assertOk()
+        ->assertSee('Pramuka')
+        ->assertDontSee('Futsal')
+        ->assertSee('1 dari 1 peserta sudah dinilai');
+});
+
+it('menampilkan peserta ekskul beserta nilai dan catatannya', function () {
+    $ekskul = Ekskul::create(['nama' => 'Pramuka', 'guru_id' => $this->guru->id]);
+
+    $siswa = Siswa::factory()->create([
+        'kelas_id' => $this->kelas->id,
+        'tahun_ajaran_id' => $this->tahun->id,
+        'nama' => 'Bilal Abdurrahman',
+    ]);
+
+    EkskulPenilaian::create([
+        'ekskul_id' => $ekskul->id,
+        'guru_id' => $this->guru->id,
+        'siswa_id' => $siswa->id,
+        'tahun_ajaran_id' => $this->tahun->id,
+        'semester' => 'Ganjil',
+        'nilai' => 85,
+        'catatan' => 'Rajin latihan',
+    ]);
+
+    $this->actingAs($this->userGuru)
+        ->withSession($this->sesi)
+        ->get(route('guru.pwa.ekskul.form', $ekskul))
+        ->assertOk()
+        ->assertSee('Bilal Abdurrahman')
+        ->assertSee('nilai['.$siswa->id.']', false)
+        ->assertSee('value="85"', false)
+        ->assertSee('Rajin latihan')
+        ->assertSee('Tambah peserta ekskul');
+});
+
+it('menolak guru lain membuka penilaian ekskul bukan miliknya', function () {
+    $ekskul = Ekskul::create(['nama' => 'Pramuka', 'guru_id' => $this->guru->id]);
+    $userGuruLain = User::findOrFail($this->guruLain->user_id);
+
+    $this->actingAs($userGuruLain)
+        ->withSession($this->sesi)
+        ->get(route('guru.pwa.ekskul.form', $ekskul))
+        ->assertForbidden();
+});
+
+it('menambah dan menilai peserta ekskul dari aplikasi guru', function () {
+    $ekskul = Ekskul::create(['nama' => 'Pramuka', 'guru_id' => $this->guru->id]);
+
+    $siswa = Siswa::factory()->create([
+        'kelas_id' => $this->kelas->id,
+        'tahun_ajaran_id' => $this->tahun->id,
+    ]);
+
+    $this->actingAs($this->userGuru)
+        ->withSession($this->sesi)
+        ->post(route('guru.ekskul.store', $ekskul), [
+            'action' => 'add',
+            'siswa_ids' => [$siswa->id],
+        ])
+        ->assertRedirect()
+        ->assertSessionHasNoErrors();
+
+    $this->assertDatabaseHas('ekskul_penilaians', [
+        'ekskul_id' => $ekskul->id,
+        'siswa_id' => $siswa->id,
+        'tahun_ajaran_id' => $this->tahun->id,
+        'semester' => 'Ganjil',
+    ]);
+
+    $this->actingAs($this->userGuru)
+        ->withSession($this->sesi)
+        ->post(route('guru.ekskul.store', $ekskul), [
+            'nilai' => [$siswa->id => '88'],
+            'catatan' => [$siswa->id => 'Aktif'],
+        ])
+        ->assertRedirect()
+        ->assertSessionHasNoErrors();
+
+    $tersimpan = EkskulPenilaian::where('siswa_id', $siswa->id)->firstOrFail();
+
+    expect((float) $tersimpan->nilai)->toBe(88.0)
+        ->and($tersimpan->catatan)->toBe('Aktif');
+});
+
+it('menampilkan halaman akun aplikasi guru', function () {
+    $this->actingAs($this->userGuru)
+        ->withSession($this->sesi)
+        ->get(route('guru.pwa.akun'))
+        ->assertOk()
+        ->assertSee($this->guru->nama)
+        ->assertSee('Bobot nilai rapor')
+        ->assertSee('Ubah kata sandi')
+        ->assertSee('bobot_sumatif', false)
+        ->assertSee('Gelap')
+        ->assertSee(route('logout'), false);
+});
+
+it('menolak admin membuka halaman akun aplikasi guru', function () {
+    $admin = User::factory()->create(['role' => 'admin']);
+
+    $this->actingAs($admin)
+        ->withSession($this->sesi)
+        ->get(route('guru.pwa.akun'))
+        ->assertForbidden();
+});
+
+it('menyimpan bobot nilai dari halaman akun aplikasi guru', function () {
+    $this->actingAs($this->userGuru)
+        ->withSession($this->sesi)
+        ->post(route('penilaian.bobot.update'), [
+            'bobot_sumatif' => 60,
+            'bobot_sts' => 40,
+        ])
+        ->assertRedirect()
+        ->assertSessionHasNoErrors();
+
+    $this->assertDatabaseHas('users', [
+        'id' => $this->userGuru->id,
+        'bobot_sumatif' => 60,
+        'bobot_sts' => 40,
+    ]);
+});
+
+it('memakai menu bawah aplikasi guru untuk ekskul dan akun versi PWA', function () {
+    $this->actingAs($this->userGuru)
+        ->withSession($this->sesi)
+        ->get(route('guru.pwa.beranda'))
+        ->assertOk()
+        ->assertSee(route('guru.pwa.ekskul'), false)
+        ->assertSee(route('guru.pwa.akun'), false);
 });

@@ -23,3 +23,16 @@
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
 </IfModule>
+
+# Aturan cache untuk aplikasi PWA
+<IfModule mod_headers.c>
+    # Aset hasil build punya nama ber-hash, aman disimpan lama
+    <FilesMatch "\.(woff2?|ttf|otf|eot|svg|png|jpe?g|webp|gif|ico|css|js|mjs)$">
+        Header set Cache-Control "public, max-age=31536000, immutable"
+    </FilesMatch>
+
+    # Berkas ini justru harus selalu segar supaya update aplikasi terpakai
+    <FilesMatch "^(sw\.js|manifest\.webmanifest|offline\.html)$">
+        Header set Cache-Control "no-cache, must-revalidate"
+    </FilesMatch>
+</IfModule>

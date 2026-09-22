@@ -84,7 +84,7 @@
                     </div>
 
                     @if ($canEdit)
-                        <button type="button" @click="sheetIsiCepat = true"
+                        <button type="button" @click="bukaIsiCepat()"
                             class="flex h-12 shrink-0 items-center gap-2 rounded-2xl bg-emerald-600 px-4 text-sm font-semibold text-white transition active:scale-95">
                             <i class="fas fa-bolt"></i>
                             <span class="hidden min-[380px]:inline">{{ __('Isi Cepat') }}</span>
@@ -188,7 +188,7 @@
             {{-- Lembar isi cepat --}}
             <div x-cloak x-show="sheetIsiCepat" x-transition.opacity
                 class="fixed inset-0 z-40 flex items-end bg-slate-900/60 backdrop-blur-sm"
-                @click.self="sheetIsiCepat = false">
+                @click.self="tutupIsiCepat()">
                 <div x-show="sheetIsiCepat" x-transition
                     class="mx-auto w-full max-w-lg rounded-t-3xl bg-white p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] shadow-2xl dark:bg-slate-900">
                     <div class="mx-auto mb-4 h-1.5 w-12 rounded-full bg-slate-200 dark:bg-slate-700"></div>
@@ -250,7 +250,7 @@
                     </div>
 
                     <div class="mt-5 flex gap-2">
-                        <button type="button" @click="sheetIsiCepat = false"
+                        <button type="button" @click="tutupIsiCepat()"
                             class="h-12 flex-1 rounded-2xl border border-slate-200 text-sm font-semibold text-slate-600 transition active:scale-[0.99] dark:border-slate-700 dark:text-slate-300">
                             {{ __('Batal') }}
                         </button>
@@ -288,6 +288,10 @@
 
                     this.$watch('cari', () => this.hitungTampil());
 
+                    window.addEventListener('popstate', () => {
+                        this.sheetIsiCepat = false;
+                    });
+
                     window.addEventListener('beforeunload', (peristiwa) => {
                         if (!this.dirty || this.menyimpan) {
                             return;
@@ -296,6 +300,21 @@
                         peristiwa.preventDefault();
                         peristiwa.returnValue = '';
                     });
+                },
+
+                bukaIsiCepat() {
+                    this.sheetIsiCepat = true;
+                    history.pushState({
+                        pwaSheet: true
+                    }, '');
+                },
+
+                tutupIsiCepat() {
+                    this.sheetIsiCepat = false;
+
+                    if (history.state && history.state.pwaSheet) {
+                        history.back();
+                    }
                 },
 
                 kolom() {
