@@ -46,11 +46,11 @@ class SiswaController extends Controller
      */
     public function index(): View
     {
-        $tahunId = session('selected_tahun_ajaran_id');
+        $tahunId = $this->tahunAjaranAktif();
         $tahunAjaran = $tahunId ? TahunAjaran::find($tahunId) : null;
 
         $siswas = Siswa::with('kelas')
-            ->when($tahunId, fn ($query) => $query->where('tahun_ajaran_id', $tahunId))
+            ->where('tahun_ajaran_id', $tahunId)
             ->withCount(['penilaians', 'raporMetadatas', 'tahfidzPenilaians', 'ekskulPenilaians'])
             ->orderBy('nama')
             ->get();
@@ -163,7 +163,7 @@ class SiswaController extends Controller
      */
     public function destroyAll(): RedirectResponse
     {
-        $tahunId = session('selected_tahun_ajaran_id');
+        $tahunId = $this->tahunAjaranAktif();
 
         if (! $tahunId) {
             return back()->withErrors(['tahun_ajaran' => __('Pilih tahun ajaran terlebih dahulu.')]);
@@ -223,7 +223,7 @@ class SiswaController extends Controller
      */
     public function syncFromApi(Request $request): RedirectResponse
     {
-        $tahunId = session('selected_tahun_ajaran_id');
+        $tahunId = $this->tahunAjaranAktif();
         if (! $tahunId) {
             return back()->with('error', 'Pilih tahun ajaran terlebih dahulu.');
         }
@@ -445,6 +445,19 @@ class SiswaController extends Controller
         ];
 
         return $request->validate($rules);
+    }
+
+    /**
+     * Menentukan tahun ajaran yang dipakai halaman siswa.
+     *
+     * Memakai tahun ajaran pada sesi, dan jatuh ke tahun ajaran aktif bila sesi
+     * belum dipilih — sehingga tidak ada aksi yang berjalan lintas tahun ajaran.
+     *
+     * @return int|null ID tahun ajaran
+     */
+    private function tahunAjaranAktif(): ?int
+    {
+        return session('selected_tahun_ajaran_id') ?? TahunAjaran::where('is_active', true)->value('id');
     }
 
     /**

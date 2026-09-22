@@ -339,3 +339,50 @@ it('mengizinkan tombol hapus tampil saat data master belum punya nilai', functio
         ->assertDontSee('Tidak bisa dihapus')
         ->assertSee(route('kelas.destroy', $kelas));
 });
+
+it('tidak menyentuh data tahun ajaran lama saat semua siswa tahun ajaran baru dihapus', function () {
+    $tahunLama = buatTahunAjaranPenghapusan('2025/2026');
+    $konteksLama = buatKonteksNilai($tahunLama, 'Siswa Lama');
+    buatKonteksNilai($this->tahun, 'Siswa Baru');
+
+    // Tahun ajaran baru aktif dan sedang dipilih, lalu "Hapus Semua" ditekan.
+    $this->actingAs($this->admin)
+        ->withSession(['selected_tahun_ajaran_id' => $this->tahun->id])
+        ->delete(route('siswa.destroy-all'))
+        ->assertRedirect()
+        ->assertSessionHas('status', fn (string $status) => str_contains($status, '1 siswa'));
+
+    expect(Siswa::where('tahun_ajaran_id', $this->tahun->id)->count())->toBe(0)
+        ->and(Penilaian::where('tahun_ajaran_id', $this->tahun->id)->count())->toBe(0);
+
+    // Seluruh data tahun ajaran lama harus utuh.
+    expect(Siswa::whereKey($konteksLama['siswa']->id)->exists())->toBeTrue()
+        ->and(Penilaian::whereKey($konteksLama['nilai']->id)->exists())->toBeTrue()
+        ->and(RaporMetadata::whereKey($konteksLama['rapor']->id)->exists())->toBeTrue()
+        ->and(TahfidzPenilaian::whereKey($konteksLama['tahfidz']->id)->exists())->toBeTrue()
+        ->and(EkskulPenilaian::whereKey($konteksLama['ekskulPenilaian']->id)->exists())->toBeTrue()
+        ->and(Mengajar::whereKey($konteksLama['mengajar']->id)->exists())->toBeTrue()
+        ->and(Kelas::whereKey($konteksLama['kelas']->id)->exists())->toBeTrue()
+        ->and(MataPelajaran::whereKey($konteksLama['mapel']->id)->exists())->toBeTrue()
+        ->and(Guru::whereKey($konteksLama['guru']->id)->exists())->toBeTrue();
+
+    // Tahun ajaran lama tetap bisa dibuka lengkap.
+    $this->actingAs($this->admin)
+        ->withSession(['selected_tahun_ajaran_id' => $tahunLama->id])
+        ->get(route('siswa.index'))
+        ->assertSuccessful()
+        ->assertSee('Siswa Lama')
+        ->assertDontSee('Siswa Baru');
+});
+
+it('memakai tahun ajaran aktif sebagai cadangan bila sesi tahun ajaran kosong', function () {
+    $konteksLama = buatKonteksNilai(buatTahunAjaranPenghapusan('2025/2026'), 'Siswa Lama');
+    buatKonteksNilai($this->tahun, 'Siswa Baru');
+
+    $this->actingAs($this->admin)
+        ->delete(route('siswa.destroy-all'))
+        ->assertRedirect();
+
+    expect(Siswa::where('tahun_ajaran_id', $this->tahun->id)->count())->toBe(0)
+        ->and(Siswa::whereKey($konteksLama['siswa']->id)->exists())->toBeTrue();
+});
