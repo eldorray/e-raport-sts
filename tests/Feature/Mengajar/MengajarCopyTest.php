@@ -275,7 +275,8 @@ it('menampilkan jumlah jadwal tiap tahun ajaran pada modal salin', function () {
         ])
         ->get(route('mengajar.index'))
         ->assertSuccessful()
-        ->assertSee('2 jadwal semester Ganjil');
+        ->assertSee('Ganjil: 2 jadwal')
+        ->assertSee('Genap: 0 jadwal');
 });
 
 it('memberi tahu saat tahun ajaran aktif belum punya kelas pada modal salin', function () {
@@ -293,5 +294,97 @@ it('memberi tahu saat tahun ajaran aktif belum punya kelas pada modal salin', fu
         ->get(route('mengajar.index'))
         ->assertSuccessful()
         ->assertSee('Tahun ajaran aktif belum punya kelas')
-        ->assertSee('1 jadwal semester Ganjil');
+        ->assertSee('Ganjil: 1 jadwal');
+});
+
+it('menyalin jadwal dari semester Ganjil ke Genap pada tahun ajaran yang sama', function () {
+    $kelas = buatKelasSalin($this->tahunTarget, '1A', 'I');
+    $guru = buatGuruSalin('Guru Satu');
+    $mapel = buatMapelSalin('Matematika', 'MTK');
+    buatJadwalSalin($this->tahunTarget->id, $kelas->id, $mapel->id, $guru->id, 4);
+
+    $this->actingAs($this->admin)
+        ->withSession([
+            'selected_tahun_ajaran_id' => $this->tahunTarget->id,
+            'selected_semester' => 'Genap',
+        ])
+        ->post(route('mengajar.copy'), [
+            'source_tahun_ajaran_id' => $this->tahunTarget->id,
+            'source_semester' => 'Ganjil',
+            'kelas_id' => $kelas->id,
+        ])
+        ->assertRedirect()
+        ->assertSessionHas('status', fn (string $status) => str_contains($status, '1 jadwal')
+            && str_contains($status, 'Ganjil')
+            && str_contains($status, 'Genap'));
+
+    $genap = Mengajar::where('tahun_ajaran_id', $this->tahunTarget->id)
+        ->where('semester', 'Genap')
+        ->get();
+
+    expect($genap)->toHaveCount(1)
+        ->and($genap->first()->guru_id)->toBe($guru->id)
+        ->and($genap->first()->jtm)->toBe(4)
+        ->and(Mengajar::where('semester', 'Ganjil')->count())->toBe(1);
+});
+
+it('menolak salin bila tahun ajaran dan semester sumber sama dengan yang aktif', function () {
+    $kelas = buatKelasSalin($this->tahunTarget, '1A', 'I');
+    $guru = buatGuruSalin('Guru Satu');
+    $mapel = buatMapelSalin('Matematika', 'MTK');
+    buatJadwalSalin($this->tahunTarget->id, $kelas->id, $mapel->id, $guru->id, 4);
+
+    $this->actingAs($this->admin)
+        ->withSession([
+            'selected_tahun_ajaran_id' => $this->tahunTarget->id,
+            'selected_semester' => 'Ganjil',
+        ])
+        ->post(route('mengajar.copy'), [
+            'source_tahun_ajaran_id' => $this->tahunTarget->id,
+            'source_semester' => 'Ganjil',
+            'kelas_id' => $kelas->id,
+        ])
+        ->assertRedirect()
+        ->assertSessionHas('error', fn (string $pesan) => str_contains($pesan, 'tidak ada yang perlu disalin'));
+
+    expect(Mengajar::where('semester', 'Genap')->count())->toBe(0);
+});
+
+it('menjelaskan bila semester sumber yang dipilih belum punya jadwal', function () {
+    $kelasSumber = buatKelasSalin($this->tahunSumber, '1A', 'I');
+    $kelasTarget = buatKelasSalin($this->tahunTarget, '1A', 'I');
+    $guru = buatGuruSalin('Guru Satu');
+    $mapel = buatMapelSalin('Matematika', 'MTK');
+    buatJadwalSalin($this->tahunSumber->id, $kelasSumber->id, $mapel->id, $guru->id, 4);
+
+    $this->actingAs($this->admin)
+        ->withSession([
+            'selected_tahun_ajaran_id' => $this->tahunTarget->id,
+            'selected_semester' => 'Genap',
+        ])
+        ->post(route('mengajar.copy'), [
+            'source_tahun_ajaran_id' => $this->tahunSumber->id,
+            'source_semester' => 'Genap',
+            'kelas_id' => $kelasTarget->id,
+        ])
+        ->assertRedirect()
+        ->assertSessionHas('error', fn (string $pesan) => str_contains($pesan, 'belum punya jadwal mengajar pada semester Genap'));
+
+    expect(Mengajar::where('tahun_ajaran_id', $this->tahunTarget->id)->count())->toBe(0);
+});
+
+it('menolak semester sumber yang tidak dikenal', function () {
+    $kelasTarget = buatKelasSalin($this->tahunTarget, '1A', 'I');
+
+    $this->actingAs($this->admin)
+        ->withSession([
+            'selected_tahun_ajaran_id' => $this->tahunTarget->id,
+            'selected_semester' => 'Ganjil',
+        ])
+        ->post(route('mengajar.copy'), [
+            'source_tahun_ajaran_id' => $this->tahunSumber->id,
+            'source_semester' => 'Semester Antara',
+            'kelas_id' => $kelasTarget->id,
+        ])
+        ->assertSessionHasErrors('source_semester');
 });

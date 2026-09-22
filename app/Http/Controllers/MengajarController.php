@@ -23,6 +23,13 @@ use Illuminate\View\View;
 class MengajarController extends Controller
 {
     /**
+     * Semester yang dikenal aplikasi.
+     *
+     * @var array<int, string>
+     */
+    private const SEMESTER_VALID = ['Ganjil', 'Genap'];
+
+    /**
      * Menampilkan daftar jadwal mengajar per kelas.
      *
      * @param  Request  $request  HTTP request
@@ -69,12 +76,14 @@ class MengajarController extends Controller
         $gurus = Guru::orderBy('nama')->get();
         $tahunOptions = TahunAjaran::orderByDesc('is_active')->orderByDesc('tahun_mulai')->get();
 
-        // Jumlah jadwal mengajar tiap tahun ajaran pada semester yang sedang aktif,
-        // dipakai untuk menandai tahun ajaran yang benar-benar bisa disalin.
-        $jadwalPerTahun = Mengajar::when($semester, fn ($query) => $query->where('semester', $semester))
-            ->selectRaw('tahun_ajaran_id, COUNT(*) as jumlah_jadwal')
-            ->groupBy('tahun_ajaran_id')
-            ->pluck('jumlah_jadwal', 'tahun_ajaran_id');
+        // Jumlah jadwal mengajar tiap tahun ajaran per semester, dipakai untuk
+        // menandai tahun ajaran mana yang benar-benar bisa disalin.
+        $jadwalPerTahun = Mengajar::selectRaw('tahun_ajaran_id, semester, COUNT(*) as jumlah_jadwal')
+            ->groupBy('tahun_ajaran_id', 'semester')
+            ->get()
+            ->mapWithKeys(fn (Mengajar $baris): array => [
+                $baris->tahun_ajaran_id.'-'.$baris->semester => (int) $baris->getAttribute('jumlah_jadwal'),
+            ]);
 
         return view('mengajar.index', compact(
             'tingkats',
@@ -198,30 +207,43 @@ class MengajarController extends Controller
 
         $data = $request->validate([
             'source_tahun_ajaran_id' => ['required', 'exists:tahun_ajarans,id'],
+            'source_semester' => ['nullable', Rule::in(self::SEMESTER_VALID)],
             'kelas_id' => ['required', Rule::exists('kelas', 'id')->where('tahun_ajaran_id', $targetYear)],
         ], [
             'kelas_id.exists' => __('Kelas tujuan tidak terdaftar pada tahun ajaran yang sedang dipilih.'),
+            'source_semester.in' => __('Semester sumber tidak dikenal.'),
         ]);
+
+        $sourceSemester = $data['source_semester'] ?? $targetSemester;
+
+        /** @var TahunAjaran $tahunSumber */
+        $tahunSumber = TahunAjaran::findOrFail($data['source_tahun_ajaran_id']);
+
+        if ($tahunSumber->id === (int) $targetYear && $sourceSemester === $targetSemester) {
+            return back()->with('error', __('Tahun ajaran dan semester sumber sama dengan yang sedang dipilih, jadi tidak ada yang perlu disalin. Pilih semester sumber lain bila ingin menyalin dari Ganjil ke Genap.'));
+        }
 
         /** @var Kelas $kelasTarget */
         $kelasTarget = Kelas::findOrFail($data['kelas_id']);
-        $kelasSumber = $this->kelasSetara($data['source_tahun_ajaran_id'], $kelasTarget);
+        $kelasSumber = $this->kelasSetara($tahunSumber->id, $kelasTarget);
 
         if (! $kelasSumber) {
-            return back()->with('error', __('Kelas :kelas tidak ditemukan pada tahun ajaran sumber.', [
+            return back()->with('error', __('Kelas :kelas tidak ditemukan pada tahun ajaran sumber (:sumber).', [
                 'kelas' => $kelasTarget->nama,
+                'sumber' => $tahunSumber->nama,
             ]));
         }
 
-        $sourceRecords = Mengajar::where('tahun_ajaran_id', $data['source_tahun_ajaran_id'])
-            ->where('semester', $targetSemester)
+        $sourceRecords = Mengajar::where('tahun_ajaran_id', $tahunSumber->id)
+            ->where('semester', $sourceSemester)
             ->where('kelas_id', $kelasSumber->id)
             ->get();
 
         if ($sourceRecords->isEmpty()) {
-            return back()->with('error', __('Kelas :kelas belum punya jadwal mengajar pada semester :semester di tahun ajaran sumber.', [
-                'kelas' => $kelasTarget->nama,
-                'semester' => $targetSemester,
+            return back()->with('error', __('Kelas :kelas belum punya jadwal mengajar pada semester :semester di tahun ajaran :sumber.', [
+                'kelas' => $kelasSumber->nama,
+                'semester' => $sourceSemester,
+                'sumber' => $tahunSumber->nama,
             ]));
         }
 
@@ -239,10 +261,12 @@ class MengajarController extends Controller
             }
         });
 
-        return back()->with('status', __(':jumlah jadwal mengajar disalin ke kelas :kelas (semester :semester).', [
+        return back()->with('status', __(':jumlah jadwal mengajar disalin dari :sumber semester :semester_sumber ke kelas :kelas semester :semester_tujuan.', [
             'jumlah' => $sourceRecords->count(),
+            'sumber' => $tahunSumber->nama,
+            'semester_sumber' => $sourceSemester,
             'kelas' => $kelasTarget->nama,
-            'semester' => $targetSemester,
+            'semester_tujuan' => $targetSemester,
         ]));
     }
 

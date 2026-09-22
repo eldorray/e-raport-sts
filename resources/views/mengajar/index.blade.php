@@ -221,7 +221,7 @@
             <form action="{{ route('mengajar.copy') }}" method="POST" class="space-y-4 px-6 py-6">
                 @csrf
                 <p class="rounded-lg bg-gray-50 px-3 py-2 text-xs text-gray-600 dark:bg-gray-800/60 dark:text-gray-300">
-                    {{ __('Jadwal mengajar kelas yang sama pada tahun ajaran sumber akan disalin ke kelas yang dipilih di tahun ajaran aktif, beserta guru dan JTM-nya. Kelas dicocokkan berdasarkan nama (contoh: 1A dengan 1A).') }}
+                    {{ __('Jadwal mengajar kelas yang sama pada tahun ajaran sumber akan disalin ke kelas yang dipilih, beserta guru dan JTM-nya. Kelas dicocokkan berdasarkan nama (contoh: 1A dengan 1A), dan semester sumber boleh berbeda dari semester yang sedang aktif — misalnya menyalin jadwal Ganjil ke Genap.') }}
                 </p>
                 <div class="space-y-2">
                     <label
@@ -229,17 +229,24 @@
                     <select name="source_tahun_ajaran_id" required
                         class="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
                         @forelse ($tahunOptions as $option)
-                            @continue($option->id == $tahunId)
-                            @php($jumlahJadwal = (int) $jadwalPerTahun->get($option->id, 0))
+                            @php($jumlahGanjil = (int) $jadwalPerTahun->get($option->id.'-Ganjil', 0))
+                            @php($jumlahGenap = (int) $jadwalPerTahun->get($option->id.'-Genap', 0))
                             <option value="{{ $option->id }}">
-                                {{ $option->nama }}{{ $option->is_active ? ' — Aktif' : '' }} —
-                                {{ $jumlahJadwal > 0
-                                    ? __(':jumlah jadwal semester :semester', ['jumlah' => $jumlahJadwal, 'semester' => $semester ?: '-'])
-                                    : __('belum ada jadwal semester :semester', ['semester' => $semester ?: '-']) }}
+                                {{ $option->nama }}{{ $option->is_active ? ' — Aktif' : '' }}{{ $option->id == $tahunId ? ' ('.__('tahun ajaran ini').')' : '' }} —
+                                {{ __('Ganjil: :ganjil jadwal · Genap: :genap jadwal', ['ganjil' => $jumlahGanjil, 'genap' => $jumlahGenap]) }}
                             </option>
                         @empty
-                            <option value="">{{ __('Belum ada tahun ajaran lain.') }}</option>
+                            <option value="">{{ __('Belum ada tahun ajaran.') }}</option>
                         @endforelse
+                    </select>
+                </div>
+                <div class="space-y-2">
+                    <label
+                        class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Semester Sumber') }}</label>
+                    <select name="source_semester" required
+                        class="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+                        <option value="Ganjil" @selected($semester === 'Ganjil')>{{ __('Ganjil') }}</option>
+                        <option value="Genap" @selected($semester !== 'Ganjil')>{{ __('Genap') }}</option>
                     </select>
                 </div>
                 <div class="space-y-2">
