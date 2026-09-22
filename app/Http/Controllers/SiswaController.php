@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Exports\SiswaTemplateExport;
 use App\Imports\SiswaImport;
 use App\Models\Siswa;
+use App\Services\KelasResolverService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -95,7 +96,7 @@ class SiswaController extends Controller
      * Memperbarui data siswa yang sudah ada.
      *
      * @param  Request  $request  HTTP request dengan data yang diperbarui
-     * @param  Siswa    $siswa    Instance siswa dari route model binding
+     * @param  Siswa  $siswa  Instance siswa dari route model binding
      * @return RedirectResponse Redirect ke halaman sebelumnya dengan pesan status
      */
     public function update(Request $request, Siswa $siswa): RedirectResponse
@@ -179,7 +180,7 @@ class SiswaController extends Controller
             'file' => ['required', 'file', 'mimes:xlsx,xls,csv'],
         ]);
 
-        $import = new SiswaImport();
+        $import = new SiswaImport;
 
         try {
             Excel::import($import, $request->file('file'));
@@ -199,7 +200,7 @@ class SiswaController extends Controller
      */
     public function template()
     {
-        return Excel::download(new SiswaTemplateExport(), 'template-siswa.xlsx');
+        return Excel::download(new SiswaTemplateExport, 'template-siswa.xlsx');
     }
 
     /**
@@ -211,15 +212,20 @@ class SiswaController extends Controller
     public function syncFromApi(Request $request): RedirectResponse
     {
         $tahunId = session('selected_tahun_ajaran_id');
-        if (!$tahunId) {
+        if (! $tahunId) {
             return back()->with('error', 'Pilih tahun ajaran terlebih dahulu.');
         }
 
         $request->validate([
             'source' => ['required', 'in:siswa-mi,siswa-smp'],
+            'assign_kelas' => ['sometimes', 'boolean'],
         ]);
 
         $source = $request->input('source');
+        $assignKelas = $request->boolean('assign_kelas', true);
+        $kelasResolver = $assignKelas
+            ? new KelasResolverService($tahunId, $source === 'siswa-mi' ? 'MI' : 'SMP')
+            : null;
         $created = 0;
         $updated = 0;
         $failed = 0;
@@ -228,20 +234,21 @@ class SiswaController extends Controller
         try {
             $page = 1;
             $hasMorePages = true;
-            $apiBaseUrl = env('SYNC_API_BASE_URL', 'https://datainduk.ypdhalmadani.sch.id');
+            $apiBaseUrl = config('services.data_induk.base_url');
             $baseUrl = "{$apiBaseUrl}/api/{$source}/all";
 
             while ($hasMorePages) {
+                /** @var \Illuminate\Http\Client\Response $response */
                 $response = Http::timeout(60)->get($baseUrl, ['page' => $page]);
 
-                if (!$response->successful()) {
-                    return back()->with('error', 'Gagal mengambil data dari API. Status: ' . $response->status());
+                if (! $response->successful()) {
+                    return back()->with('error', 'Gagal mengambil data dari API. Status: '.$response->status());
                 }
 
                 $data = $response->json();
                 $siswas = $data['data'] ?? $data;
 
-                if (!is_array($siswas)) {
+                if (! is_array($siswas)) {
                     return back()->with('error', 'Format response API tidak valid.');
                 }
 
@@ -260,15 +267,26 @@ class SiswaController extends Controller
                             $gender = 'P';
                         }
 
-                        if (!$nama) {
+                        if (! $nama) {
                             $failed++;
-                            $errors[] = "Data tidak lengkap: Nama kosong";
+                            $errors[] = 'Data tidak lengkap: Nama kosong';
+
                             continue;
                         }
 
                         // Generate unique NIS if not available
-                        if (!$nis) {
-                            $nis = 'TMP-' . time() . '-' . rand(1000, 9999);
+                        if (! $nis) {
+                            $nis = 'TMP-'.time().'-'.rand(1000, 9999);
+                        }
+
+                        // Petakan rombel dari API (mis. "Kelas 1 - KELAS 1A") ke kelas lokal
+                        $tingkatRombel = $siswaData['tingkat_rombel'] ?? null;
+                        $kelasId = null;
+                        $namaRombel = null;
+
+                        if ($kelasResolver !== null && $tingkatRombel) {
+                            $kelasId = $kelasResolver->resolveId($tingkatRombel);
+                            $namaRombel = $kelasResolver->parseRombel($tingkatRombel)['nama'] ?? null;
                         }
 
                         // Prepare siswa data
@@ -276,6 +294,8 @@ class SiswaController extends Controller
                             'tahun_ajaran_id' => $tahunId,
                             'nis' => $nis,
                             'nisn' => $nisn,
+                            'kelas_id' => $kelasId,
+                            'kelas_diterima' => $namaRombel,
                             'nama' => $nama,
                             'jenis_kelamin' => $gender,
                             'tempat_lahir' => $siswaData['tempat_lahir'] ?? null,
@@ -295,13 +315,22 @@ class SiswaController extends Controller
                                 ->where('nisn', $nisn)
                                 ->first();
                         }
-                        if (!$existingSiswa && $nis) {
+                        if (! $existingSiswa && $nis) {
                             $existingSiswa = Siswa::where('tahun_ajaran_id', $tahunId)
                                 ->where('nis', $nis)
                                 ->first();
                         }
 
                         if ($existingSiswa) {
+                            // Jangan hapus kelas/kelas diterima lama bila API tidak mengirim rombel
+                            if ($kelasId === null) {
+                                unset($syncData['kelas_id']);
+                            }
+
+                            if ($namaRombel === null || filled($existingSiswa->kelas_diterima)) {
+                                unset($syncData['kelas_diterima']);
+                            }
+
                             $existingSiswa->update($syncData);
                             $updated++;
                         } else {
@@ -310,7 +339,7 @@ class SiswaController extends Controller
                         }
                     } catch (\Exception $e) {
                         $failed++;
-                        $errors[] = "Error: " . $e->getMessage();
+                        $errors[] = 'Error: '.$e->getMessage();
                     }
                 }
 
@@ -331,6 +360,9 @@ class SiswaController extends Controller
             }
 
             $message = "Sync berhasil: {$created} siswa baru, {$updated} diperbarui.";
+            if ($kelasResolver?->created > 0) {
+                $message .= " {$kelasResolver->created} kelas baru dibuat otomatis.";
+            }
             if ($failed > 0) {
                 $message .= " {$failed} gagal.";
             }
@@ -338,20 +370,22 @@ class SiswaController extends Controller
             return back()->with('status', $message);
 
         } catch (\Illuminate\Http\Client\ConnectionException $e) {
-            Log::error('Sync API Error: ' . $e->getMessage());
+            Log::error('Sync API Error: '.$e->getMessage());
+
             return back()->with('error', 'Tidak dapat terhubung ke API. Pastikan server API berjalan.');
         } catch (\Exception $e) {
-            Log::error('Sync API Error: ' . $e->getMessage());
-            return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+            Log::error('Sync API Error: '.$e->getMessage());
+
+            return back()->with('error', 'Terjadi kesalahan: '.$e->getMessage());
         }
     }
 
     /**
      * Validasi data request untuk create/update siswa.
      *
-     * @param  Request   $request   HTTP request dengan data siswa
+     * @param  Request  $request  HTTP request dengan data siswa
      * @param  int|null  $ignoreId  ID siswa yang diabaikan untuk validasi unique
-     * @return array Data yang sudah divalidasi
+     * @return array<string, mixed> Data yang sudah divalidasi
      */
     private function validatedData(Request $request, ?int $ignoreId = null): array
     {
@@ -361,7 +395,7 @@ class SiswaController extends Controller
             'nis' => [
                 'required',
                 'string',
-                'max:' . self::MAX_NIS_LENGTH,
+                'max:'.self::MAX_NIS_LENGTH,
                 Rule::unique('siswas', 'nis')
                     ->where(fn ($q) => $q->where('tahun_ajaran_id', $tahunId))
                     ->ignore($ignoreId),
@@ -369,12 +403,12 @@ class SiswaController extends Controller
             'nisn' => [
                 'nullable',
                 'string',
-                'max:' . self::MAX_NIS_LENGTH,
+                'max:'.self::MAX_NIS_LENGTH,
                 Rule::unique('siswas', 'nisn')
                     ->where(fn ($q) => $q->where('tahun_ajaran_id', $tahunId))
                     ->ignore($ignoreId),
             ],
-            'nama' => ['required', 'string', 'max:' . self::MAX_NAME_LENGTH],
+            'nama' => ['required', 'string', 'max:'.self::MAX_NAME_LENGTH],
             'jenis_kelamin' => ['required', Rule::in(['L', 'P'])],
             'tempat_lahir' => ['nullable', 'string', 'max:100'],
             'tanggal_lahir' => ['nullable', 'date'],
@@ -394,7 +428,7 @@ class SiswaController extends Controller
             'nama_wali' => ['nullable', 'string', 'max:150'],
             'pekerjaan_wali' => ['nullable', 'string', 'max:100'],
             'alamat_wali' => ['nullable', 'string'],
-            'photo' => ['nullable', 'image', 'max:' . self::MAX_PHOTO_SIZE_KB],
+            'photo' => ['nullable', 'image', 'max:'.self::MAX_PHOTO_SIZE_KB],
             'is_active' => ['sometimes', 'boolean'],
         ];
 
@@ -405,7 +439,6 @@ class SiswaController extends Controller
      * Menghapus foto siswa jika ada.
      *
      * @param  string|null  $photoPath  Path foto yang akan dihapus
-     * @return void
      */
     private function deletePhotoIfExists(?string $photoPath): void
     {
@@ -418,7 +451,7 @@ class SiswaController extends Controller
      * Membangun response hasil import.
      *
      * @param  SiswaImport  $import  Instance import dengan hasil
-     * @param  string       $entity  Nama entity untuk pesan (siswa/guru)
+     * @param  string  $entity  Nama entity untuk pesan (siswa/guru)
      * @return RedirectResponse Response dengan pesan hasil import
      */
     private function buildImportResponse(SiswaImport $import, string $entity): RedirectResponse
@@ -437,7 +470,7 @@ class SiswaController extends Controller
         }
 
         $statusParts = [];
-        $statusParts[] = __(':count ' . $entity . ' berhasil diimpor.', ['count' => $import->imported]);
+        $statusParts[] = __(':count '.$entity.' berhasil diimpor.', ['count' => $import->imported]);
 
         if ($skippedCount > 0) {
             $statusParts[] = __(':count baris dilewati (duplikat/invalid).', ['count' => $skippedCount]);

@@ -198,12 +198,22 @@
                         <option value="siswa-smp">Siswa SMP</option>
                     </select>
                 </div>
+                <div class="flex items-start gap-3 rounded-lg border border-gray-200 p-3 dark:border-gray-700">
+                    <input type="hidden" name="assign_kelas" value="0">
+                    <input id="assignKelas" name="assign_kelas" type="checkbox" value="1" checked
+                        class="mt-0.5 h-4 w-4 rounded border-gray-300 text-green-600 focus:ring-green-500 dark:border-gray-600 dark:bg-gray-800">
+                    <label for="assignKelas" class="text-sm text-gray-700 dark:text-gray-300">
+                        <span class="font-medium">{{ __('Tetapkan kelas otomatis') }}</span>
+                        <span class="block text-xs text-gray-500 dark:text-gray-400">{{ __('Siswa langsung dimasukkan ke kelas sesuai rombel pada data API.') }}</span>
+                    </label>
+                </div>
                 <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 text-sm text-blue-800 dark:text-blue-300">
                     <p class="font-medium mb-2">{{ __('Informasi:') }}</p>
                     <ul class="list-disc list-inside space-y-1">
                         <li>Data akan diambil dari: <code class="bg-blue-100 dark:bg-blue-800 px-1 rounded">{{ env('SYNC_API_BASE_URL', 'https://datainduk.ypdhalmadani.sch.id') }}/api/[source]/all</code></li>
                         <li>Siswa yang sudah ada (berdasarkan NISN/NIS) akan diperbarui</li>
                         <li>Siswa baru akan ditambahkan</li>
+                        <li>Rombel dari API (mis. <em>Kelas 1 - KELAS 1A</em>) dipetakan ke kelas; kelas yang belum ada dibuat otomatis</li>
                     </ul>
                 </div>
                 <div class="flex justify-end gap-3">
