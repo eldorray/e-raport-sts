@@ -220,6 +220,9 @@
             </div>
             <form action="{{ route('mengajar.copy') }}" method="POST" class="space-y-4 px-6 py-6">
                 @csrf
+                <p class="rounded-lg bg-gray-50 px-3 py-2 text-xs text-gray-600 dark:bg-gray-800/60 dark:text-gray-300">
+                    {{ __('Jadwal mengajar kelas yang sama pada tahun ajaran sumber akan disalin ke kelas yang dipilih di tahun ajaran aktif, beserta guru dan JTM-nya. Kelas dicocokkan berdasarkan nama (contoh: 1A dengan 1A).') }}
+                </p>
                 <div class="space-y-2">
                     <label
                         class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Sumber Tahun Ajaran') }}</label>

@@ -11,6 +11,7 @@ use App\Services\PenghapusanDataService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
@@ -177,18 +178,42 @@ class MengajarController extends Controller
         $targetYear = session('selected_tahun_ajaran_id');
         $targetSemester = session('selected_semester');
 
+        if (! $targetYear) {
+            return back()->withErrors(['tahun_ajaran' => __('Pilih tahun ajaran terlebih dahulu.')]);
+        }
+
+        if (! $targetSemester) {
+            return back()->withErrors(['semester' => __('Pilih semester terlebih dahulu.')]);
+        }
+
         $data = $request->validate([
             'source_tahun_ajaran_id' => ['required', 'exists:tahun_ajarans,id'],
-            'kelas_id' => ['required', 'exists:kelas,id'],
+            'kelas_id' => ['required', Rule::exists('kelas', 'id')->where('tahun_ajaran_id', $targetYear)],
+        ], [
+            'kelas_id.exists' => __('Kelas tujuan tidak terdaftar pada tahun ajaran yang sedang dipilih.'),
         ]);
 
         /** @var Kelas $kelasTarget */
         $kelasTarget = Kelas::findOrFail($data['kelas_id']);
+        $kelasSumber = $this->kelasSetara($data['source_tahun_ajaran_id'], $kelasTarget);
+
+        if (! $kelasSumber) {
+            return back()->with('error', __('Kelas :kelas tidak ditemukan pada tahun ajaran sumber.', [
+                'kelas' => $kelasTarget->nama,
+            ]));
+        }
 
         $sourceRecords = Mengajar::where('tahun_ajaran_id', $data['source_tahun_ajaran_id'])
-            ->when($targetSemester, fn ($q) => $q->where('semester', $targetSemester))
-            ->where('kelas_id', $kelasTarget->id)
+            ->where('semester', $targetSemester)
+            ->where('kelas_id', $kelasSumber->id)
             ->get();
+
+        if ($sourceRecords->isEmpty()) {
+            return back()->with('error', __('Kelas :kelas belum punya jadwal mengajar pada semester :semester di tahun ajaran sumber.', [
+                'kelas' => $kelasTarget->nama,
+                'semester' => $targetSemester,
+            ]));
+        }
 
         DB::transaction(function () use ($sourceRecords, $targetYear, $targetSemester, $kelasTarget) {
             foreach ($sourceRecords as $record) {
@@ -199,15 +224,16 @@ class MengajarController extends Controller
                         'kelas_id' => $kelasTarget->id,
                         'mata_pelajaran_id' => $record->mata_pelajaran_id,
                     ],
-                    [
-                        'guru_id' => $record->guru_id,
-                        'jtm' => $record->jtm,
-                    ]
+                    $this->atributSalinan($record)
                 );
             }
         });
 
-        return back()->with('status', __('Jadwal mengajar berhasil disalin.'));
+        return back()->with('status', __(':jumlah jadwal mengajar disalin ke kelas :kelas (semester :semester).', [
+            'jumlah' => $sourceRecords->count(),
+            'kelas' => $kelasTarget->nama,
+            'semester' => $targetSemester,
+        ]));
     }
 
     /**
@@ -225,18 +251,38 @@ class MengajarController extends Controller
             return back()->withErrors(['tahun_ajaran' => __('Pilih tahun ajaran terlebih dahulu.')]);
         }
 
+        if (! $targetSemester) {
+            return back()->withErrors(['semester' => __('Pilih semester terlebih dahulu.')]);
+        }
+
         $data = $request->validate([
-            'source_kelas_id' => ['required', 'exists:kelas,id'],
-            'target_kelas_id' => ['required', 'exists:kelas,id', 'different:source_kelas_id'],
+            'source_kelas_id' => ['required', Rule::exists('kelas', 'id')->where('tahun_ajaran_id', $targetYear)],
+            'target_kelas_id' => [
+                'required',
+                Rule::exists('kelas', 'id')->where('tahun_ajaran_id', $targetYear),
+                'different:source_kelas_id',
+            ],
+        ], [
+            'source_kelas_id.exists' => __('Kelas sumber tidak terdaftar pada tahun ajaran yang sedang dipilih.'),
+            'target_kelas_id.exists' => __('Kelas tujuan tidak terdaftar pada tahun ajaran yang sedang dipilih.'),
         ]);
 
+        /** @var Kelas $kelasSumber */
+        $kelasSumber = Kelas::findOrFail($data['source_kelas_id']);
+
+        /** @var Kelas $kelasTarget */
+        $kelasTarget = Kelas::findOrFail($data['target_kelas_id']);
+
         $sourceRecords = Mengajar::where('tahun_ajaran_id', $targetYear)
-            ->when($targetSemester, fn ($q) => $q->where('semester', $targetSemester))
-            ->where('kelas_id', $data['source_kelas_id'])
+            ->where('semester', $targetSemester)
+            ->where('kelas_id', $kelasSumber->id)
             ->get();
 
         if ($sourceRecords->isEmpty()) {
-            return back()->with('status', __('Tidak ada jadwal mengajar di kelas sumber.'));
+            return back()->with('error', __('Tidak ada jadwal mengajar di kelas :kelas pada semester :semester.', [
+                'kelas' => $kelasSumber->nama,
+                'semester' => $targetSemester,
+            ]));
         }
 
         DB::transaction(function () use ($sourceRecords, $targetYear, $targetSemester, $data) {
@@ -248,15 +294,16 @@ class MengajarController extends Controller
                         'kelas_id' => $data['target_kelas_id'],
                         'mata_pelajaran_id' => $record->mata_pelajaran_id,
                     ],
-                    [
-                        'guru_id' => $record->guru_id,
-                        'jtm' => $record->jtm,
-                    ]
+                    $this->atributSalinan($record)
                 );
             }
         });
 
-        return back()->with('status', __('Jadwal mengajar berhasil disalin dari kelas lain.'));
+        return back()->with('status', __(':jumlah jadwal mengajar disalin ke kelas :kelas (semester :semester).', [
+            'jumlah' => $sourceRecords->count(),
+            'kelas' => $kelasTarget->nama,
+            'semester' => $targetSemester,
+        ]));
     }
 
     /**
@@ -306,5 +353,77 @@ class MengajarController extends Controller
             'guru_id' => ['nullable', Rule::exists('gurus', 'id')],
             'jtm' => ['nullable', 'integer', 'min:0'],
         ]);
+    }
+
+    /**
+     * Mencari kelas pada tahun ajaran sumber yang setara dengan kelas tujuan.
+     *
+     * Kelas disimpan per tahun ajaran, sehingga kelas_id tidak bisa dipakai untuk
+     * mencocokkan antar tahun ajaran. Pencocokan dilakukan lewat nama yang
+     * dinormalisasi (huruf kecil, awalan "kelas" dan tanda baca diabaikan),
+     * dengan cadangan tingkat bila pada tahun ajaran sumber hanya ada satu kelas
+     * pada tingkat tersebut.
+     *
+     * @param  int  $tahunAjaranSumber  ID tahun ajaran asal salinan
+     * @param  Kelas  $kelasTarget  Kelas tujuan salinan
+     * @return Kelas|null Kelas sumber, null bila tidak ada padanannya
+     */
+    private function kelasSetara(int $tahunAjaranSumber, Kelas $kelasTarget): ?Kelas
+    {
+        $kelasSumber = Kelas::where('tahun_ajaran_id', $tahunAjaranSumber)->get();
+        $namaTarget = $this->normalisasiNamaKelas($kelasTarget->nama);
+
+        $samaNama = $kelasSumber->first(
+            fn (Kelas $kelas): bool => $this->normalisasiNamaKelas($kelas->nama) === $namaTarget
+        );
+
+        if ($samaNama) {
+            return $samaNama;
+        }
+
+        $samaTingkat = $kelasSumber->filter(
+            fn (Kelas $kelas): bool => $kelas->tingkat === $kelasTarget->tingkat
+        );
+
+        return $samaTingkat->count() === 1 ? $samaTingkat->first() : null;
+    }
+
+    /**
+     * Menormalkan nama kelas agar cocok antar tahun ajaran.
+     */
+    private function normalisasiNamaKelas(?string $nama): string
+    {
+        return Str::of((string) $nama)
+            ->lower()
+            ->replaceMatches('/kelas/', '')
+            ->replaceMatches('/[^a-z0-9]/', '')
+            ->value();
+    }
+
+    /**
+     * Menyusun atribut yang disalin dari jadwal mengajar tahun ajaran sumber.
+     *
+     * Bobot hanya disalin bila tahun ajaran sumber memang menyimpannya, supaya
+     * bobot yang sudah diatur pada tahun ajaran tujuan tidak ikut dikosongkan.
+     *
+     * @param  Mengajar  $record  Jadwal mengajar sumber
+     * @return array<string, mixed> Atribut yang akan di-update atau dibuat
+     */
+    private function atributSalinan(Mengajar $record): array
+    {
+        $atribut = [
+            'guru_id' => $record->guru_id,
+            'jtm' => $record->jtm,
+        ];
+
+        if ($record->bobot_sumatif !== null) {
+            $atribut['bobot_sumatif'] = $record->bobot_sumatif;
+        }
+
+        if ($record->bobot_sts !== null) {
+            $atribut['bobot_sts'] = $record->bobot_sts;
+        }
+
+        return $atribut;
     }
 }
