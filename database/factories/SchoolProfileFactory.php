@@ -15,7 +15,7 @@ class SchoolProfileFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->company . ' School',
+            'name' => $this->faker->company.' School',
             'nsm' => $this->faker->unique()->numerify('###########'),
             'npsn' => $this->faker->unique()->numerify('########'),
             'email' => $this->faker->unique()->safeEmail,

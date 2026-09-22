@@ -20,6 +20,7 @@ class GuruFactory extends Factory
         $name = $this->faker->name();
         $nip = $this->faker->unique()->numerify('###############');
         $defaultPassword = 'password123';
+
         return [
             'user_id' => \App\Models\User::factory()->create([
                 'role' => 'guru',

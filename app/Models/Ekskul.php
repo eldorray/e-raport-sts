@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Ekskul extends Model
 {
+    /** @use HasFactory<\Illuminate\Database\Eloquent\Factories\Factory<static>> */
     use HasFactory;
 
     protected $fillable = [
@@ -16,11 +17,17 @@ class Ekskul extends Model
         'guru_id',
     ];
 
+    /**
+     * @return BelongsTo<Guru, $this>
+     */
     public function guru(): BelongsTo
     {
         return $this->belongsTo(Guru::class);
     }
 
+    /**
+     * @return HasMany<EkskulPenilaian, $this>
+     */
     public function penilaians(): HasMany
     {
         return $this->hasMany(EkskulPenilaian::class);

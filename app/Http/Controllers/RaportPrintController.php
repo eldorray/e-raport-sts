@@ -11,6 +11,7 @@ use App\Models\RaporMetadata;
 use App\Models\SchoolProfile;
 use App\Models\Siswa;
 use App\Models\TahunAjaran;
+use App\Models\User;
 use App\Services\GradeDescriptorService;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -26,7 +27,7 @@ class RaportPrintController extends Controller
      * Menampilkan halaman cetak rapor siswa.
      *
      * @param  Request  $request  HTTP request
-     * @param  Siswa    $siswa    Instance siswa dari route model binding
+     * @param  Siswa  $siswa  Instance siswa dari route model binding
      * @return View Halaman cetak rapor
      */
     public function show(Request $request, Siswa $siswa): View|\Illuminate\Http\RedirectResponse
@@ -38,19 +39,19 @@ class RaportPrintController extends Controller
         $this->authorizeAccess($request->user(), $siswa, $tahunId);
 
         $kelas = $siswa->kelas;
-        
+
         // Validate student has a class assigned
         if (! $kelas) {
             return redirect()->back()->with('error', __('Siswa belum ditempatkan di kelas. Silakan tetapkan kelas terlebih dahulu.'));
         }
-        
+
         $wali = $kelas->guru;
 
         $school = SchoolProfile::first();
         $printSetting = PrintSetting::first();
         $tahun = TahunAjaran::find($tahunId);
 
-        $gradeService = new GradeDescriptorService();
+        $gradeService = new GradeDescriptorService;
         $nilai = $this->buildNilaiCollection($siswa->id, $tahunId, $semester, $gradeService);
 
         $ekskul = EkskulPenilaian::with('ekskul')
@@ -59,7 +60,7 @@ class RaportPrintController extends Controller
             ->where('semester', $semester)
             ->get();
 
-        $meta = $this->getOrCreateMetadata($tahunId, $semester, $siswa->id, $kelas?->id, $wali?->id);
+        $meta = $this->getOrCreateMetadata($tahunId, $semester, $siswa->id, $kelas->id, $wali?->id);
         $prestasi = collect($meta->prestasi ?? [])->values()->take(3);
 
         $printPlace = $this->resolvePrintPlace($printSetting, $school);
@@ -99,17 +100,16 @@ class RaportPrintController extends Controller
     /**
      * Otorisasi akses ke rapor siswa.
      */
-    private function authorizeAccess($user, Siswa $siswa, int $tahunId): void
+    private function authorizeAccess(User $user, Siswa $siswa, int $tahunId): void
     {
-        $roleSlug = strtolower($user->role ?? '');
-        $canCheckRole = method_exists($user, 'hasRole');
-        $isAdmin = ($canCheckRole && $user->hasRole('admin')) || $roleSlug === 'admin';
+        $roleSlug = strtolower((string) ($user->role ?? ''));
+        $isAdmin = $roleSlug === 'admin';
 
         if ($isAdmin) {
             return;
         }
 
-        $isGuru = ($canCheckRole && $user->hasRole('guru')) || $roleSlug === 'guru';
+        $isGuru = $roleSlug === 'guru';
         if (! $isGuru) {
             abort(403, __('Anda tidak memiliki akses ke rapor siswa ini.'));
         }
@@ -135,6 +135,8 @@ class RaportPrintController extends Controller
 
     /**
      * Build koleksi nilai dengan deskriptor menggunakan GradeDescriptorService.
+     *
+     * @return \Illuminate\Support\Collection<int, array{mapel: \App\Models\MataPelajaran|null, sumatif: float|null, sts: float|null, rapor: float|null, deskripsi: string, descriptor: array{predikat: string, keterangan: string, kalimat: string}|null, kelompok: string|null, urutan: string|null}>
      */
     private function buildNilaiCollection(
         int $siswaId,
@@ -165,7 +167,7 @@ class RaportPrintController extends Controller
                     'sumatif' => $n->nilai_sumatif,
                     'sts' => $n->nilai_sts,
                     'rapor' => $result['rapor'],
-                    'deskripsi' => $n->materi_tp,
+                    'deskripsi' => $this->buildFallbackDeskripsi($n->materi_tp),
                     'descriptor' => $result['descriptor'],
                     'kelompok' => $n->mataPelajaran?->kelompok,
                     'urutan' => $n->mataPelajaran?->urutan,
@@ -178,6 +180,21 @@ class RaportPrintController extends Controller
                 $row['mapel']?->nama_mapel
             ))
             ->values();
+    }
+
+    /**
+     * Teks fallback untuk kolom Capaian Kompetensi ketika deskriptor belum bisa
+     * dihitung (nilai sumatif/STS belum lengkap).
+     */
+    private function buildFallbackDeskripsi(?string $materiTp): string
+    {
+        $materi = trim((string) $materiTp);
+
+        if ($materi === '') {
+            return __('Nilai belum lengkap.');
+        }
+
+        return __('Nilai belum lengkap untuk materi: :materi', ['materi' => $materi]);
     }
 
     /**
@@ -243,6 +260,6 @@ class RaportPrintController extends Controller
             $watermarkText,
         );
 
-        return 'data:image/svg+xml,' . rawurlencode($svg);
+        return 'data:image/svg+xml,'.rawurlencode($svg);
     }
 }

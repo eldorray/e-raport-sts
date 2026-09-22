@@ -60,6 +60,7 @@ class EkskulPenilaianController extends Controller
             ->get();
 
         // Check if tahun ajaran is active (guru can only edit on active tahun ajaran)
+        /** @var TahunAjaran|null $tahunAjaran */
         $tahunAjaran = TahunAjaran::find($tahunId);
         $canEdit = $tahunAjaran && $tahunAjaran->is_active;
 
@@ -89,6 +90,7 @@ class EkskulPenilaianController extends Controller
         }
 
         // Block guru from editing inactive tahun ajaran
+        /** @var TahunAjaran|null $tahunAjaran */
         $tahunAjaran = TahunAjaran::find($tahunId);
         if (! $tahunAjaran || ! $tahunAjaran->is_active) {
             return back()->withErrors(['tahun_ajaran' => __('Tidak dapat menyimpan data pada tahun ajaran yang tidak aktif.')]);

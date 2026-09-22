@@ -25,22 +25,22 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property float|null $nilai_sts
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
- *
  * @property-read TahunAjaran $tahunAjaran
  * @property-read Kelas $kelas
  * @property-read Siswa $siswa
- * @property-read MataPelajaran $mataPelajaran
- * @property-read Guru $guru
- * @property-read Mengajar $mengajar
+ * @property-read MataPelajaran|null $mataPelajaran
+ * @property-read Guru|null $guru
+ * @property-read Mengajar|null $mengajar
  */
 class Penilaian extends Model
 {
+    /** @use HasFactory<\Illuminate\Database\Eloquent\Factories\Factory<static>> */
     use HasFactory;
 
     /**
      * The attributes that are mass assignable.
      *
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $fillable = [
         'tahun_ajaran_id',
@@ -68,7 +68,7 @@ class Penilaian extends Model
     /**
      * Mendapatkan tahun ajaran penilaian.
      *
-     * @return BelongsTo<TahunAjaran, Penilaian>
+     * @return BelongsTo<TahunAjaran, $this>
      */
     public function tahunAjaran(): BelongsTo
     {
@@ -78,7 +78,7 @@ class Penilaian extends Model
     /**
      * Mendapatkan kelas tempat penilaian.
      *
-     * @return BelongsTo<Kelas, Penilaian>
+     * @return BelongsTo<Kelas, $this>
      */
     public function kelas(): BelongsTo
     {
@@ -88,7 +88,7 @@ class Penilaian extends Model
     /**
      * Mendapatkan siswa yang dinilai.
      *
-     * @return BelongsTo<Siswa, Penilaian>
+     * @return BelongsTo<Siswa, $this>
      */
     public function siswa(): BelongsTo
     {
@@ -98,7 +98,7 @@ class Penilaian extends Model
     /**
      * Mendapatkan mata pelajaran penilaian.
      *
-     * @return BelongsTo<MataPelajaran, Penilaian>
+     * @return BelongsTo<MataPelajaran, $this>
      */
     public function mataPelajaran(): BelongsTo
     {
@@ -108,7 +108,7 @@ class Penilaian extends Model
     /**
      * Mendapatkan guru penilai.
      *
-     * @return BelongsTo<Guru, Penilaian>
+     * @return BelongsTo<Guru, $this>
      */
     public function guru(): BelongsTo
     {
@@ -118,7 +118,7 @@ class Penilaian extends Model
     /**
      * Mendapatkan mengajar terkait penilaian.
      *
-     * @return BelongsTo<Mengajar, Penilaian>
+     * @return BelongsTo<Mengajar, $this>
      */
     public function mengajar(): BelongsTo
     {

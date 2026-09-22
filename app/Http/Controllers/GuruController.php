@@ -8,6 +8,7 @@ use App\Models\Guru;
 use App\Models\Mengajar;
 use App\Models\TahunAjaran;
 use App\Models\User;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -15,7 +16,6 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
-use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\View\View;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -31,9 +31,6 @@ class GuruController extends Controller
 
     /** @var int Jumlah guru per chunk untuk bulk delete */
     private const BULK_DELETE_CHUNK_SIZE = 100;
-
-    /** @var int Jumlah item per halaman untuk pagination */
-    private const PAGINATION_PER_PAGE = 15;
 
     /** @var string Domain email default untuk guru */
     private const EMAIL_DOMAIN = '@guru.local';
@@ -105,7 +102,7 @@ class GuruController extends Controller
      * Memperbarui data guru yang sudah ada.
      *
      * @param  Request  $request  HTTP request dengan data yang diperbarui
-     * @param  Guru     $guru     Instance guru dari route model binding
+     * @param  Guru  $guru  Instance guru dari route model binding
      * @return RedirectResponse Redirect ke halaman sebelumnya dengan pesan status
      */
     public function update(Request $request, Guru $guru): RedirectResponse
@@ -152,7 +149,7 @@ class GuruController extends Controller
      */
     public function destroy(Guru $guru): RedirectResponse
     {
-        $guru->user?->delete();
+        $guru->user->delete();
         $guru->delete();
 
         return back()->with('status', __('Guru dihapus.'));
@@ -173,7 +170,7 @@ class GuruController extends Controller
             Mengajar::whereIn('guru_id', $guruIds)->delete();
 
             foreach ($gurus as $guru) {
-                $guru->user?->delete();
+                $guru->user->delete();
                 $guru->delete();
             }
         });
@@ -191,7 +188,7 @@ class GuruController extends Controller
     {
         $newStatus = ! $guru->is_active;
         $guru->update(['is_active' => $newStatus]);
-        $guru->user?->update(['is_active' => $newStatus]);
+        $guru->user->update(['is_active' => $newStatus]);
 
         $message = $newStatus ? __('Guru diaktifkan.') : __('Guru dinonaktifkan.');
 
@@ -210,7 +207,7 @@ class GuruController extends Controller
             'file' => ['required', 'file', 'mimes:xlsx,xls,csv'],
         ]);
 
-        $import = new GuruImport();
+        $import = new GuruImport;
 
         try {
             Excel::import($import, $request->file('file'));
@@ -230,7 +227,7 @@ class GuruController extends Controller
      */
     public function template()
     {
-        return Excel::download(new GuruTemplateExport(), 'template-guru.xlsx');
+        return Excel::download(new GuruTemplateExport, 'template-guru.xlsx');
     }
 
     /**
@@ -267,20 +264,21 @@ class GuruController extends Controller
         try {
             $page = 1;
             $hasMorePages = true;
-            $apiBaseUrl = env('SYNC_API_BASE_URL', 'https://datainduk.ypdhalmadani.sch.id');
+            $apiBaseUrl = config('services.data_induk.base_url');
             $baseUrl = "{$apiBaseUrl}/api/{$source}/all";
 
             while ($hasMorePages) {
+                /** @var \Illuminate\Http\Client\Response $response */
                 $response = Http::timeout(60)->get($baseUrl, ['page' => $page]);
 
-                if (!$response->successful()) {
-                    return back()->with('error', 'Gagal mengambil data dari API. Status: ' . $response->status());
+                if (! $response->successful()) {
+                    return back()->with('error', 'Gagal mengambil data dari API. Status: '.$response->status());
                 }
 
                 $data = $response->json();
                 $gurus = $data['data'] ?? $data;
 
-                if (!is_array($gurus)) {
+                if (! is_array($gurus)) {
                     return back()->with('error', 'Format response API tidak valid.');
                 }
 
@@ -299,9 +297,10 @@ class GuruController extends Controller
                             $gender = 'P';
                         }
 
-                        if (!$nip || !$nama) {
+                        if (! $nip || ! $nama) {
                             $failed++;
                             $errors[] = "Data tidak lengkap: NIP={$nip}, Nama={$nama}";
+
                             continue;
                         }
 
@@ -321,7 +320,7 @@ class GuruController extends Controller
 
                         if ($existingGuru) {
                             $existingGuru->update($syncData);
-                            $existingGuru->user?->update([
+                            $existingGuru->user->update([
                                 'name' => $nama,
                                 'nip' => $nip,
                                 'nik' => $nik,
@@ -332,7 +331,7 @@ class GuruController extends Controller
                             // Create user first
                             $user = User::create([
                                 'name' => $nama,
-                                'email' => Str::slug($nip, '.') . self::EMAIL_DOMAIN,
+                                'email' => Str::slug($nip, '.').self::EMAIL_DOMAIN,
                                 'password' => Hash::make($nip), // Default password is NIP
                                 'role' => self::USER_ROLE_GURU,
                                 'nip' => $nip,
@@ -347,7 +346,7 @@ class GuruController extends Controller
                         }
                     } catch (\Exception $e) {
                         $failed++;
-                        $errors[] = "Error: " . $e->getMessage();
+                        $errors[] = 'Error: '.$e->getMessage();
                     }
                 }
 
@@ -375,20 +374,22 @@ class GuruController extends Controller
             return back()->with('status', $message);
 
         } catch (\Illuminate\Http\Client\ConnectionException $e) {
-            Log::error('Sync API Error: ' . $e->getMessage());
+            Log::error('Sync API Error: '.$e->getMessage());
+
             return back()->with('error', 'Tidak dapat terhubung ke API. Pastikan server API berjalan.');
         } catch (\Exception $e) {
-            Log::error('Sync API Error: ' . $e->getMessage());
-            return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+            Log::error('Sync API Error: '.$e->getMessage());
+
+            return back()->with('error', 'Terjadi kesalahan: '.$e->getMessage());
         }
     }
 
     /**
      * Validasi data request untuk create/update guru.
      *
-     * @param  Request   $request       HTTP request dengan data guru
+     * @param  Request  $request  HTTP request dengan data guru
      * @param  int|null  $ignoreGuruId  ID guru yang diabaikan untuk validasi unique
-     * @return array Data yang sudah divalidasi
+     * @return array<string, mixed> Data yang sudah divalidasi
      */
     private function validatedData(Request $request, ?int $ignoreGuruId = null): array
     {
@@ -402,7 +403,7 @@ class GuruController extends Controller
             'pendidikan' => ['nullable', 'string', 'max:100'],
             'wali_kelas' => ['nullable', 'string', 'max:50'],
             'jtm' => ['nullable', 'integer', 'min:0'],
-            'password' => [$ignoreGuruId ? 'nullable' : 'required', 'string', 'min:' . self::MIN_PASSWORD_LENGTH],
+            'password' => [$ignoreGuruId ? 'nullable' : 'required', 'string', 'min:'.self::MIN_PASSWORD_LENGTH],
             'is_active' => ['required', 'boolean'],
         ];
 
@@ -420,18 +421,19 @@ class GuruController extends Controller
      */
     private function buildEmail(string $nip): string
     {
-        return Str::slug($nip, '.') . self::EMAIL_DOMAIN;
+        return Str::slug($nip, '.').self::EMAIL_DOMAIN;
     }
 
     /**
      * Menghitung total JTM mengajar per guru.
      *
-     * @param  \Illuminate\Support\Collection  $guruIds  Koleksi ID guru
-     * @param  int|null                        $tahunId  ID tahun ajaran
+     * @param  \Illuminate\Support\Collection<int, int>  $guruIds  Koleksi ID guru
+     * @param  int|null  $tahunId  ID tahun ajaran
      * @return array<int, int> Array dengan key guru_id dan value total JTM
      */
     private function calculateJtmMengajar($guruIds, ?int $tahunId): array
     {
+        /** @var array<int, int> $jtmMengajar */
         $jtmMengajar = [];
 
         if ($guruIds->isEmpty()) {
@@ -444,8 +446,11 @@ class GuruController extends Controller
             ->get();
 
         foreach ($mengajar as $m) {
+            /** @var int $guruId */
+            $guruId = $m->guru_id;
+            /** @phpstan-ignore nullsafe.neverNull (relasi mataPelajaran nullable di runtime) */
             $jam = $m->jtm ?? $m->mataPelajaran?->jumlah_jam ?? 0;
-            $jtmMengajar[$m->guru_id] = ($jtmMengajar[$m->guru_id] ?? 0) + (int) $jam;
+            $jtmMengajar[$guruId] = ($jtmMengajar[$guruId] ?? 0) + (int) $jam;
         }
 
         return $jtmMengajar;

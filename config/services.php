@@ -35,4 +35,16 @@ return [
         ],
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Data Induk Sync API
+    |--------------------------------------------------------------------------
+    |
+    | Base URL API data induk untuk sinkronisasi guru/siswa/mata pelajaran.
+    |
+    */
+    'data_induk' => [
+        'base_url' => env('SYNC_API_BASE_URL', 'https://datainduk.ypdhalmadani.sch.id'),
+    ],
+
 ];

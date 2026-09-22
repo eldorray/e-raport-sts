@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class EkskulPenilaian extends Model
 {
+    /** @use HasFactory<\Illuminate\Database\Eloquent\Factories\Factory<static>> */
     use HasFactory;
 
     protected $fillable = [
@@ -20,21 +21,33 @@ class EkskulPenilaian extends Model
         'catatan',
     ];
 
+    /**
+     * @return BelongsTo<Ekskul, $this>
+     */
     public function ekskul(): BelongsTo
     {
         return $this->belongsTo(Ekskul::class);
     }
 
+    /**
+     * @return BelongsTo<Guru, $this>
+     */
     public function guru(): BelongsTo
     {
         return $this->belongsTo(Guru::class);
     }
 
+    /**
+     * @return BelongsTo<Siswa, $this>
+     */
     public function siswa(): BelongsTo
     {
         return $this->belongsTo(Siswa::class);
     }
 
+    /**
+     * @return BelongsTo<TahunAjaran, $this>
+     */
     public function tahunAjaran(): BelongsTo
     {
         return $this->belongsTo(TahunAjaran::class);
@@ -42,7 +55,7 @@ class EkskulPenilaian extends Model
 
     /**
      * Mendapatkan predikat berdasarkan nilai.
-     * 
+     *
      * A (Sangat Baik): >= 85
      * B (Baik): 70 - 84
      * C (Cukup): 50 - 69
@@ -65,6 +78,7 @@ class EkskulPenilaian extends Model
         if ($nilai >= 50) {
             return 'C';
         }
+
         return 'D';
     }
 

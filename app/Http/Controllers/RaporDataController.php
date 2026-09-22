@@ -12,6 +12,11 @@ use Illuminate\View\View;
 
 class RaporDataController extends Controller
 {
+    /**
+     * Pastikan konteks tahun ajaran & semester tersedia di session.
+     *
+     * @return array{0: int, 1: string, 2: TahunAjaran|null}
+     */
     private function ensureContext(): array
     {
         $tahunId = session('selected_tahun_ajaran_id');
@@ -21,12 +26,18 @@ class RaporDataController extends Controller
             abort(422, __('Pilih tahun ajaran & semester terlebih dahulu di dashboard.'));
         }
 
+        /** @var TahunAjaran|null $tahun */
         $tahun = TahunAjaran::find($tahunId);
 
         return [$tahunId, $semester, $tahun];
     }
 
-    private function kelasListForUser(Request $request, int $tahunId)
+    /**
+     * Daftar kelas yang boleh diakses user pada tahun ajaran tertentu.
+     *
+     * @return array{0: \Illuminate\Database\Eloquent\Collection<int, Kelas>, 1: Guru|null}
+     */
+    private function kelasListForUser(Request $request, int $tahunId): array
     {
         $role = $request->user()->role ?? null;
         $guru = null;
@@ -48,13 +59,35 @@ class RaporDataController extends Controller
         return [$kelasQuery->get(), $guru];
     }
 
-    private function findKelasOrAbort(?int $kelasId, $kelasList): ?Kelas
+    /**
+     * Temukan kelas dari daftar berdasarkan ID, atau ambil yang pertama.
+     *
+     * @param  \Illuminate\Database\Eloquent\Collection<int, Kelas>  $kelasList
+     */
+    private function findKelasOrAbort(?int $kelasId, \Illuminate\Database\Eloquent\Collection $kelasList): ?Kelas
     {
         if (! $kelasId) {
             return $kelasList->first();
         }
 
         return $kelasList->firstWhere('id', $kelasId);
+    }
+
+    /**
+     * Pastikan user boleh menyimpan data untuk kelas ini.
+     * Admin selalu boleh; guru harus menjadi wali kelas dari kelas tersebut.
+     */
+    private function authorizeKelasStore(Request $request, Kelas $kelas): void
+    {
+        if ($request->user()->role === 'admin') {
+            return;
+        }
+
+        $guru = Guru::where('user_id', $request->user()->id)->first();
+
+        if (! $guru || $kelas->guru_id !== $guru->id) {
+            abort(403, __('Anda bukan wali kelas untuk kelas ini.'));
+        }
     }
 
     public function absen(Request $request): View
@@ -73,6 +106,7 @@ class RaporDataController extends Controller
         if ($kelas) {
             $siswas = $kelas->siswas()->orderBy('nama')->get();
             foreach ($siswas as $siswa) {
+                /** @var \App\Models\RaporMetadata|null $meta */
                 $meta = RaporMetadata::where('tahun_ajaran_id', $tahunId)
                     ->where('semester', $semester)
                     ->where('siswa_id', $siswa->id)
@@ -113,9 +147,17 @@ class RaporDataController extends Controller
         ]);
 
         $kelas = Kelas::findOrFail($kelasId);
+        $this->authorizeKelasStore($request, $kelas);
         $waliId = $kelas->guru_id;
 
+        // Hanya izinkan siswa yang memang anggota kelas ini
+        $validSiswaIds = $kelas->siswas()->pluck('id');
+
         foreach ($request->input('absen') as $siswaId => $row) {
+            if (! $validSiswaIds->contains((int) $siswaId)) {
+                continue;
+            }
+
             $meta = RaporMetadata::firstOrCreate(
                 [
                     'tahun_ajaran_id' => $tahunId,
@@ -156,6 +198,7 @@ class RaporDataController extends Controller
         if ($kelas) {
             $siswas = $kelas->siswas()->orderBy('nama')->get();
             foreach ($siswas as $siswa) {
+                /** @var \App\Models\RaporMetadata|null $meta */
                 $meta = RaporMetadata::where('tahun_ajaran_id', $tahunId)
                     ->where('semester', $semester)
                     ->where('siswa_id', $siswa->id)
@@ -190,9 +233,17 @@ class RaporDataController extends Controller
         ]);
 
         $kelas = Kelas::findOrFail($kelasId);
+        $this->authorizeKelasStore($request, $kelas);
         $waliId = $kelas->guru_id;
 
+        // Hanya izinkan siswa yang memang anggota kelas ini
+        $validSiswaIds = $kelas->siswas()->pluck('id');
+
         foreach ($request->input('prestasi') as $siswaId => $val) {
+            if (! $validSiswaIds->contains((int) $siswaId)) {
+                continue;
+            }
+
             $meta = RaporMetadata::firstOrCreate(
                 [
                     'tahun_ajaran_id' => $tahunId,
@@ -233,6 +284,7 @@ class RaporDataController extends Controller
         if ($kelas) {
             $siswas = $kelas->siswas()->orderBy('nama')->get();
             foreach ($siswas as $siswa) {
+                /** @var \App\Models\RaporMetadata|null $meta */
                 $meta = RaporMetadata::where('tahun_ajaran_id', $tahunId)
                     ->where('semester', $semester)
                     ->where('siswa_id', $siswa->id)
@@ -267,9 +319,17 @@ class RaporDataController extends Controller
         ]);
 
         $kelas = Kelas::findOrFail($kelasId);
+        $this->authorizeKelasStore($request, $kelas);
         $waliId = $kelas->guru_id;
 
+        // Hanya izinkan siswa yang memang anggota kelas ini
+        $validSiswaIds = $kelas->siswas()->pluck('id');
+
         foreach ($request->input('catatan') as $siswaId => $val) {
+            if (! $validSiswaIds->contains((int) $siswaId)) {
+                continue;
+            }
+
             $meta = RaporMetadata::firstOrCreate(
                 [
                     'tahun_ajaran_id' => $tahunId,

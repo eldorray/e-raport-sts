@@ -82,15 +82,16 @@ class LoginController extends Controller
         }
 
         $selectedYearId = $request->integer('tahun_ajaran_id');
-        $yearModel = TahunAjaran::find($selectedYearId);
+        // tahun_ajaran_id sudah divalidasi exists, jadi record pasti ada
+        $yearModel = TahunAjaran::findOrFail($selectedYearId);
 
         // Semester is now taken from the selected TahunAjaran record
-        $selectedSemester = $yearModel?->semester ?? 'Ganjil';
+        $selectedSemester = $yearModel->semester ?? 'Ganjil';
 
         $request->session()->put([
             'selected_tahun_ajaran_id' => $selectedYearId,
             'selected_semester' => $selectedSemester,
-            'selected_tahun_ajaran_is_active' => $yearModel?->is_active ?? false,
+            'selected_tahun_ajaran_is_active' => $yearModel->is_active ?? false,
         ]);
 
         $redirect = match (auth()->user()->role) {

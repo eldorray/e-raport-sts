@@ -7,8 +7,20 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * Model untuk entitas Kelas (rombongan belajar).
+ *
+ * @property int $id
+ * @property string $nama
+ * @property string|null $tingkat
+ * @property int|null $guru_id
+ * @property int|null $tahun_ajaran_id
+ * @property-read \App\Models\Guru|null $guru
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Siswa> $siswas
+ */
 class Kelas extends Model
 {
+    /** @use HasFactory<\Illuminate\Database\Eloquent\Factories\Factory<static>> */
     use HasFactory;
 
     protected $table = 'kelas';
@@ -22,16 +34,25 @@ class Kelas extends Model
         'tahun_ajaran_id',
     ];
 
+    /**
+     * @return BelongsTo<Guru, $this>
+     */
     public function guru(): BelongsTo
     {
         return $this->belongsTo(Guru::class);
     }
 
+    /**
+     * @return HasMany<Siswa, $this>
+     */
     public function siswas(): HasMany
     {
         return $this->hasMany(Siswa::class);
     }
 
+    /**
+     * @return BelongsTo<TahunAjaran, $this>
+     */
     public function tahunAjaran(): BelongsTo
     {
         return $this->belongsTo(TahunAjaran::class);

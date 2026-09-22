@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Guru;
+use App\Models\Kelas;
+use App\Models\MengajarTahfidz;
 use App\Models\PrintSetting;
 use App\Models\SchoolProfile;
 use App\Models\Siswa;
@@ -34,6 +36,8 @@ class TahfidzPrintController extends Controller
             return redirect()->back()->with('error', __('Siswa belum ditempatkan di kelas.'));
         }
 
+        $this->authorizeAccess($request->user(), $kelas, $tahunId, $semester);
+
         $school = SchoolProfile::first();
         $printSetting = PrintSetting::first();
         $tahun = TahunAjaran::find($tahunId);
@@ -58,7 +62,10 @@ class TahfidzPrintController extends Controller
             $juz = 30;
         }
 
-        $printPlace = $printSetting?->tempat_cetak ?? $school?->city ?? 'Tangerang';
+        $tempatCetak = $printSetting?->tempat_cetak;
+        $schoolCity = $school?->city;
+        $printPlace = $tempatCetak ?? $schoolCity ?? 'Tangerang';
+        /** @phpstan-ignore nullsafe.neverNull (PrintSetting::first() bisa null di runtime) */
         $raporDate = $printSetting?->tanggal_cetak_rapor ?? now();
         $namaYayasan = $printSetting?->nama_yayasan;
 
@@ -77,5 +84,35 @@ class TahfidzPrintController extends Controller
             'juz',
             'namaYayasan'
         ));
+    }
+
+    /**
+     * Pastikan user boleh mencetak rapor tahfidz untuk siswa di kelas ini.
+     * Admin selalu boleh; guru harus pembimbing tahfidz kelas tsb ATAU wali kelasnya.
+     */
+    private function authorizeAccess(\App\Models\User $user, Kelas $kelas, int $tahunId, string $semester): void
+    {
+        if ($user->role === 'admin') {
+            return;
+        }
+
+        $guru = Guru::where('user_id', $user->id)->first();
+
+        if (! $guru) {
+            abort(403, __('Akun Anda belum terhubung dengan data guru.'));
+        }
+
+        // Wali kelas boleh mencetak rapor tahfidz siswa di kelasnya
+        $isWaliKelas = $kelas->guru_id === $guru->id;
+
+        $isPembimbingTahfidz = MengajarTahfidz::where('guru_id', $guru->id)
+            ->where('tahun_ajaran_id', $tahunId)
+            ->where('semester', $semester)
+            ->where('kelas_id', $kelas->id)
+            ->exists();
+
+        if (! $isWaliKelas && ! $isPembimbingTahfidz) {
+            abort(403, __('Anda tidak memiliki akses ke rapor tahfidz siswa ini.'));
+        }
     }
 }

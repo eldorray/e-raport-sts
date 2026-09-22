@@ -84,8 +84,11 @@ class TahfidzController extends Controller
                         ->where('semester', $semester)
                         ->first();
                     $siswa->tahfidz = $penilaian;
+                    /** @phpstan-ignore nullsafe.neverNull (relasi nullable di runtime) */
                     $siswa->jumlah_surah_30 = $penilaian?->jumlah_surah_juz30 ?? 0;
+                    /** @phpstan-ignore nullsafe.neverNull (relasi nullable di runtime) */
                     $siswa->jumlah_surah_29 = $penilaian?->jumlah_surah_juz29 ?? 0;
+
                     return $siswa;
                 });
         }
@@ -93,6 +96,7 @@ class TahfidzController extends Controller
         $pembimbingList = Guru::where('is_active', true)->orderBy('nama')->get();
 
         // Check if tahun ajaran is active (guru can only edit on active tahun ajaran)
+        /** @var \App\Models\TahunAjaran|null $tahunAjaran */
         $tahunAjaran = TahunAjaran::find($tahunId);
         $canEdit = $isAdmin || ($tahunAjaran && $tahunAjaran->is_active);
 
@@ -154,6 +158,7 @@ class TahfidzController extends Controller
 
         // Check if tahun ajaran is active (guru can only edit on active tahun ajaran)
         $isAdmin = $user->role === 'admin';
+        /** @var \App\Models\TahunAjaran|null $tahunAjaran */
         $tahunAjaran = TahunAjaran::find($tahunId);
         $canEdit = $isAdmin || ($tahunAjaran && $tahunAjaran->is_active);
 
@@ -174,7 +179,7 @@ class TahfidzController extends Controller
     /**
      * Menyimpan penilaian tahfidz.
      */
-    public function store(Request $request, Siswa $siswa)
+    public function store(Request $request, Siswa $siswa): \Illuminate\Http\RedirectResponse
     {
         $tahunId = session('selected_tahun_ajaran_id');
         $semester = session('selected_semester');
@@ -189,6 +194,7 @@ class TahfidzController extends Controller
         // Block guru from editing inactive tahun ajaran
         $user = $request->user();
         if ($user->role !== 'admin') {
+            /** @var \App\Models\TahunAjaran|null $tahunAjaran */
             $tahunAjaran = TahunAjaran::find($tahunId);
             if (! $tahunAjaran || ! $tahunAjaran->is_active) {
                 return back()->withErrors(['tahun_ajaran' => __('Tidak dapat menyimpan data pada tahun ajaran yang tidak aktif.')]);
@@ -214,10 +220,10 @@ class TahfidzController extends Controller
         // Add juz-specific validation
         if ($juz === 30) {
             $rules['surah_hafalan'] = 'nullable|array';
-            $rules['surah_hafalan.*'] = 'string|in:' . implode(',', array_keys(TahfidzPenilaian::SURAH_LIST));
+            $rules['surah_hafalan.*'] = 'string|in:'.implode(',', array_keys(TahfidzPenilaian::SURAH_LIST));
         } else {
             $rules['surah_hafalan_29'] = 'nullable|array';
-            $rules['surah_hafalan_29.*'] = 'string|in:' . implode(',', array_keys(TahfidzPenilaian::SURAH_LIST_JUZ29));
+            $rules['surah_hafalan_29.*'] = 'string|in:'.implode(',', array_keys(TahfidzPenilaian::SURAH_LIST_JUZ29));
         }
 
         $validated = $request->validate($rules);
@@ -246,7 +252,7 @@ class TahfidzController extends Controller
     /**
      * Reset penilaian tahfidz siswa.
      */
-    public function reset(Request $request, Siswa $siswa)
+    public function reset(Request $request, Siswa $siswa): \Illuminate\Http\RedirectResponse
     {
         $tahunId = session('selected_tahun_ajaran_id');
         $semester = session('selected_semester');
@@ -261,6 +267,7 @@ class TahfidzController extends Controller
         // Block guru from resetting inactive tahun ajaran
         $user = $request->user();
         if ($user->role !== 'admin') {
+            /** @var \App\Models\TahunAjaran|null $tahunAjaran */
             $tahunAjaran = TahunAjaran::find($tahunId);
             if (! $tahunAjaran || ! $tahunAjaran->is_active) {
                 return back()->withErrors(['tahun_ajaran' => __('Tidak dapat mereset data pada tahun ajaran yang tidak aktif.')]);

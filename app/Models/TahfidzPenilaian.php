@@ -20,10 +20,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string|null $deskripsi_tajwid
  * @property string|null $predikat_makhorijul
  * @property string|null $deskripsi_makhorijul
- * @property array|null $surah_hafalan
+ * @property array<array-key, mixed>|null $surah_hafalan
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
- *
  * @property-read Siswa $siswa
  * @property-read TahunAjaran $tahunAjaran
  * @property-read Guru|null $pembimbing
@@ -31,6 +30,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class TahfidzPenilaian extends Model
 {
+    /** @use HasFactory<\Illuminate\Database\Eloquent\Factories\Factory<static>> */
     use HasFactory;
 
     /**
@@ -106,7 +106,7 @@ class TahfidzPenilaian extends Model
     /**
      * The attributes that are mass assignable.
      *
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $fillable = [
         'siswa_id',
@@ -136,7 +136,7 @@ class TahfidzPenilaian extends Model
     /**
      * Mendapatkan siswa yang dinilai.
      *
-     * @return BelongsTo<Siswa, TahfidzPenilaian>
+     * @return BelongsTo<Siswa, $this>
      */
     public function siswa(): BelongsTo
     {
@@ -146,7 +146,7 @@ class TahfidzPenilaian extends Model
     /**
      * Mendapatkan tahun ajaran.
      *
-     * @return BelongsTo<TahunAjaran, TahfidzPenilaian>
+     * @return BelongsTo<TahunAjaran, $this>
      */
     public function tahunAjaran(): BelongsTo
     {
@@ -156,7 +156,7 @@ class TahfidzPenilaian extends Model
     /**
      * Mendapatkan guru pembimbing tahfidz.
      *
-     * @return BelongsTo<Guru, TahfidzPenilaian>
+     * @return BelongsTo<Guru, $this>
      */
     public function pembimbing(): BelongsTo
     {
@@ -165,8 +165,6 @@ class TahfidzPenilaian extends Model
 
     /**
      * Mendapatkan deskripsi dinamis berdasarkan jumlah surah yang dihafal.
-     *
-     * @return string
      */
     public function getDeskripsiAttribute(): string
     {
@@ -182,7 +180,7 @@ class TahfidzPenilaian extends Model
         }
 
         if (empty($parts)) {
-            return "Ananda belum memiliki hafalan surah yang tercatat. Tingkatkan terus semangat menghafalnya. Semoga Allah mudahkan. Aamiin.";
+            return 'Ananda belum memiliki hafalan surah yang tercatat. Tingkatkan terus semangat menghafalnya. Semoga Allah mudahkan. Aamiin.';
         }
 
         $surahInfo = implode(' dan ', $parts);
@@ -208,8 +206,6 @@ class TahfidzPenilaian extends Model
 
     /**
      * Mendapatkan jumlah surah yang dihafal.
-     *
-     * @return int
      */
     public function getJumlahSurahAttribute(): int
     {
@@ -234,9 +230,6 @@ class TahfidzPenilaian extends Model
 
     /**
      * Mengecek apakah surah tertentu sudah dihafal.
-     *
-     * @param string $surahKey
-     * @return bool
      */
     public function hasSurah(string $surahKey): bool
     {

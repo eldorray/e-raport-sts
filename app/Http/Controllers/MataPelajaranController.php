@@ -8,10 +8,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
+use Illuminate\View\View;
 
 class MataPelajaranController extends Controller
 {
-    public function index()
+    public function index(): View
     {
         $mataPelajaran = MataPelajaran::orderByRaw('COALESCE(NULLIF(urutan, ""), "9999")')
             ->orderBy('urutan')
@@ -20,7 +21,7 @@ class MataPelajaranController extends Controller
         return view('lembaga.matapelajaran', compact('mataPelajaran'));
     }
 
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
         $data = $request->validate([
             'kode' => ['required', 'string', 'max:20', 'unique:mata_pelajarans,kode'],
@@ -36,7 +37,7 @@ class MataPelajaranController extends Controller
         return back()->with('status', __('Mata pelajaran berhasil ditambahkan.'));
     }
 
-    public function update(Request $request, MataPelajaran $mataPelajaran)
+    public function update(Request $request, MataPelajaran $mataPelajaran): RedirectResponse
     {
         $data = $request->validate([
             'kode' => [
@@ -63,7 +64,7 @@ class MataPelajaranController extends Controller
         return back()->with('status', __('Mata pelajaran berhasil diperbarui.'));
     }
 
-    public function destroy(MataPelajaran $mataPelajaran)
+    public function destroy(MataPelajaran $mataPelajaran): RedirectResponse
     {
         $mataPelajaran->delete();
 
@@ -89,17 +90,18 @@ class MataPelajaranController extends Controller
         $errors = [];
 
         try {
-            $apiBaseUrl = env('SYNC_API_BASE_URL', 'https://datainduk.ypdhalmadani.sch.id');
+            $apiBaseUrl = config('services.data_induk.base_url');
+            /** @var \Illuminate\Http\Client\Response $response */
             $response = Http::timeout(60)->get("{$apiBaseUrl}/api/{$source}/all");
 
-            if (!$response->successful()) {
-                return back()->with('error', 'Gagal mengambil data dari API. Status: ' . $response->status());
+            if (! $response->successful()) {
+                return back()->with('error', 'Gagal mengambil data dari API. Status: '.$response->status());
             }
 
             $data = $response->json();
             $mapels = $data['data'] ?? $data;
 
-            if (!is_array($mapels)) {
+            if (! is_array($mapels)) {
                 return back()->with('error', 'Format response API tidak valid.');
             }
 
@@ -114,9 +116,10 @@ class MataPelajaranController extends Controller
                         $nama = trim($nama);
                     }
 
-                    if (!$kode || !$nama) {
+                    if (! $kode || ! $nama) {
                         $failed++;
-                        $errors[] = "Data tidak lengkap: kode atau nama kosong";
+                        $errors[] = 'Data tidak lengkap: kode atau nama kosong';
+
                         continue;
                     }
 
@@ -142,7 +145,7 @@ class MataPelajaranController extends Controller
                     }
                 } catch (\Exception $e) {
                     $failed++;
-                    $errors[] = "Error: " . $e->getMessage();
+                    $errors[] = 'Error: '.$e->getMessage();
                 }
             }
 
@@ -154,11 +157,13 @@ class MataPelajaranController extends Controller
             return back()->with('status', $message);
 
         } catch (\Illuminate\Http\Client\ConnectionException $e) {
-            Log::error('Sync API Error: ' . $e->getMessage());
+            Log::error('Sync API Error: '.$e->getMessage());
+
             return back()->with('error', 'Tidak dapat terhubung ke API. Pastikan server API berjalan.');
         } catch (\Exception $e) {
-            Log::error('Sync API Error: ' . $e->getMessage());
-            return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+            Log::error('Sync API Error: '.$e->getMessage());
+
+            return back()->with('error', 'Terjadi kesalahan: '.$e->getMessage());
         }
     }
 }

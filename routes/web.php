@@ -1,29 +1,29 @@
 <?php
 
-use App\Http\Controllers\Settings;
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\SchoolProfileController;
-use App\Http\Controllers\MataPelajaranController;
-use App\Http\Controllers\TahunAjaranController;
-use App\Http\Controllers\GuruController;
-use App\Http\Controllers\SiswaController;
-use App\Http\Controllers\KelasController;
-use App\Http\Controllers\RombelKelasController;
-use App\Http\Controllers\MengajarController;
-use App\Http\Controllers\PenilaianController;
-use App\Http\Controllers\EkskulController;
-use App\Http\Controllers\EkskulPenilaianController;
-use App\Http\Controllers\RaporAdminController;
-use App\Http\Controllers\RaportPrintController;
-use App\Http\Controllers\RaporDataController;
-use App\Http\Controllers\PrintSettingController;
 use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\BackupController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\EkskulController;
+use App\Http\Controllers\EkskulPenilaianController;
+use App\Http\Controllers\GuruController;
+use App\Http\Controllers\KelasController;
+use App\Http\Controllers\MataPelajaranController;
+use App\Http\Controllers\MengajarController;
+use App\Http\Controllers\MengajarTahfidzController;
+use App\Http\Controllers\PenilaianController;
+use App\Http\Controllers\PrintSettingController;
+use App\Http\Controllers\RaporAdminController;
+use App\Http\Controllers\RaporDataController;
+use App\Http\Controllers\RaportPrintController;
+use App\Http\Controllers\RombelKelasController;
+use App\Http\Controllers\SchoolProfileController;
+use App\Http\Controllers\Settings;
+use App\Http\Controllers\SiswaController;
 use App\Http\Controllers\TahfidzController;
 use App\Http\Controllers\TahfidzPrintController;
-use App\Http\Controllers\MengajarTahfidzController;
+use App\Http\Controllers\TahunAjaranController;
 use App\Http\Controllers\WaliKelasSiswaController;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');

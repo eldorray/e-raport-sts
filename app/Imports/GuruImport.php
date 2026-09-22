@@ -14,13 +14,18 @@ use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
 
-class GuruImport implements ToCollection, WithHeadingRow, WithValidation, SkipsOnFailure
+class GuruImport implements SkipsOnFailure, ToCollection, WithHeadingRow, WithValidation
 {
     use SkipsFailures;
 
     public int $imported = 0;
+
+    /** @var list<array{nip: string|null, reason: string}> */
     public array $skipped = [];
 
+    /**
+     * @param  Collection<int, array<string, mixed>>  $rows
+     */
     public function collection(Collection $rows): void
     {
         foreach ($rows as $row) {
@@ -28,11 +33,13 @@ class GuruImport implements ToCollection, WithHeadingRow, WithValidation, SkipsO
 
             if ($nip === '') {
                 $this->skipped[] = ['nip' => null, 'reason' => 'NIP kosong'];
+
                 continue;
             }
 
             if (Guru::where('nip', $nip)->exists()) {
                 $this->skipped[] = ['nip' => $nip, 'reason' => 'NIP sudah ada'];
+
                 continue;
             }
 
@@ -50,6 +57,7 @@ class GuruImport implements ToCollection, WithHeadingRow, WithValidation, SkipsO
                 $tanggalLahir = $this->parseDate($row['tanggal_lahir'] ?? null);
             } catch (\Throwable $e) {
                 $this->skipped[] = ['nip' => $nip, 'reason' => 'Tanggal lahir tidak valid'];
+
                 continue;
             }
 
@@ -82,6 +90,9 @@ class GuruImport implements ToCollection, WithHeadingRow, WithValidation, SkipsO
         }
     }
 
+    /**
+     * @return array<string, list<string>>
+     */
     public function rules(): array
     {
         return [
@@ -99,20 +110,20 @@ class GuruImport implements ToCollection, WithHeadingRow, WithValidation, SkipsO
         ];
     }
 
-    private function parseDate($value): ?Carbon
+    private function parseDate(mixed $value): ?Carbon
     {
         if ($value === null || $value === '') {
             return null;
         }
 
         if (is_numeric($value)) {
-            return Carbon::instance(\PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($value));
+            return Carbon::instance(\PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject((float) $value));
         }
 
-        return Carbon::parse($value);
+        return Carbon::parse((string) $value);
     }
 
-    private function toBoolean($value): bool
+    private function toBoolean(mixed $value): bool
     {
         if ($value === null || $value === '') {
             return true;
@@ -125,6 +136,6 @@ class GuruImport implements ToCollection, WithHeadingRow, WithValidation, SkipsO
 
     private function buildEmail(string $nip): string
     {
-        return Str::slug($nip, '.') . '@guru.local';
+        return Str::slug($nip, '.').'@guru.local';
     }
 }

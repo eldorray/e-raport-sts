@@ -25,10 +25,10 @@ class PenilaianController extends Controller
     /** @var float Toleransi untuk validasi total bobot */
     private const BOBOT_TOLERANCE = 0.01;
 
-    /** @var float Nilai minimum untuk penilaian */
+    /** @var int Nilai minimum untuk penilaian */
     private const MIN_NILAI = 0;
 
-    /** @var float Nilai maksimum untuk penilaian */
+    /** @var int Nilai maksimum untuk penilaian */
     private const MAX_NILAI = 100;
 
     /**
@@ -67,7 +67,7 @@ class PenilaianController extends Controller
     /**
      * Menampilkan form input nilai untuk satu mengajar.
      *
-     * @param  Request   $request   HTTP request
+     * @param  Request  $request  HTTP request
      * @param  Mengajar  $mengajar  Instance mengajar dari route model binding
      * @return View Halaman form penilaian
      */
@@ -92,10 +92,11 @@ class PenilaianController extends Controller
             ->get()
             ->keyBy('siswa_id');
 
-        $bobotSumatif = $user?->bobot_sumatif ?? $this->getDefaultBobotSumatif();
-        $bobotSts = $user?->bobot_sts ?? $this->getDefaultBobotSts();
+        $bobotSumatif = $user->bobot_sumatif ?? $this->getDefaultBobotSumatif();
+        $bobotSts = $user->bobot_sts ?? $this->getDefaultBobotSts();
 
         // Check if tahun ajaran is active (guru can only edit on active tahun ajaran)
+        /** @var TahunAjaran|null $tahunAjaran */
         $tahunAjaran = TahunAjaran::find($tahunId);
         $canEdit = $tahunAjaran && $tahunAjaran->is_active;
 
@@ -114,7 +115,7 @@ class PenilaianController extends Controller
     /**
      * Menyimpan nilai siswa.
      *
-     * @param  Request   $request   HTTP request dengan data nilai
+     * @param  Request  $request  HTTP request dengan data nilai
      * @param  Mengajar  $mengajar  Instance mengajar dari route model binding
      * @return RedirectResponse Redirect ke halaman sebelumnya
      */
@@ -131,6 +132,7 @@ class PenilaianController extends Controller
         $this->authorizeGuruAccess($guru, $mengajar);
 
         // Block guru from editing inactive tahun ajaran
+        /** @var TahunAjaran|null $tahunAjaran */
         $tahunAjaran = TahunAjaran::find($tahunId);
         if (! $tahunAjaran || ! $tahunAjaran->is_active) {
             return back()->withErrors(['tahun_ajaran' => __('Tidak dapat menyimpan data pada tahun ajaran yang tidak aktif.')]);
@@ -138,15 +140,15 @@ class PenilaianController extends Controller
 
         $validated = $request->validate([
             'nilai_sumatif' => ['sometimes', 'array'],
-            'nilai_sumatif.*' => ['nullable', 'numeric', 'min:' . self::MIN_NILAI, 'max:' . self::MAX_NILAI],
+            'nilai_sumatif.*' => ['nullable', 'numeric', 'min:'.self::MIN_NILAI, 'max:'.self::MAX_NILAI],
             'nilai_sts' => ['sometimes', 'array'],
-            'nilai_sts.*' => ['nullable', 'numeric', 'min:' . self::MIN_NILAI, 'max:' . self::MAX_NILAI],
+            'nilai_sts.*' => ['nullable', 'numeric', 'min:'.self::MIN_NILAI, 'max:'.self::MAX_NILAI],
             'materi_tp' => ['nullable', 'string', 'max:255'],
         ]);
 
         $user = $request->user();
-        $bobotSumatif = $user?->bobot_sumatif ?? $this->getDefaultBobotSumatif();
-        $bobotSts = $user?->bobot_sts ?? $this->getDefaultBobotSts();
+        $bobotSumatif = $user->bobot_sumatif ?? $this->getDefaultBobotSumatif();
+        $bobotSts = $user->bobot_sts ?? $this->getDefaultBobotSts();
 
         if (! $this->isValidTotalBobot($bobotSumatif, $bobotSts)) {
             return back()
@@ -178,8 +180,8 @@ class PenilaianController extends Controller
         $user = $request->user();
 
         return view('penilaian.bobot', [
-            'bobotSumatif' => $user?->bobot_sumatif ?? $this->getDefaultBobotSumatif(),
-            'bobotSts' => $user?->bobot_sts ?? $this->getDefaultBobotSts(),
+            'bobotSumatif' => $user->bobot_sumatif ?? $this->getDefaultBobotSumatif(),
+            'bobotSts' => $user->bobot_sts ?? $this->getDefaultBobotSts(),
             'user' => $user,
         ]);
     }
@@ -193,8 +195,8 @@ class PenilaianController extends Controller
     public function updateBobot(Request $request): RedirectResponse
     {
         $data = $request->validate([
-            'bobot_sumatif' => ['required', 'numeric', 'min:' . self::MIN_NILAI, 'max:' . self::MAX_NILAI],
-            'bobot_sts' => ['required', 'numeric', 'min:' . self::MIN_NILAI, 'max:' . self::MAX_NILAI],
+            'bobot_sumatif' => ['required', 'numeric', 'min:'.self::MIN_NILAI, 'max:'.self::MAX_NILAI],
+            'bobot_sts' => ['required', 'numeric', 'min:'.self::MIN_NILAI, 'max:'.self::MAX_NILAI],
         ]);
 
         if (! $this->isValidTotalBobot($data['bobot_sumatif'], $data['bobot_sts'])) {
@@ -233,7 +235,7 @@ class PenilaianController extends Controller
      * Memvalidasi apakah total bobot sudah sesuai.
      *
      * @param  float  $bobotSumatif  Bobot sumatif
-     * @param  float  $bobotSts      Bobot STS
+     * @param  float  $bobotSts  Bobot STS
      * @return bool True jika valid
      */
     private function isValidTotalBobot(float $bobotSumatif, float $bobotSts): bool
@@ -244,9 +246,9 @@ class PenilaianController extends Controller
     /**
      * Memvalidasi akses guru ke mengajar.
      *
-     * @param  Guru|null  $guru     Instance guru
-     * @param  Mengajar   $mengajar Instance mengajar
-     * @return void
+     * @param  Guru|null  $guru  Instance guru
+     * @param  Mengajar  $mengajar  Instance mengajar
+     *
      * @throws \Symfony\Component\HttpKernel\Exception\HttpException
      */
     private function authorizeGuruAccess(?Guru $guru, Mengajar $mengajar): void
@@ -260,8 +262,8 @@ class PenilaianController extends Controller
      * Memvalidasi tahun ajaran untuk mengajar.
      *
      * @param  int|null  $tahunId  ID tahun ajaran dari session
-     * @param  Mengajar  $mengajar Instance mengajar
-     * @return void
+     * @param  Mengajar  $mengajar  Instance mengajar
+     *
      * @throws \Symfony\Component\HttpKernel\Exception\HttpException
      */
     private function validateTahunAjaran(?int $tahunId, Mengajar $mengajar): void
@@ -274,13 +276,12 @@ class PenilaianController extends Controller
     /**
      * Menyimpan nilai semua siswa.
      *
-     * @param  array                            $validated  Data nilai yang sudah divalidasi
-     * @param  Mengajar                         $mengajar   Instance mengajar
-     * @param  Guru                             $guru       Instance guru
-     * @param  int                              $tahunId    ID tahun ajaran
-     * @param  string                           $semester   Semester
-     * @param  \Illuminate\Support\Collection   $siswas     Koleksi ID siswa
-     * @return void
+     * @param  array<string, mixed>  $validated  Data nilai yang sudah divalidasi
+     * @param  Mengajar  $mengajar  Instance mengajar
+     * @param  Guru  $guru  Instance guru
+     * @param  int  $tahunId  ID tahun ajaran
+     * @param  string  $semester  Semester
+     * @param  \Illuminate\Support\Collection<int, int>  $siswas  Koleksi ID siswa
      */
     private function saveNilaiSiswa(
         array $validated,
@@ -328,9 +329,8 @@ class PenilaianController extends Controller
     /**
      * Reset semua nilai untuk satu mengajar.
      *
-     * @param  Request   $request   HTTP request
+     * @param  Request  $request  HTTP request
      * @param  Mengajar  $mengajar  Instance mengajar
-     * @return RedirectResponse
      */
     public function reset(Request $request, Mengajar $mengajar): RedirectResponse
     {
@@ -345,6 +345,7 @@ class PenilaianController extends Controller
         $this->authorizeGuruAccess($guru, $mengajar);
 
         // Block guru from resetting inactive tahun ajaran
+        /** @var TahunAjaran|null $tahunAjaran */
         $tahunAjaran = TahunAjaran::find($tahunId);
         if (! $tahunAjaran || ! $tahunAjaran->is_active) {
             return back()->withErrors(['tahun_ajaran' => __('Tidak dapat mereset data pada tahun ajaran yang tidak aktif.')]);

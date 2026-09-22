@@ -75,9 +75,10 @@ class RombelKelasController extends Controller
         return redirect()->route('rombel.index', ['kelas_id' => $kelas->id])
             ->with('status', __('Rombel kelas berhasil diperbarui.'));
     }
+
     /**
      * Menyalin rombel dari tahun ajaran/semester sebelumnya.
-     * 
+     *
      * Jika siswa belum ada di tahun ajaran target, akan dibuat duplikat data siswa.
      * Kemudian siswa tersebut akan di-assign ke kelas yang sesuai.
      */
@@ -97,8 +98,8 @@ class RombelKelasController extends Controller
 
         // Get kelas dari source tahun ajaran beserta siswanya
         $sourceKelasWithSiswas = Kelas::with(['siswas' => function ($query) use ($sourceTahunId) {
-                $query->where('tahun_ajaran_id', $sourceTahunId);
-            }])
+            $query->where('tahun_ajaran_id', $sourceTahunId);
+        }])
             ->where('tahun_ajaran_id', $sourceTahunId)
             ->get();
 
@@ -119,19 +120,20 @@ class RombelKelasController extends Controller
 
             if (! $targetKelas) {
                 $skippedKelasCount++;
+
                 continue;
             }
 
             foreach ($sourceKelas->siswas as $sourceSiswa) {
                 // Cari siswa di tahun ajaran target dengan NISN atau NIS yang sama
                 $targetSiswa = null;
-                
+
                 if (! empty($sourceSiswa->nisn)) {
                     $targetSiswa = Siswa::where('tahun_ajaran_id', $targetTahunId)
                         ->where('nisn', $sourceSiswa->nisn)
                         ->first();
                 }
-                
+
                 if (! $targetSiswa && ! empty($sourceSiswa->nis)) {
                     $targetSiswa = Siswa::where('tahun_ajaran_id', $targetTahunId)
                         ->where('nis', $sourceSiswa->nis)
@@ -144,7 +146,7 @@ class RombelKelasController extends Controller
                     unset($siswaData['id'], $siswaData['created_at'], $siswaData['updated_at']);
                     $siswaData['tahun_ajaran_id'] = $targetTahunId;
                     $siswaData['kelas_id'] = $targetKelas->id;
-                    
+
                     try {
                         $targetSiswa = Siswa::create($siswaData);
                         $createdCount++;
@@ -152,6 +154,7 @@ class RombelKelasController extends Controller
                     } catch (\Exception $e) {
                         // Skip jika ada error (misal duplikat NIS/NISN)
                         $skippedSiswaCount++;
+
                         continue;
                     }
                 } else {
@@ -168,17 +171,15 @@ class RombelKelasController extends Controller
 
         $message = __('Berhasil: :copied siswa di-assign ke kelas.', ['copied' => $copiedCount]);
         if ($createdCount > 0) {
-            $message .= ' ' . __(':count siswa baru dibuat.', ['count' => $createdCount]);
+            $message .= ' '.__(':count siswa baru dibuat.', ['count' => $createdCount]);
         }
         if ($skippedKelasCount > 0) {
-            $message .= ' ' . __(':count kelas dilewati.', ['count' => $skippedKelasCount]);
+            $message .= ' '.__(':count kelas dilewati.', ['count' => $skippedKelasCount]);
         }
         if ($skippedSiswaCount > 0) {
-            $message .= ' ' . __(':count siswa dilewati (sudah punya kelas/duplikat).', ['count' => $skippedSiswaCount]);
+            $message .= ' '.__(':count siswa dilewati (sudah punya kelas/duplikat).', ['count' => $skippedSiswaCount]);
         }
 
         return back()->with('status', $message);
     }
 }
-
-

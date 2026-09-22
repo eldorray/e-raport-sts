@@ -15,7 +15,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property \Carbon\Carbon $logged_in_at
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
- *
  * @property-read User $user
  */
 class LoginLog extends Model
@@ -23,7 +22,7 @@ class LoginLog extends Model
     /**
      * The attributes that are mass assignable.
      *
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $fillable = [
         'user_id',
@@ -44,7 +43,7 @@ class LoginLog extends Model
     /**
      * Mendapatkan user yang login.
      *
-     * @return BelongsTo<User, LoginLog>
+     * @return BelongsTo<User, $this>
      */
     public function user(): BelongsTo
     {

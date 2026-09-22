@@ -2,8 +2,8 @@
 
 namespace App\Providers;
 
-use App\Models\Guru;
 use App\Models\Ekskul;
+use App\Models\Guru;
 use App\Models\Mengajar;
 use App\Models\Penilaian;
 use Illuminate\Support\Facades\Auth;
@@ -31,6 +31,7 @@ class AppServiceProvider extends ServiceProvider
             if (! $user || $user->role !== 'guru') {
                 $view->with('sidebarAssignments', collect());
                 $view->with('sidebarEkskul', collect());
+
                 return;
             }
 
@@ -41,28 +42,37 @@ class AppServiceProvider extends ServiceProvider
             if (! $guru || ! $tahunId) {
                 $view->with('sidebarAssignments', collect());
                 $view->with('sidebarEkskul', collect());
+
                 return;
             }
 
-            $assignments = Mengajar::with(['kelas', 'mataPelajaran'])
+            $mengajarList = Mengajar::with(['kelas.siswas', 'mataPelajaran'])
                 ->where('guru_id', $guru->id)
                 ->where('tahun_ajaran_id', $tahunId)
                 ->when($semester, fn ($q) => $q->where('semester', $semester))
                 ->orderBy('mata_pelajaran_id')
                 ->orderBy('kelas_id')
-                ->get()
-                ->map(function ($m) use ($tahunId, $semester) {
+                ->get();
+
+            // Ambil jumlah siswa yang sudah dinilai per mengajar dalam SATU query
+            // (menghindari N+1 query count per mengajar di dalam loop).
+            $filledCounts = Penilaian::where('tahun_ajaran_id', $tahunId)
+                ->when($semester, fn ($q) => $q->where('semester', $semester))
+                ->whereIn('mengajar_id', $mengajarList->pluck('id'))
+                ->whereNotNull('nilai_sumatif')
+                ->select('mengajar_id', \Illuminate\Support\Facades\DB::raw('COUNT(DISTINCT siswa_id) as filled'))
+                ->groupBy('mengajar_id')
+                ->pluck('filled', 'mengajar_id');
+
+            $assignments = $mengajarList
+                ->map(function ($m) use ($filledCounts) {
                     $target = $m->kelas?->siswas?->count() ?? 0;
-                    $filled = Penilaian::where('mengajar_id', $m->id)
-                        ->where('tahun_ajaran_id', $tahunId)
-                        ->when($semester, fn ($q) => $q->where('semester', $semester))
-                        ->whereNotNull('nilai_sumatif')
-                        ->distinct('siswa_id')
-                        ->count('siswa_id');
+                    $filled = (int) ($filledCounts->get($m->id) ?? 0);
 
                     $m->penilaian_target = $target;
                     $m->penilaian_filled = $filled;
                     $m->penilaian_done = $target > 0 && $filled >= $target;
+
                     return $m;
                 })
                 ->groupBy('mata_pelajaran_id');
@@ -72,6 +82,7 @@ class AppServiceProvider extends ServiceProvider
                 return $items->every(function ($m) {
                     $target = $m->penilaian_target ?? 0;
                     $filled = $m->penilaian_filled ?? 0;
+
                     return $target > 0 && $filled >= $target;
                 });
             });

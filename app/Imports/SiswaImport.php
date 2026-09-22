@@ -18,7 +18,7 @@ use Maatwebsite\Excel\Concerns\WithValidation;
  *
  * Menangani import massal data siswa dengan validasi dan skip duplikat.
  */
-class SiswaImport implements ToCollection, WithHeadingRow, WithValidation, SkipsOnFailure
+class SiswaImport implements SkipsOnFailure, ToCollection, WithHeadingRow, WithValidation
 {
     use SkipsFailures;
 
@@ -31,8 +31,8 @@ class SiswaImport implements ToCollection, WithHeadingRow, WithValidation, Skips
     /**
      * Memproses koleksi baris dari file Excel.
      *
-     * @param  Collection  $rows  Koleksi baris data
-     * @return void
+     * @param  Collection<int, array<string, mixed>>  $rows  Koleksi baris data
+     *
      * @throws \RuntimeException Jika tahun ajaran belum dipilih
      */
     public function collection(Collection $rows): void
@@ -86,9 +86,8 @@ class SiswaImport implements ToCollection, WithHeadingRow, WithValidation, Skips
     /**
      * Memproses satu baris data siswa.
      *
-     * @param  mixed  $row      Data baris
-     * @param  int    $tahunId  ID tahun ajaran
-     * @return void
+     * @param  mixed  $row  Data baris
+     * @param  int  $tahunId  ID tahun ajaran
      */
     private function processRow($row, int $tahunId): void
     {
@@ -96,11 +95,13 @@ class SiswaImport implements ToCollection, WithHeadingRow, WithValidation, Skips
 
         if ($nis === '') {
             $this->skipped[] = ['nis' => null, 'reason' => 'NIS kosong'];
+
             return;
         }
 
         if (Siswa::where('nis', $nis)->exists()) {
             $this->skipped[] = ['nis' => $nis, 'reason' => 'NIS sudah ada'];
+
             return;
         }
 
@@ -108,6 +109,7 @@ class SiswaImport implements ToCollection, WithHeadingRow, WithValidation, Skips
 
         if ($data === null) {
             $this->skipped[] = ['nis' => $nis, 'reason' => 'Tanggal tidak valid'];
+
             return;
         }
 
@@ -118,9 +120,9 @@ class SiswaImport implements ToCollection, WithHeadingRow, WithValidation, Skips
     /**
      * Mengurai data dari satu baris menjadi array untuk create.
      *
-     * @param  mixed  $row      Data baris
-     * @param  int    $tahunId  ID tahun ajaran
-     * @return array|null Array data siswa atau null jika parsing gagal
+     * @param  mixed  $row  Data baris
+     * @param  int  $tahunId  ID tahun ajaran
+     * @return array<string, mixed>|null Array data siswa atau null jika parsing gagal
      */
     private function parseRowData($row, int $tahunId): ?array
     {
@@ -172,8 +174,8 @@ class SiswaImport implements ToCollection, WithHeadingRow, WithValidation, Skips
      * Mencari ID kelas berdasarkan nama dan tahun ajaran.
      *
      * @param  string|null  $kelasName  Nama kelas
-     * @param  int          $tahunId    ID tahun ajaran
-     * @param  string|null  $tingkat    Tingkat kelas
+     * @param  int  $tahunId  ID tahun ajaran
+     * @param  string|null  $tingkat  Tingkat kelas
      * @return int|null ID kelas atau null
      */
     private function findKelasId(?string $kelasName, int $tahunId, ?string $tingkat): ?int
@@ -224,16 +226,16 @@ class SiswaImport implements ToCollection, WithHeadingRow, WithValidation, Skips
      * @param  mixed  $value  Nilai tanggal
      * @return Carbon|null Instance Carbon atau null
      */
-    private function parseDate($value): ?Carbon
+    private function parseDate(mixed $value): ?Carbon
     {
         if ($value === null || $value === '') {
             return null;
         }
 
         if (is_numeric($value)) {
-            return Carbon::instance(\PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($value));
+            return Carbon::instance(\PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject((float) $value));
         }
 
-        return Carbon::parse($value);
+        return Carbon::parse((string) $value);
     }
 }

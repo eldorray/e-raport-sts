@@ -3,7 +3,7 @@
 /**
  * Script untuk menambahkan kolom logo_right ke school_profiles
  * Akses via browser: https://domain.com/add-logo-right-column.php
- * 
+ *
  * HAPUS FILE INI SETELAH SELESAI!
  */
 
@@ -17,7 +17,7 @@ $kernel->bootstrap();
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
-echo "<pre>";
+echo '<pre>';
 echo "=== Menambahkan kolom logo_right ===\n\n";
 
 try {
@@ -26,12 +26,12 @@ try {
         echo "✅ Kolom 'logo_right' sudah ada di tabel school_profiles.\n";
     } else {
         // Tambahkan kolom logo_right
-        DB::statement("ALTER TABLE school_profiles ADD COLUMN logo_right VARCHAR(255) NULL AFTER logo");
+        DB::statement('ALTER TABLE school_profiles ADD COLUMN logo_right VARCHAR(255) NULL AFTER logo');
         echo "✅ Kolom 'logo_right' berhasil ditambahkan!\n";
     }
 } catch (Exception $e) {
-    echo "❌ Error: " . $e->getMessage() . "\n";
+    echo '❌ Error: '.$e->getMessage()."\n";
 }
 
 echo "\n⚠️ PENTING: Hapus file add-logo-right-column.php setelah selesai!\n";
-echo "</pre>";
+echo '</pre>';

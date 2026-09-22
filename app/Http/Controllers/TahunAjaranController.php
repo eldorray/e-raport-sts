@@ -3,13 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\TahunAjaran;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\Rule;
+use Illuminate\View\View;
 
 class TahunAjaranController extends Controller
 {
-    public function index()
+    public function index(): View
     {
         $tahunAjaran = TahunAjaran::orderByDesc('is_active')
             ->orderByDesc('tahun_mulai')
@@ -24,7 +25,7 @@ class TahunAjaranController extends Controller
         return view('lembaga.tahun-ajaran', compact('tahunAjaran', 'stats'));
     }
 
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
         $data = $this->validatedData($request);
 
@@ -39,7 +40,7 @@ class TahunAjaranController extends Controller
         return back()->with('status', __('Tahun ajaran berhasil ditambahkan.'));
     }
 
-    public function update(Request $request, TahunAjaran $tahunAjaran)
+    public function update(Request $request, TahunAjaran $tahunAjaran): RedirectResponse
     {
         $data = $this->validatedData($request, $tahunAjaran->id);
 
@@ -54,7 +55,7 @@ class TahunAjaranController extends Controller
         return back()->with('status', __('Tahun ajaran berhasil diperbarui.'));
     }
 
-    public function destroy(TahunAjaran $tahunAjaran)
+    public function destroy(TahunAjaran $tahunAjaran): RedirectResponse
     {
         if ($tahunAjaran->is_active) {
             return back()->with('status', __('Nonaktifkan tahun ajaran ini sebelum menghapus.'));
@@ -65,10 +66,10 @@ class TahunAjaranController extends Controller
         return back()->with('status', __('Tahun ajaran berhasil dihapus.'));
     }
 
-    public function toggleActive(TahunAjaran $tahunAjaran)
+    public function toggleActive(TahunAjaran $tahunAjaran): RedirectResponse
     {
         DB::transaction(function () use ($tahunAjaran) {
-            if (!$tahunAjaran->is_active) {
+            if (! $tahunAjaran->is_active) {
                 // Activating: deactivate all others first
                 TahunAjaran::where('id', '!=', $tahunAjaran->id)->update(['is_active' => false]);
                 $tahunAjaran->update(['is_active' => true]);
@@ -79,12 +80,14 @@ class TahunAjaranController extends Controller
         });
 
         $status = $tahunAjaran->fresh()->is_active;
+
         return back()->with('status', $status ? __('Tahun ajaran diaktifkan.') : __('Tahun ajaran dinonaktifkan.'));
     }
 
-    public function activate(Request $request, TahunAjaran $tahunAjaran)
+    public function activate(Request $request, TahunAjaran $tahunAjaran): RedirectResponse
     {
         // Choose target from request dropdown (dashboard) or route model binding
+        /** @var TahunAjaran $target */
         $target = $request->filled('tahun_ajaran_id')
             ? TahunAjaran::findOrFail($request->integer('tahun_ajaran_id'))
             : $tahunAjaran;
@@ -111,13 +114,14 @@ class TahunAjaranController extends Controller
         return back()->with('status', $shouldActivate ? __('Tahun ajaran diaktifkan.') : __('Tahun ajaran diganti.'));
     }
 
-    public function switchSession(Request $request)
+    public function switchSession(Request $request): RedirectResponse
     {
         $data = $request->validate([
             'tahun_ajaran_id' => ['required', 'exists:tahun_ajarans,id'],
             'semester' => ['nullable', 'string', 'max:20'],
         ]);
 
+        /** @var TahunAjaran $tahun */
         $tahun = TahunAjaran::findOrFail($data['tahun_ajaran_id']);
         $semester = ($data['semester'] ?? null) ?: $tahun->semester;
 
@@ -132,6 +136,9 @@ class TahunAjaranController extends Controller
         return back()->with('status', __('Tahun ajaran diganti.'));
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     private function validatedData(Request $request, ?int $ignoreId = null): array
     {
         $currentYear = (int) date('Y');
@@ -142,8 +149,8 @@ class TahunAjaranController extends Controller
                 'string',
                 'max:50',
             ],
-            'tahun_mulai' => ['required', 'integer', 'between:' . ($currentYear - 10) . ',' . ($currentYear + 10)],
-            'tahun_selesai' => ['required', 'integer', 'gte:tahun_mulai', 'between:' . ($currentYear - 10) . ',' . ($currentYear + 11)],
+            'tahun_mulai' => ['required', 'integer', 'between:'.($currentYear - 10).','.($currentYear + 10)],
+            'tahun_selesai' => ['required', 'integer', 'gte:tahun_mulai', 'between:'.($currentYear - 10).','.($currentYear + 11)],
             'semester' => ['required', 'string', 'max:20'],
             'keterangan' => ['nullable', 'string', 'max:500'],
             'is_active' => ['sometimes', 'boolean'],

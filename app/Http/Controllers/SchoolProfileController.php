@@ -3,23 +3,25 @@
 namespace App\Http\Controllers;
 
 use App\Models\SchoolProfile;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use Illuminate\View\View;
 
 class SchoolProfileController extends Controller
 {
-    public function index()
+    public function index(): View
     {
-        $schoolProfile = SchoolProfile::first() ?? new SchoolProfile();
+        $schoolProfile = SchoolProfile::first() ?? new SchoolProfile;
 
         return view('school-profile', compact('schoolProfile'));
     }
 
-    public function update(Request $request)
+    public function update(Request $request): RedirectResponse
     {
         $intent = $request->input('intent', 'identity');
-        $schoolProfile = SchoolProfile::first() ?? new SchoolProfile();
+        $schoolProfile = SchoolProfile::first() ?? new SchoolProfile;
 
         if ($intent === 'logo') {
             if (! $schoolProfile->exists) {
@@ -43,7 +45,11 @@ class SchoolProfileController extends Controller
                     Storage::disk('public')->delete($schoolProfile->logo);
                 }
 
-                $schoolProfile->logo = $request->file('logo')->store('logos', 'public');
+                $logoPath = $request->file('logo')->store('logos', 'public');
+                if ($logoPath === false) {
+                    return back()->withErrors(['logo' => __('Gagal menyimpan file logo.')]);
+                }
+                $schoolProfile->logo = $logoPath;
             }
 
             $schoolProfile->save();
@@ -73,7 +79,11 @@ class SchoolProfileController extends Controller
                     Storage::disk('public')->delete($schoolProfile->logo_right);
                 }
 
-                $schoolProfile->logo_right = $request->file('logo_right')->store('logos', 'public');
+                $logoRightPath = $request->file('logo_right')->store('logos', 'public');
+                if ($logoRightPath === false) {
+                    return back()->withErrors(['logo_right' => __('Gagal menyimpan file logo kanan.')]);
+                }
+                $schoolProfile->logo_right = $logoRightPath;
             }
 
             $schoolProfile->save();

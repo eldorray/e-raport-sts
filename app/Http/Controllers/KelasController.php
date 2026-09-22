@@ -79,7 +79,7 @@ class KelasController extends Controller
      * Memperbarui data kelas yang sudah ada.
      *
      * @param  Request  $request  HTTP request dengan data yang diperbarui
-     * @param  Kelas    $kelas    Instance kelas dari route model binding
+     * @param  Kelas  $kelas  Instance kelas dari route model binding
      * @return RedirectResponse Redirect ke halaman sebelumnya dengan pesan status
      */
     public function update(Request $request, Kelas $kelas): RedirectResponse
@@ -121,9 +121,9 @@ class KelasController extends Controller
     /**
      * Validasi data request untuk create/update kelas.
      *
-     * @param  Request   $request   HTTP request dengan data kelas
+     * @param  Request  $request  HTTP request dengan data kelas
      * @param  int|null  $ignoreId  ID kelas yang diabaikan untuk validasi unique
-     * @return array Data yang sudah divalidasi
+     * @return array<string, mixed> Data yang sudah divalidasi
      */
     private function validatedData(Request $request, ?int $ignoreId = null): array
     {
@@ -133,14 +133,14 @@ class KelasController extends Controller
             'nama' => [
                 'required',
                 'string',
-                'max:' . self::MAX_CLASS_NAME_LENGTH,
+                'max:'.self::MAX_CLASS_NAME_LENGTH,
                 Rule::unique('kelas', 'nama')
                     ->where(fn ($q) => $q->where('tahun_ajaran_id', $tahunId))
                     ->ignore($ignoreId),
             ],
-            'tingkat' => ['required', 'string', 'max:' . self::MAX_TINGKAT_LENGTH],
-            'jurusan' => ['nullable', 'string', 'max:' . self::MAX_JURUSAN_LENGTH],
-            'jenis' => ['nullable', 'string', 'max:' . self::MAX_JURUSAN_LENGTH],
+            'tingkat' => ['required', 'string', 'max:'.self::MAX_TINGKAT_LENGTH],
+            'jurusan' => ['nullable', 'string', 'max:'.self::MAX_JURUSAN_LENGTH],
+            'jenis' => ['nullable', 'string', 'max:'.self::MAX_JURUSAN_LENGTH],
             'guru_id' => ['nullable', Rule::exists('gurus', 'id')],
         ]);
     }
@@ -149,7 +149,6 @@ class KelasController extends Controller
      * Sinkronisasi data wali kelas di tabel guru.
      *
      * @param  Kelas  $kelas  Instance kelas
-     * @return void
      */
     private function syncGuruWaliKelas(Kelas $kelas): void
     {
@@ -162,8 +161,7 @@ class KelasController extends Controller
      * Clear wali kelas dari guru sebelumnya jika berbeda.
      *
      * @param  int|null  $previousGuruId  ID guru sebelumnya
-     * @param  int|null  $currentGuruId   ID guru saat ini
-     * @return void
+     * @param  int|null  $currentGuruId  ID guru saat ini
      */
     private function clearPreviousWaliKelas(?int $previousGuruId, ?int $currentGuruId): void
     {
@@ -207,6 +205,7 @@ class KelasController extends Controller
 
             if ($exists) {
                 $skippedCount++;
+
                 continue;
             }
 
@@ -225,10 +224,9 @@ class KelasController extends Controller
 
         $message = __('Berhasil menyalin :count kelas.', ['count' => $copiedCount]);
         if ($skippedCount > 0) {
-            $message .= ' ' . __(':count kelas dilewati karena sudah ada.', ['count' => $skippedCount]);
+            $message .= ' '.__(':count kelas dilewati karena sudah ada.', ['count' => $skippedCount]);
         }
 
         return back()->with('status', $message);
     }
 }
-

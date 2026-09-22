@@ -16,13 +16,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int|null $guru_id
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
- *
  * @property-read TahunAjaran $tahunAjaran
  * @property-read Kelas $kelas
  * @property-read Guru|null $guru
  */
 class MengajarTahfidz extends Model
 {
+    /** @use HasFactory<\Illuminate\Database\Eloquent\Factories\Factory<static>> */
     use HasFactory;
 
     protected $fillable = [
@@ -34,6 +34,8 @@ class MengajarTahfidz extends Model
 
     /**
      * Mendapatkan tahun ajaran.
+     *
+     * @return BelongsTo<TahunAjaran, $this>
      */
     public function tahunAjaran(): BelongsTo
     {
@@ -42,6 +44,8 @@ class MengajarTahfidz extends Model
 
     /**
      * Mendapatkan kelas.
+     *
+     * @return BelongsTo<Kelas, $this>
      */
     public function kelas(): BelongsTo
     {
@@ -50,6 +54,8 @@ class MengajarTahfidz extends Model
 
     /**
      * Mendapatkan guru yang mengajar.
+     *
+     * @return BelongsTo<Guru, $this>
      */
     public function guru(): BelongsTo
     {

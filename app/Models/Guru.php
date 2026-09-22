@@ -28,18 +28,18 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property bool $is_active
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
- *
- * @property-read User $user
+ * @property-read User|null $user
  * @property-read Kelas|null $kelasWali
  */
 class Guru extends Model
 {
+    /** @use HasFactory<\Database\Factories\GuruFactory> */
     use HasFactory;
 
     /**
      * The attributes that are mass assignable.
      *
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $fillable = [
         'user_id',
@@ -70,7 +70,7 @@ class Guru extends Model
     /**
      * Mendapatkan user account yang terkait dengan guru.
      *
-     * @return BelongsTo<User, Guru>
+     * @return BelongsTo<User, $this>
      */
     public function user(): BelongsTo
     {
@@ -80,7 +80,7 @@ class Guru extends Model
     /**
      * Mendapatkan kelas yang diwali oleh guru.
      *
-     * @return HasOne<Kelas>
+     * @return HasOne<Kelas, $this>
      */
     public function kelasWali(): HasOne
     {

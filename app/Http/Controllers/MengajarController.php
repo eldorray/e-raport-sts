@@ -58,7 +58,7 @@ class MengajarController extends Controller
             $mengajarByMapel = $mengajars->keyBy('mata_pelajaran_id');
         }
 
-            $mataPelajarans = MataPelajaran::orderByRaw("FIELD(kelompok, 'PAI', 'Umum', 'Mulok')")
+        $mataPelajarans = MataPelajaran::orderByRaw("FIELD(kelompok, 'PAI', 'Umum', 'Mulok')")
             ->orderByRaw('CAST(urutan AS UNSIGNED)')
             ->orderBy('nama_mapel')
             ->get();
@@ -130,7 +130,7 @@ class MengajarController extends Controller
     /**
      * Memperbarui jadwal mengajar yang sudah ada.
      *
-     * @param  Request   $request   HTTP request dengan data yang diperbarui
+     * @param  Request  $request  HTTP request dengan data yang diperbarui
      * @param  Mengajar  $mengajar  Instance mengajar dari route model binding
      * @return RedirectResponse Redirect ke halaman sebelumnya dengan pesan status
      */
@@ -172,6 +172,7 @@ class MengajarController extends Controller
             'kelas_id' => ['required', 'exists:kelas,id'],
         ]);
 
+        /** @var Kelas $kelasTarget */
         $kelasTarget = Kelas::findOrFail($data['kelas_id']);
 
         $sourceRecords = Mengajar::where('tahun_ajaran_id', $data['source_tahun_ajaran_id'])
@@ -279,10 +280,10 @@ class MengajarController extends Controller
     /**
      * Validasi data request untuk update mengajar.
      *
-     * @param  Request      $request   HTTP request dengan data mengajar
-     * @param  int|null     $tahunId   ID tahun ajaran
+     * @param  Request  $request  HTTP request dengan data mengajar
+     * @param  int|null  $tahunId  ID tahun ajaran
      * @param  string|null  $semester  Semester
-     * @return array Data yang sudah divalidasi
+     * @return array<string, mixed> Data yang sudah divalidasi
      */
     private function validatedData(Request $request, ?int $tahunId, ?string $semester): array
     {

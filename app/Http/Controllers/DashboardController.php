@@ -38,6 +38,7 @@ class DashboardController extends Controller
         $sessionSemester = session('selected_semester');
         $fallbackYearId = TahunAjaran::where('is_active', true)->value('id');
         $selectedTahunAjaran = $sessionYearId ?: $fallbackYearId;
+        /** @var TahunAjaran|null $yearModel */
         $yearModel = $selectedTahunAjaran ? TahunAjaran::find($selectedTahunAjaran) : null;
         $selectedSemester = $sessionSemester ?? $yearModel?->semester;
         $tahunAjaranOptions = TahunAjaran::orderByDesc('is_active')->orderByDesc('tahun_mulai')->get();
@@ -124,10 +125,10 @@ class DashboardController extends Controller
     /**
      * Build guru statistics.
      *
-     * @param  int       $userId            User ID
+     * @param  int  $userId  User ID
      * @param  int|null  $selectedTahunAjaran  Selected academic year ID
-     * @param  string|null  $selectedSemester   Selected semester
-     * @return array Guru statistics and related data
+     * @param  string|null  $selectedSemester  Selected semester
+     * @return array{stats: array<string, int|float>|null, guru: Guru|null, wali_kelas_nama: string|null, penilaian_filled: int, target_penilaian: int} Guru statistics and related data
      */
     private function buildGuruStats(int $userId, ?int $selectedTahunAjaran, ?string $selectedSemester): array
     {
@@ -160,12 +161,12 @@ class DashboardController extends Controller
         $mapelDiampu = $mengajarList->pluck('mata_pelajaran_id')->unique()->count();
 
         $totalSiswaGuru = $mengajarList
-            ->flatMap(fn ($m) => $m->kelas?->siswas ?? collect())
+            ->flatMap(fn (Mengajar $m) => $m->kelas?->siswas ?? collect())
             ->pluck('id')
             ->unique()
             ->count();
 
-        $targetPenilaian = $mengajarList->sum(fn ($m) => $m->kelas?->siswas?->count() ?? 0);
+        $targetPenilaian = $mengajarList->sum(fn (Mengajar $m) => $m->kelas?->siswas?->count() ?? 0);
 
         $penilaianFilled = Penilaian::where('guru_id', $guruModel->id)
             ->when($selectedTahunAjaran, fn ($q) => $q->where('tahun_ajaran_id', $selectedTahunAjaran))
@@ -197,7 +198,7 @@ class DashboardController extends Controller
      * @param  int|null  $tahunAjaranId  Academic year ID
      * @param  string|null  $semester  Semester
      * @param  int|null  $kelasId  Filter by specific class (for wali kelas)
-     * @return \Illuminate\Support\Collection
+     * @return \Illuminate\Support\Collection<int, object{mapel: string, guru: string, kelas: string, total_siswa: int<0, max>, filled: mixed, progress: 0|float}&\stdClass>
      */
     private function buildPenilaianStatus(?int $tahunAjaranId, ?string $semester, ?int $kelasId = null)
     {
@@ -227,7 +228,7 @@ class DashboardController extends Controller
             ->groupBy('mengajar_id')
             ->pluck('filled', 'mengajar_id');
 
-        return $mengajars->map(function ($m) use ($filledCounts) {
+        return $mengajars->map(function (Mengajar $m) use ($filledCounts) {
             $totalSiswa = $m->kelas?->siswas?->count() ?? 0;
             $filled = $filledCounts->get($m->id, 0);
             $progress = $totalSiswa > 0 ? round(min(100, ($filled / $totalSiswa) * 100)) : 0;

@@ -42,14 +42,19 @@ use Illuminate\Support\Str;
  * @property bool $is_active
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
- *
  * @property-read Kelas|null $kelas
  * @property-read TahunAjaran $tahunAjaran
  * @property-read string $photo_url
  * @property-read string $initials
+ *
+ * Properti dinamis yang di-set saat runtime (mis. di TahfidzController):
+ * @property mixed $tahfidz
+ * @property int $jumlah_surah_30
+ * @property int $jumlah_surah_29
  */
 class Siswa extends Model
 {
+    /** @use HasFactory<\Database\Factories\SiswaFactory> */
     use HasFactory;
 
     /** @var string Disk storage untuk foto */
@@ -61,7 +66,7 @@ class Siswa extends Model
     /**
      * The attributes that are mass assignable.
      *
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $fillable = [
         'tahun_ajaran_id',
@@ -106,7 +111,7 @@ class Siswa extends Model
     /**
      * Mendapatkan kelas yang ditempati siswa.
      *
-     * @return BelongsTo<Kelas, Siswa>
+     * @return BelongsTo<Kelas, $this>
      */
     public function kelas(): BelongsTo
     {
@@ -116,7 +121,7 @@ class Siswa extends Model
     /**
      * Mendapatkan tahun ajaran siswa.
      *
-     * @return BelongsTo<TahunAjaran, Siswa>
+     * @return BelongsTo<TahunAjaran, $this>
      */
     public function tahunAjaran(): BelongsTo
     {

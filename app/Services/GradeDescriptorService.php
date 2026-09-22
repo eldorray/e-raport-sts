@@ -20,10 +20,10 @@ class GradeDescriptorService
      * Menghitung nilai rapor dari nilai sumatif dan STS.
      *
      * @param  float|null  $nilaiSumatif  Nilai sumatif
-     * @param  float|null  $nilaiSts      Nilai STS
-     * @param  float       $bobotSumatif  Bobot sumatif (default dari config)
-     * @param  float       $bobotSts      Bobot STS (default dari config)
-     * @return float|null  Nilai rapor atau null jika tidak bisa dihitung
+     * @param  float|null  $nilaiSts  Nilai STS
+     * @param  float  $bobotSumatif  Bobot sumatif (default dari config)
+     * @param  float  $bobotSts  Bobot STS (default dari config)
+     * @return float|null Nilai rapor atau null jika tidak bisa dihitung
      */
     public function calculateRapor(
         ?float $nilaiSumatif,
@@ -48,9 +48,9 @@ class GradeDescriptorService
     /**
      * Mendapatkan deskriptor nilai berdasarkan nilai rapor.
      *
-     * @param  float|null   $rapor     Nilai rapor
+     * @param  float|null  $rapor  Nilai rapor
      * @param  string|null  $materiTp  Materi/TP untuk placeholder
-     * @return array|null   Array dengan predikat, keterangan, dan kalimat deskripsi
+     * @return array{predikat: string, keterangan: string, kalimat: string}|null Array dengan predikat, keterangan, dan kalimat deskripsi
      */
     public function getDescriptor(?float $rapor, ?string $materiTp = null): ?array
     {
@@ -75,12 +75,12 @@ class GradeDescriptorService
     /**
      * Mendapatkan nilai dan deskriptor sekaligus.
      *
-     * @param  float|null   $nilaiSumatif  Nilai sumatif
-     * @param  float|null   $nilaiSts      Nilai STS
-     * @param  string|null  $materiTp      Materi/TP untuk placeholder
-     * @param  float|null   $bobotSumatif  Bobot sumatif
-     * @param  float|null   $bobotSts      Bobot STS
-     * @return array Array dengan rapor dan descriptor
+     * @param  float|null  $nilaiSumatif  Nilai sumatif
+     * @param  float|null  $nilaiSts  Nilai STS
+     * @param  string|null  $materiTp  Materi/TP untuk placeholder
+     * @param  float|null  $bobotSumatif  Bobot sumatif
+     * @param  float|null  $bobotSts  Bobot STS
+     * @return array{rapor: float|null, descriptor: array{predikat: string, keterangan: string, kalimat: string}|null} Array dengan rapor dan descriptor
      */
     public function calculateWithDescriptor(
         ?float $nilaiSumatif,
@@ -101,8 +101,8 @@ class GradeDescriptorService
     /**
      * Menentukan grade key berdasarkan nilai rapor.
      *
-     * @param  float  $rapor      Nilai rapor
-     * @param  array  $boundaries Batas-batas nilai
+     * @param  float  $rapor  Nilai rapor
+     * @param  array<string, int>  $boundaries  Batas-batas nilai
      * @return string Grade key (sangat_baik, baik, cukup, perlu_bimbingan)
      */
     private function determineGradeKey(float $rapor, array $boundaries): string
@@ -126,7 +126,7 @@ class GradeDescriptorService
      * Memvalidasi apakah total bobot sudah sesuai.
      *
      * @param  float  $bobotSumatif  Bobot sumatif
-     * @param  float  $bobotSts      Bobot STS
+     * @param  float  $bobotSts  Bobot STS
      * @return bool True jika valid
      */
     private function isValidTotalBobot(float $bobotSumatif, float $bobotSts): bool

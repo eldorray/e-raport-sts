@@ -104,7 +104,7 @@ class RaporAdminController extends Controller
      * Menampilkan ledger nilai per kelas.
      *
      * @param  Request  $request  HTTP request
-     * @param  Kelas    $kelas    Instance kelas dari route model binding
+     * @param  Kelas  $kelas  Instance kelas dari route model binding
      * @return View Halaman ledger
      */
     public function ledger(Request $request, Kelas $kelas): View
@@ -129,7 +129,9 @@ class RaporAdminController extends Controller
         // Calculate ranking based on total score (highest first)
         $nilai = $this->calculateRanking($nilai);
 
+        /** @var SchoolProfile|null $school */
         $school = SchoolProfile::first();
+        /** @var PrintSetting|null $printSetting */
         $printSetting = PrintSetting::first();
 
         $printPlace = $printSetting?->tempat_cetak ?? $school?->city ?? self::DEFAULT_PRINT_PLACE;
@@ -174,9 +176,9 @@ class RaporAdminController extends Controller
      * Mendapatkan daftar siswa berdasarkan filter.
      *
      * @param  string|null  $tingkat  Filter tingkat
-     * @param  int|null     $kelasId  Filter kelas ID
-     * @param  Guru|null    $guru     Instance guru untuk filter wali kelas
-     * @return \Illuminate\Database\Eloquent\Collection
+     * @param  int|null  $kelasId  Filter kelas ID
+     * @param  Guru|null  $guru  Instance guru untuk filter wali kelas
+     * @return \Illuminate\Database\Eloquent\Collection<int, Siswa>
      */
     private function getSiswasByFilter(?string $tingkat, ?int $kelasId, ?Guru $guru)
     {
@@ -195,10 +197,9 @@ class RaporAdminController extends Controller
     /**
      * Memvalidasi akses guru ke kelas.
      *
-     * @param  string|null  $role   Role user
-     * @param  Kelas        $kelas  Instance kelas
-     * @param  mixed        $user   Instance user
-     * @return void
+     * @param  string|null  $role  Role user
+     * @param  Kelas  $kelas  Instance kelas
+     * @param  mixed  $user  Instance user
      */
     private function authorizeKelasAccess(?string $role, Kelas $kelas, $user): void
     {
@@ -216,10 +217,10 @@ class RaporAdminController extends Controller
     /**
      * Mendapatkan daftar mata pelajaran per kelas.
      *
-     * @param  int          $kelasId   ID kelas
-     * @param  int          $tahunId   ID tahun ajaran
+     * @param  int  $kelasId  ID kelas
+     * @param  int  $tahunId  ID tahun ajaran
      * @param  string|null  $semester  Semester
-     * @return \Illuminate\Database\Eloquent\Collection
+     * @return \Illuminate\Database\Eloquent\Collection<int, Mengajar>
      */
     private function getMapelsByKelas(int $kelasId, int $tahunId, ?string $semester)
     {
@@ -234,25 +235,30 @@ class RaporAdminController extends Controller
     /**
      * Menghitung nilai rapor per siswa.
      *
-     * @param  \Illuminate\Database\Eloquent\Collection  $siswas    Koleksi siswa
-     * @param  \Illuminate\Database\Eloquent\Collection  $mapels    Koleksi mengajar
-     * @param  int                                       $tahunId   ID tahun ajaran
-     * @param  string|null                               $semester  Semester
-     * @return array Array nilai per siswa
+     * @param  \Illuminate\Database\Eloquent\Collection<int, Siswa>  $siswas  Koleksi siswa
+     * @param  \Illuminate\Database\Eloquent\Collection<int, Mengajar>  $mapels  Koleksi mengajar
+     * @param  int  $tahunId  ID tahun ajaran
+     * @param  string|null  $semester  Semester
+     * @return array<int, array{siswa: Siswa, mapels: array<int, int|null>, total: int, count: int}> Array nilai per siswa
      */
     private function calculateNilaiPerSiswa($siswas, $mapels, int $tahunId, ?string $semester): array
     {
         $nilai = [];
 
+        // Ambil semua penilaian kelas ini sekali saja (menghindari N+1 siswa×mapel),
+        // lalu index berdasarkan kombinasi siswa_id-mengajar_id.
+        $penilaianByKey = Penilaian::whereIn('siswa_id', $siswas->pluck('id'))
+            ->whereIn('mengajar_id', $mapels->pluck('id'))
+            ->where('tahun_ajaran_id', $tahunId)
+            ->when($semester, fn ($q) => $q->where('semester', $semester))
+            ->get()
+            ->keyBy(fn (Penilaian $p) => $p->siswa_id.'-'.$p->mengajar_id);
+
         foreach ($siswas as $siswa) {
             $row = ['siswa' => $siswa, 'mapels' => [], 'total' => 0, 'count' => 0];
 
             foreach ($mapels as $mengajar) {
-                $penilaian = Penilaian::where('mengajar_id', $mengajar->id)
-                    ->where('siswa_id', $siswa->id)
-                    ->where('tahun_ajaran_id', $tahunId)
-                    ->when($semester, fn ($q) => $q->where('semester', $semester))
-                    ->first();
+                $penilaian = $penilaianByKey->get($siswa->id.'-'.$mengajar->id);
 
                 $rapor = $this->calculateRaporValue($penilaian, $mengajar);
 
@@ -274,7 +280,7 @@ class RaporAdminController extends Controller
      * Menghitung nilai rapor dari penilaian.
      *
      * @param  Penilaian|null  $penilaian  Instance penilaian
-     * @param  Mengajar        $mengajar   Instance mengajar
+     * @param  Mengajar  $mengajar  Instance mengajar
      * @return int|null Nilai rapor atau null
      */
     private function calculateRaporValue(?Penilaian $penilaian, Mengajar $mengajar): ?int
@@ -297,14 +303,14 @@ class RaporAdminController extends Controller
     /**
      * Menghitung ranking siswa berdasarkan total nilai.
      *
-     * @param  array  $nilai  Array nilai per siswa
-     * @return array Array nilai dengan ranking
+     * @param  array<int, array{siswa: Siswa, mapels: array<int, int|null>, total: int, count: int}>  $nilai  Array nilai per siswa
+     * @return array<int, array{siswa: Siswa, mapels: array<int, int|null>, total: int, count: int, ranking?: int|null}> Array nilai dengan ranking
      */
     private function calculateRanking(array $nilai): array
     {
         // Sort by total descending to determine ranking
         $sorted = $nilai;
-        usort($sorted, fn($a, $b) => $b['total'] <=> $a['total']);
+        usort($sorted, fn ($a, $b) => $b['total'] <=> $a['total']);
 
         // Assign ranking with same rank for same total
         $rankings = [];
@@ -343,8 +349,8 @@ class RaporAdminController extends Controller
     /**
      * Membuat data URL untuk watermark SVG.
      *
-     * @param  PrintSetting|null   $printSetting  Instance print setting
-     * @param  SchoolProfile|null  $school        Instance school profile
+     * @param  PrintSetting|null  $printSetting  Instance print setting
+     * @param  SchoolProfile|null  $school  Instance school profile
      * @return string|null Data URL SVG atau null
      */
     private function generateWatermarkDataUrl(?PrintSetting $printSetting, ?SchoolProfile $school): ?string
@@ -369,6 +375,6 @@ class RaporAdminController extends Controller
             $watermarkText,
         );
 
-        return 'data:image/svg+xml,' . rawurlencode($svg);
+        return 'data:image/svg+xml,'.rawurlencode($svg);
     }
 }

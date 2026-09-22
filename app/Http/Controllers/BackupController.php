@@ -3,9 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -43,7 +41,7 @@ class BackupController extends Controller
      */
     public function download(): StreamedResponse
     {
-        $filename = 'backup_' . config('app.name') . '_' . date('Y-m-d_H-i-s') . '.sql';
+        $filename = 'backup_'.config('app.name').'_'.date('Y-m-d_H-i-s').'.sql';
 
         return response()->streamDownload(function () {
             $this->generateBackup();
@@ -55,7 +53,7 @@ class BackupController extends Controller
     /**
      * Restore database dari file SQL yang diupload.
      */
-    public function restore(Request $request)
+    public function restore(Request $request): \Illuminate\Http\RedirectResponse
     {
         $request->validate([
             'backup_file' => ['required', 'file', 'max:51200'], // Max 50MB
@@ -70,6 +68,10 @@ class BackupController extends Controller
 
         try {
             $sql = file_get_contents($file->getRealPath());
+
+            if ($sql === false || trim($sql) === '') {
+                return back()->with('error', __('File tidak dapat dibaca atau kosong.'));
+            }
 
             // Validate it looks like SQL
             if (! str_contains($sql, 'INSERT INTO') && ! str_contains($sql, 'CREATE TABLE')) {
@@ -89,20 +91,39 @@ class BackupController extends Controller
 
             // Remove comments and normalize line endings
             $sql = preg_replace('/--.*$/m', '', $sql);
+            if ($sql === null) {
+                DB::statement('SET FOREIGN_KEY_CHECKS=1');
+
+                return back()->with('error', __('Gagal memproses file SQL.'));
+            }
             $sql = str_replace("\r\n", "\n", $sql);
 
             // Split by semicolon followed by newline to avoid splitting on semicolons inside statements
             $statements = preg_split('/;\s*\n/', $sql);
+            if ($statements === false) {
+                DB::statement('SET FOREIGN_KEY_CHECKS=1');
+
+                return back()->with('error', __('Gagal memproses file SQL.'));
+            }
 
             foreach ($statements as $statement) {
                 $statement = trim($statement);
-                if (! empty($statement) && ! str_starts_with($statement, '--')) {
-                    // Skip SET statements that might conflict
-                    if (preg_match('/^SET\s+/i', $statement)) {
-                        continue;
-                    }
-                    DB::unprepared($statement);
+                if ($statement === '' || str_starts_with($statement, '--')) {
+                    continue;
                 }
+
+                // Skip SET statements that might conflict
+                if (preg_match('/^SET\s+/i', $statement)) {
+                    continue;
+                }
+
+                // Hanya izinkan statement dari file backup yang sah:
+                // struktur tabel dan data. Blokir statement berbahaya lainnya.
+                if (! preg_match('/^(CREATE\s+TABLE|INSERT\s+INTO|DROP\s+TABLE)/i', $statement)) {
+                    continue;
+                }
+
+                DB::unprepared($statement);
             }
 
             DB::statement('SET FOREIGN_KEY_CHECKS=1');
@@ -111,7 +132,7 @@ class BackupController extends Controller
         } catch (\Exception $e) {
             DB::statement('SET FOREIGN_KEY_CHECKS=1');
 
-            return back()->with('error', __('Gagal restore: ') . $e->getMessage());
+            return back()->with('error', __('Gagal restore: ').$e->getMessage());
         }
     }
 
@@ -123,8 +144,8 @@ class BackupController extends Controller
         $tables = $this->getTables();
 
         echo "-- E-Raport Database Backup\n";
-        echo "-- Generated: " . date('Y-m-d H:i:s') . "\n";
-        echo "-- Laravel Version: " . app()->version() . "\n\n";
+        echo '-- Generated: '.date('Y-m-d H:i:s')."\n";
+        echo '-- Laravel Version: '.app()->version()."\n\n";
         echo "SET FOREIGN_KEY_CHECKS=0;\n\n";
 
         foreach ($tables as $table) {
@@ -150,7 +171,7 @@ class BackupController extends Controller
         if (! empty($createTable)) {
             $createStatement = $createTable[0]->{'Create Table'} ?? '';
             echo "DROP TABLE IF EXISTS `{$table}`;\n";
-            echo $createStatement . ";\n\n";
+            echo $createStatement.";\n\n";
         }
 
         // Get table data
@@ -158,12 +179,13 @@ class BackupController extends Controller
 
         if ($rows->isEmpty()) {
             echo "-- No data in {$table}\n\n";
+
             return;
         }
 
         // Get column names
         $columns = array_keys((array) $rows->first());
-        $columnList = '`' . implode('`, `', $columns) . '`';
+        $columnList = '`'.implode('`, `', $columns).'`';
 
         echo "-- Data for {$table}\n";
 
@@ -178,14 +200,14 @@ class BackupController extends Controller
                     } elseif (is_numeric($value)) {
                         $rowValues[] = $value;
                     } else {
-                        $rowValues[] = "'" . addslashes((string) $value) . "'";
+                        $rowValues[] = "'".addslashes((string) $value)."'";
                     }
                 }
-                $values[] = '(' . implode(', ', $rowValues) . ')';
+                $values[] = '('.implode(', ', $rowValues).')';
             }
 
             echo "INSERT INTO `{$table}` ({$columnList}) VALUES\n";
-            echo implode(",\n", $values) . ";\n";
+            echo implode(",\n", $values).";\n";
         }
 
         echo "\n";
@@ -193,6 +215,8 @@ class BackupController extends Controller
 
     /**
      * Get all table names in the database.
+     *
+     * @return list<string>
      */
     private function getTables(): array
     {
