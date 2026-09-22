@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\TahunAjaran;
+use App\Services\PenghapusanDataService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -12,7 +13,15 @@ class TahunAjaranController extends Controller
 {
     public function index(): View
     {
-        $tahunAjaran = TahunAjaran::orderByDesc('is_active')
+        $tahunAjaran = TahunAjaran::withCount([
+            'siswas',
+            'kelas',
+            'penilaians',
+            'raporMetadatas',
+            'tahfidzPenilaians',
+            'mengajars',
+        ])
+            ->orderByDesc('is_active')
             ->orderByDesc('tahun_mulai')
             ->get();
 
@@ -55,10 +64,25 @@ class TahunAjaranController extends Controller
         return back()->with('status', __('Tahun ajaran berhasil diperbarui.'));
     }
 
+    /**
+     * Menghapus tahun ajaran.
+     *
+     * Penghapusan ditolak bila tahun ajaran masih menyimpan siswa, kelas, nilai,
+     * atau rapor agar tidak ada data yang hilang tanpa disadari.
+     *
+     * @param  TahunAjaran  $tahunAjaran  Instance tahun ajaran dari route model binding
+     * @return RedirectResponse Redirect ke halaman sebelumnya dengan pesan status
+     */
     public function destroy(TahunAjaran $tahunAjaran): RedirectResponse
     {
         if ($tahunAjaran->is_active) {
             return back()->with('status', __('Nonaktifkan tahun ajaran ini sebelum menghapus.'));
+        }
+
+        $alasan = (new PenghapusanDataService)->alasanTahunAjaranTidakBisaDihapus($tahunAjaran);
+
+        if ($alasan !== null) {
+            return back()->withErrors(['tahun_ajaran' => $alasan]);
         }
 
         $tahunAjaran->delete();

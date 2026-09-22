@@ -6,6 +6,7 @@ use App\Models\Guru;
 use App\Models\Kelas;
 use App\Models\Siswa;
 use App\Models\TahunAjaran;
+use App\Services\PenghapusanDataService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -38,7 +39,7 @@ class KelasController extends Controller
 
         $kelasList = Kelas::with(['guru'])
             ->when($tahunId, fn ($q) => $q->where('tahun_ajaran_id', $tahunId))
-            ->withCount('siswas')
+            ->withCount(['siswas', 'penilaians', 'mengajars'])
             ->orderBy('tingkat')
             ->orderBy('nama')
             ->get();
@@ -100,13 +101,20 @@ class KelasController extends Controller
     /**
      * Menghapus kelas dari database.
      *
-     * Siswa yang ada di kelas akan di-unassign.
+     * Siswa yang ada di kelas akan di-unassign. Penghapusan ditolak bila kelas
+     * masih menyimpan nilai rapor agar data nilai tidak ikut terhapus.
      *
      * @param  Kelas  $kelas  Instance kelas dari route model binding
      * @return RedirectResponse Redirect ke halaman sebelumnya dengan pesan status
      */
     public function destroy(Kelas $kelas): RedirectResponse
     {
+        $alasan = (new PenghapusanDataService)->alasanKelasTidakBisaDihapus($kelas);
+
+        if ($alasan !== null) {
+            return back()->withErrors(['kelas' => $alasan]);
+        }
+
         Siswa::where('kelas_id', $kelas->id)->update(['kelas_id' => null]);
 
         if ($kelas->guru_id) {

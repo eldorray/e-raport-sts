@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
 
 /**
@@ -95,5 +96,13 @@ class Mengajar extends Model
     public function guru(): BelongsTo
     {
         return $this->belongsTo(Guru::class);
+    }
+
+    /**
+     * @return HasMany<Penilaian, $this>
+     */
+    public function penilaians(): HasMany
+    {
+        return $this->hasMany(Penilaian::class);
     }
 }

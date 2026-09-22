@@ -102,22 +102,26 @@
                                                     </svg>
                                                     {{ __('Edit') }}
                                                 </button>
-                                                <form action="{{ route('mata-pelajaran.destroy', $mapel) }}"
-                                                    method="POST" class="inline"
-                                                    onsubmit="return confirm('{{ __('Hapus mata pelajaran ini?') }}');">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit"
-                                                        class="inline-flex items-center gap-1 rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-600 transition hover:bg-red-100 dark:bg-red-900/40 dark:text-red-300 dark:hover:bg-red-900/60">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4"
-                                                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                                stroke-width="1.8"
-                                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7h6m-7 0l1-3h4l1 3" />
-                                                        </svg>
-                                                        {{ __('Hapus') }}
-                                                    </button>
-                                                </form>
+                                                @if ($mapel->penilaians_count > 0)
+                                                    <x-hapus-nilai-terkunci :jumlah="$mapel->penilaians_count" />
+                                                @else
+                                                    <form action="{{ route('mata-pelajaran.destroy', $mapel) }}"
+                                                        method="POST" class="inline"
+                                                        onsubmit="return confirm('{{ __('Hapus mata pelajaran ini?') }}');">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit"
+                                                            class="inline-flex items-center gap-1 rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-600 transition hover:bg-red-100 dark:bg-red-900/40 dark:text-red-300 dark:hover:bg-red-900/60">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4"
+                                                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                                    stroke-width="1.8"
+                                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7h6m-7 0l1-3h4l1 3" />
+                                                            </svg>
+                                                            {{ __('Hapus') }}
+                                                        </button>
+                                                    </form>
+                                                @endif
                                             </div>
                                         </td>
                                     </tr>

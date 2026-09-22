@@ -51,6 +51,30 @@ class Kelas extends Model
     }
 
     /**
+     * @return HasMany<Mengajar, $this>
+     */
+    public function mengajars(): HasMany
+    {
+        return $this->hasMany(Mengajar::class);
+    }
+
+    /**
+     * @return HasMany<Penilaian, $this>
+     */
+    public function penilaians(): HasMany
+    {
+        return $this->hasMany(Penilaian::class);
+    }
+
+    /**
+     * @return HasMany<RaporMetadata, $this>
+     */
+    public function raporMetadatas(): HasMany
+    {
+        return $this->hasMany(RaporMetadata::class);
+    }
+
+    /**
      * @return BelongsTo<TahunAjaran, $this>
      */
     public function tahunAjaran(): BelongsTo

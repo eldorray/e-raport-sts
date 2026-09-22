@@ -7,6 +7,7 @@ use App\Models\Kelas;
 use App\Models\MataPelajaran;
 use App\Models\Mengajar;
 use App\Models\TahunAjaran;
+use App\Services\PenghapusanDataService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -146,11 +147,20 @@ class MengajarController extends Controller
     /**
      * Menghapus jadwal mengajar.
      *
+     * Penghapusan ditolak bila jadwal ini masih menyimpan nilai agar data nilai
+     * tidak ikut terhapus.
+     *
      * @param  Mengajar  $mengajar  Instance mengajar dari route model binding
      * @return RedirectResponse Redirect ke halaman sebelumnya dengan pesan status
      */
     public function destroy(Mengajar $mengajar): RedirectResponse
     {
+        $alasan = (new PenghapusanDataService)->alasanMengajarTidakBisaDihapus($mengajar);
+
+        if ($alasan !== null) {
+            return back()->withErrors(['mengajar' => $alasan]);
+        }
+
         $mengajar->delete();
 
         return back()->with('status', __('Jadwal mengajar dihapus.'));

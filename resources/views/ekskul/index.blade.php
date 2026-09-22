@@ -37,15 +37,19 @@
                                         data-guru="{{ $ekskul->guru_id }}">
                                         <i class="fa-solid fa-pen text-[11px]"></i> Edit
                                     </button>
-                                    <form action="{{ route('ekskul.destroy', $ekskul) }}" method="POST"
-                                        onsubmit="return confirm('Hapus ekskul ini?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit"
-                                            class="inline-flex items-center gap-1 rounded-md bg-red-100 px-3 py-1 text-xs font-semibold text-red-600 hover:bg-red-200">
-                                            <i class="fa-solid fa-trash text-[11px]"></i> Del
-                                        </button>
-                                    </form>
+                                    @if ($ekskul->penilaians_count > 0)
+                                        <x-hapus-nilai-terkunci :jumlah="$ekskul->penilaians_count" :label="__('Del')" />
+                                    @else
+                                        <form action="{{ route('ekskul.destroy', $ekskul) }}" method="POST"
+                                            onsubmit="return confirm('Hapus ekskul ini?');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit"
+                                                class="inline-flex items-center gap-1 rounded-md bg-red-100 px-3 py-1 text-xs font-semibold text-red-600 hover:bg-red-200">
+                                                <i class="fa-solid fa-trash text-[11px]"></i> Del
+                                            </button>
+                                        </form>
+                                    @endif
                                 </div>
                             </td>
                         </tr>

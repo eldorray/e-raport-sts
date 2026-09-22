@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\MataPelajaran;
+use App\Services\PenghapusanDataService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -14,7 +15,8 @@ class MataPelajaranController extends Controller
 {
     public function index(): View
     {
-        $mataPelajaran = MataPelajaran::orderByRaw('COALESCE(NULLIF(urutan, ""), "9999")')
+        $mataPelajaran = MataPelajaran::withCount(['penilaians', 'mengajars'])
+            ->orderByRaw('COALESCE(NULLIF(urutan, ""), "9999")')
             ->orderBy('urutan')
             ->get();
 
@@ -64,8 +66,23 @@ class MataPelajaranController extends Controller
         return back()->with('status', __('Mata pelajaran berhasil diperbarui.'));
     }
 
+    /**
+     * Menghapus mata pelajaran.
+     *
+     * Penghapusan ditolak bila mata pelajaran masih punya nilai agar data nilai
+     * tidak ikut terhapus.
+     *
+     * @param  MataPelajaran  $mataPelajaran  Instance mata pelajaran dari route model binding
+     * @return RedirectResponse Redirect ke halaman sebelumnya dengan pesan status
+     */
     public function destroy(MataPelajaran $mataPelajaran): RedirectResponse
     {
+        $alasan = (new PenghapusanDataService)->alasanMataPelajaranTidakBisaDihapus($mataPelajaran);
+
+        if ($alasan !== null) {
+            return back()->withErrors(['mata_pelajaran' => $alasan]);
+        }
+
         $mataPelajaran->delete();
 
         return back()->with('status', __('Mata pelajaran berhasil dihapus.'));

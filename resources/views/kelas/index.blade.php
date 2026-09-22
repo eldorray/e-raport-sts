@@ -65,15 +65,19 @@
                                         data-guru-id="{{ $kelas->guru_id }}">
                                         {{ __('Edit') }}
                                     </button>
-                                    <form action="{{ route('kelas.destroy', $kelas) }}" method="POST"
-                                        onsubmit="return confirm('{{ __('Hapus kelas ini?') }}');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit"
-                                            class="inline-flex items-center gap-1 rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-600">
-                                            {{ __('Hapus') }}
-                                        </button>
-                                    </form>
+                                    @if ($kelas->penilaians_count > 0)
+                                        <x-hapus-nilai-terkunci :jumlah="$kelas->penilaians_count" />
+                                    @else
+                                        <form action="{{ route('kelas.destroy', $kelas) }}" method="POST"
+                                            onsubmit="return confirm('{{ __('Hapus kelas ini?') }}');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit"
+                                                class="inline-flex items-center gap-1 rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-600">
+                                                {{ __('Hapus') }}
+                                            </button>
+                                        </form>
+                                    @endif
                                 </div>
                             </td>
                         </tr>

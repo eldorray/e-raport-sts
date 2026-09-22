@@ -6,9 +6,19 @@
                 {{ __('Kelola data siswa, termasuk detail lengkap dan foto.') }}</p>
         </div>
         <div class="flex flex-wrap gap-2">
+            @php
+                $rincianHapus = (new \App\Services\PenghapusanDataService)->rangkuman($dampakHapus ?? []);
+                $konfirmasiHapusSemua = __('Hapus :jumlah siswa tahun ajaran :tahun?', [
+                    'jumlah' => $siswas->count(),
+                    'tahun' => $tahunAjaran?->nama ?? '-',
+                ]);
+                if ($rincianHapus) {
+                    $konfirmasiHapusSemua .= ' '.__('Data nilai yang ikut terhapus: :rincian.', ['rincian' => $rincianHapus]);
+                }
+            @endphp
             @if ($siswas->count() > 0)
                 <form action="{{ route('siswa.destroy-all') }}" method="POST"
-                    onsubmit="return confirm('{{ __('Hapus semua siswa? Tindakan ini tidak dapat dibatalkan.') }}');">
+                    onsubmit="return confirm(@js($konfirmasiHapusSemua));">
                     @csrf
                     @method('DELETE')
                     <button type="submit"
@@ -125,8 +135,20 @@
                                         data-alamat-wali="{{ $siswa->alamat_wali }}">
                                         {{ __('Edit') }}
                                     </button>
+                                    @php
+                                        $rincianSiswa = (new \App\Services\PenghapusanDataService)->rangkuman([
+                                            'nilai' => $siswa->penilaians_count,
+                                            'rapor' => $siswa->rapor_metadatas_count,
+                                            'penilaian tahfidz' => $siswa->tahfidz_penilaians_count,
+                                            'nilai ekskul' => $siswa->ekskul_penilaians_count,
+                                        ]);
+                                        $konfirmasiHapusSiswa = __('Hapus :nama?', ['nama' => $siswa->nama]);
+                                        if ($rincianSiswa) {
+                                            $konfirmasiHapusSiswa .= ' '.__('Data nilai yang ikut terhapus: :rincian.', ['rincian' => $rincianSiswa]);
+                                        }
+                                    @endphp
                                     <form action="{{ route('siswa.destroy', $siswa) }}" method="POST"
-                                        onsubmit="return confirm('{{ __('Hapus siswa ini?') }}');">
+                                        onsubmit="return confirm(@js($konfirmasiHapusSiswa));">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit"

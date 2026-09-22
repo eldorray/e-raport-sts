@@ -6,8 +6,10 @@ use App\Exports\GuruTemplateExport;
 use App\Imports\GuruImport;
 use App\Models\Guru;
 use App\Models\Mengajar;
+use App\Models\Penilaian;
 use App\Models\TahunAjaran;
 use App\Models\User;
+use App\Services\PenghapusanDataService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -45,7 +47,7 @@ class GuruController extends Controller
      */
     public function index(): View
     {
-        $gurus = Guru::with('user')->orderBy('nama')->get();
+        $gurus = Guru::with('user')->withCount(['penilaians', 'mengajars'])->orderBy('nama')->get();
 
         $tahunId = session('selected_tahun_ajaran_id') ?? TahunAjaran::where('is_active', true)->value('id');
         $guruIds = $gurus->pluck('id');
@@ -55,6 +57,7 @@ class GuruController extends Controller
         return view('guru.index', [
             'gurus' => $gurus,
             'jtmMengajar' => $jtmMengajar,
+            'totalNilai' => Penilaian::count(),
         ]);
     }
 
@@ -144,11 +147,20 @@ class GuruController extends Controller
     /**
      * Menghapus guru dan user account terkait.
      *
+     * Penghapusan ditolak bila guru masih punya nilai agar data nilai tidak ikut
+     * terhapus.
+     *
      * @param  Guru  $guru  Instance guru dari route model binding
      * @return RedirectResponse Redirect ke halaman sebelumnya dengan pesan status
      */
     public function destroy(Guru $guru): RedirectResponse
     {
+        $alasan = (new PenghapusanDataService)->alasanGuruTidakBisaDihapus($guru);
+
+        if ($alasan !== null) {
+            return back()->withErrors(['guru' => $alasan]);
+        }
+
         $guru->user->delete();
         $guru->delete();
 
@@ -158,12 +170,20 @@ class GuruController extends Controller
     /**
      * Menghapus semua data guru beserta data mengajar terkait.
      *
-     * Menggunakan chunking untuk efisiensi memory pada data besar.
+     * Menggunakan chunking untuk efisiensi memory pada data besar. Penghapusan
+     * ditolak bila masih ada nilai tersimpan agar nilai di semua tahun ajaran
+     * tidak hilang.
      *
      * @return RedirectResponse Redirect ke halaman sebelumnya dengan pesan status
      */
     public function destroyAll(): RedirectResponse
     {
+        $alasan = (new PenghapusanDataService)->alasanSemuaGuruTidakBisaDihapus();
+
+        if ($alasan !== null) {
+            return back()->withErrors(['guru' => $alasan]);
+        }
+
         Guru::chunkById(self::BULK_DELETE_CHUNK_SIZE, function ($gurus) {
             $guruIds = $gurus->pluck('id');
 

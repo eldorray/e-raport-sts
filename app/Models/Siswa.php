@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -126,6 +127,46 @@ class Siswa extends Model
     public function tahunAjaran(): BelongsTo
     {
         return $this->belongsTo(TahunAjaran::class);
+    }
+
+    /**
+     * Mendapatkan seluruh nilai rapor siswa.
+     *
+     * @return HasMany<Penilaian, $this>
+     */
+    public function penilaians(): HasMany
+    {
+        return $this->hasMany(Penilaian::class);
+    }
+
+    /**
+     * Mendapatkan metadata rapor siswa (absensi, catatan wali, prestasi).
+     *
+     * @return HasMany<RaporMetadata, $this>
+     */
+    public function raporMetadatas(): HasMany
+    {
+        return $this->hasMany(RaporMetadata::class);
+    }
+
+    /**
+     * Mendapatkan penilaian tahfidz siswa.
+     *
+     * @return HasMany<TahfidzPenilaian, $this>
+     */
+    public function tahfidzPenilaians(): HasMany
+    {
+        return $this->hasMany(TahfidzPenilaian::class);
+    }
+
+    /**
+     * Mendapatkan nilai ekskul siswa.
+     *
+     * @return HasMany<EkskulPenilaian, $this>
+     */
+    public function ekskulPenilaians(): HasMany
+    {
+        return $this->hasMany(EkskulPenilaian::class);
     }
 
     /**

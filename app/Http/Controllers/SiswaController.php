@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Exports\SiswaTemplateExport;
 use App\Imports\SiswaImport;
 use App\Models\Siswa;
+use App\Models\TahunAjaran;
 use App\Services\KelasResolverService;
+use App\Services\PenghapusanDataService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -31,9 +33,6 @@ class SiswaController extends Controller
     /** @var int Panjang maksimum nama */
     private const MAX_NAME_LENGTH = 255;
 
-    /** @var int Jumlah siswa per chunk untuk bulk delete */
-    private const BULK_DELETE_CHUNK_SIZE = 200;
-
     /** @var string Disk storage untuk foto siswa */
     private const PHOTO_DISK = 'public';
 
@@ -41,17 +40,26 @@ class SiswaController extends Controller
     private const PHOTO_FOLDER = 'siswa';
 
     /**
-     * Menampilkan daftar semua siswa.
+     * Menampilkan daftar siswa pada tahun ajaran yang sedang dipilih.
      *
      * @return View Halaman index siswa
      */
     public function index(): View
     {
+        $tahunId = session('selected_tahun_ajaran_id');
+        $tahunAjaran = $tahunId ? TahunAjaran::find($tahunId) : null;
+
         $siswas = Siswa::with('kelas')
+            ->when($tahunId, fn ($query) => $query->where('tahun_ajaran_id', $tahunId))
+            ->withCount(['penilaians', 'raporMetadatas', 'tahfidzPenilaians', 'ekskulPenilaians'])
             ->orderBy('nama')
             ->get();
 
-        return view('siswa.index', compact('siswas'));
+        $dampakHapus = $tahunId
+            ? (new PenghapusanDataService)->ringkasanNilaiTahunAjaran($tahunId)
+            : [];
+
+        return view('siswa.index', compact('siswas', 'tahunAjaran', 'dampakHapus'));
     }
 
     /**
@@ -116,17 +124,16 @@ class SiswaController extends Controller
     }
 
     /**
-     * Menghapus siswa dari database.
+     * Menghapus siswa beserta seluruh data nilainya.
      *
      * @param  Siswa  $siswa  Instance siswa dari route model binding
      * @return RedirectResponse Redirect ke halaman sebelumnya dengan pesan status
      */
     public function destroy(Siswa $siswa): RedirectResponse
     {
-        $this->deletePhotoIfExists($siswa->photo_path);
-        $siswa->delete();
+        (new PenghapusanDataService)->hapusSiswa($siswa);
 
-        return back()->with('status', __('Siswa dihapus.'));
+        return back()->with('status', __('Siswa dihapus beserta nilai dan rapornya.'));
     }
 
     /**
@@ -146,22 +153,27 @@ class SiswaController extends Controller
     }
 
     /**
-     * Menghapus semua data siswa.
+     * Menghapus semua siswa pada tahun ajaran yang sedang dipilih.
      *
-     * Menggunakan chunking untuk efisiensi memory pada data besar.
+     * Tahun ajaran lain tidak terpengaruh agar nilai tahun ajaran lain aman.
+     * Data nilai siswa yang dihapus (rapor, tahfidz, ekskul) ikut dibersihkan
+     * secara eksplisit.
      *
      * @return RedirectResponse Redirect ke halaman sebelumnya dengan pesan status
      */
     public function destroyAll(): RedirectResponse
     {
-        Siswa::chunkById(self::BULK_DELETE_CHUNK_SIZE, function ($siswas) {
-            foreach ($siswas as $siswa) {
-                $this->deletePhotoIfExists($siswa->photo_path);
-                $siswa->delete();
-            }
-        });
+        $tahunId = session('selected_tahun_ajaran_id');
 
-        return back()->with('status', __('Semua siswa dihapus.'));
+        if (! $tahunId) {
+            return back()->withErrors(['tahun_ajaran' => __('Pilih tahun ajaran terlebih dahulu.')]);
+        }
+
+        $jumlah = (new PenghapusanDataService)->hapusSiswaTahunAjaran($tahunId);
+
+        return back()->with('status', __(':count siswa tahun ajaran ini dihapus beserta nilai dan rapornya.', [
+            'count' => $jumlah,
+        ]));
     }
 
     /**

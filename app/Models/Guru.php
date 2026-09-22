@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
@@ -85,5 +86,25 @@ class Guru extends Model
     public function kelasWali(): HasOne
     {
         return $this->hasOne(Kelas::class);
+    }
+
+    /**
+     * Mendapatkan jadwal mengajar guru.
+     *
+     * @return HasMany<Mengajar, $this>
+     */
+    public function mengajars(): HasMany
+    {
+        return $this->hasMany(Mengajar::class);
+    }
+
+    /**
+     * Mendapatkan nilai yang diinput guru.
+     *
+     * @return HasMany<Penilaian, $this>
+     */
+    public function penilaians(): HasMany
+    {
+        return $this->hasMany(Penilaian::class);
     }
 }

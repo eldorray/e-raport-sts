@@ -7,20 +7,25 @@
         </div>
         <div class="flex flex-wrap gap-2">
             @if ($gurus->count() > 0)
-                <form action="{{ route('guru.destroy-all') }}" method="POST"
-                    onsubmit="return confirm('{{ __('Hapus semua guru? Tindakan ini tidak dapat dibatalkan.') }}');">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit"
-                        class="inline-flex items-center gap-2 rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-rose-700 focus:outline-none focus:ring-4 focus:ring-rose-500/30">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
-                                d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                        {{ __('Hapus Semua') }}
-                    </button>
-                </form>
+                @if ($totalNilai > 0)
+                    <x-hapus-nilai-terkunci :jumlah="$totalNilai" :label="__('Hapus Semua')"
+                        class="inline-flex cursor-not-allowed items-center gap-2 rounded-lg bg-gray-100 px-4 py-2 text-sm font-semibold text-gray-400 dark:bg-gray-800 dark:text-gray-500" />
+                @else
+                    <form action="{{ route('guru.destroy-all') }}" method="POST"
+                        onsubmit="return confirm('{{ __('Hapus semua guru? Tindakan ini tidak dapat dibatalkan.') }}');">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit"
+                            class="inline-flex items-center gap-2 rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-rose-700 focus:outline-none focus:ring-4 focus:ring-rose-500/30">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                                    d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                            {{ __('Hapus Semua') }}
+                        </button>
+                    </form>
+                @endif
             @endif
             <button type="button" id="openCreateModal"
                 class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-500/30">
@@ -117,15 +122,19 @@
                                         data-active="{{ $guru->is_active ? '1' : '0' }}">
                                         {{ __('Edit') }}
                                     </button>
-                                    <form action="{{ route('guru.destroy', $guru) }}" method="POST"
-                                        onsubmit="return confirm('{{ __('Hapus guru ini?') }}');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit"
-                                            class="inline-flex items-center gap-1 rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-600">
-                                            {{ __('Hapus') }}
-                                        </button>
-                                    </form>
+                                    @if ($guru->penilaians_count > 0)
+                                        <x-hapus-nilai-terkunci :jumlah="$guru->penilaians_count" />
+                                    @else
+                                        <form action="{{ route('guru.destroy', $guru) }}" method="POST"
+                                            onsubmit="return confirm('{{ __('Hapus guru ini?') }}');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit"
+                                                class="inline-flex items-center gap-1 rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-600">
+                                                {{ __('Hapus') }}
+                                            </button>
+                                        </form>
+                                    @endif
                                     <form action="{{ route('guru.toggle', $guru) }}" method="POST">
                                         @csrf
                                         @method('PATCH')
