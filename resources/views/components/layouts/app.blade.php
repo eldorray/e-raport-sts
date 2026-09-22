@@ -217,6 +217,36 @@
                         </div>
                     @endif
 
+                    <!-- Flash Error Message -->
+                    @session('error')
+                        <div x-data="{ showFlashError: true }" x-show="showFlashError"
+                            x-transition:enter="transition ease-out duration-300"
+                            x-transition:enter-start="opacity-0 transform -translate-y-2"
+                            x-transition:enter-end="opacity-100 transform translate-y-0"
+                            x-transition:leave="transition ease-in duration-300"
+                            x-transition:leave-start="opacity-100 transform translate-y-0"
+                            x-transition:leave-end="opacity-0 transform -translate-y-2"
+                            class="mb-6 bg-red-50 dark:bg-red-900 border-l-4 border-red-500 p-4 rounded-md">
+                            <div class="flex items-start gap-3">
+                                <div class="flex-shrink-0">
+                                    <svg class="h-5 w-5 text-red-600 dark:text-red-300"
+                                        xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd"
+                                            d="M8.257 3.099c.765-1.36 2.721-1.36 3.486 0l6.518 11.59C19.02 15.97 18.122 18 16.518 18H3.482c-1.604 0-2.502-2.03-1.743-3.31l6.518-11.59zM11 14a1 1 0 10-2 0 1 1 0 002 0zm-1-2a1 1 0 01-1-1V8a1 1 0 112 0v3a1 1 0 01-1 1z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                                <div class="flex-1 text-sm text-red-700 dark:text-red-200">
+                                    {{ session('error') }}
+                                </div>
+                                <button @click="showFlashError = false"
+                                    class="text-red-600 dark:text-red-300 hover:text-red-800 dark:hover:text-red-100 focus:outline-none">
+                                    &times;
+                                </button>
+                            </div>
+                        </div>
+                    @endsession
+
                     {{ $slot }}
 
                 </div>

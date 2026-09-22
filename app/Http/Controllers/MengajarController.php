@@ -60,12 +60,21 @@ class MengajarController extends Controller
             $mengajarByMapel = $mengajars->keyBy('mata_pelajaran_id');
         }
 
-        $mataPelajarans = MataPelajaran::orderByRaw("FIELD(kelompok, 'PAI', 'Umum', 'Mulok')")
-            ->orderByRaw('CAST(urutan AS UNSIGNED)')
+        $mataPelajarans = MataPelajaran::orderByRaw(
+            "CASE kelompok WHEN 'PAI' THEN 1 WHEN 'Umum' THEN 2 WHEN 'Mulok' THEN 3 ELSE 4 END"
+        )
+            ->orderByRaw("COALESCE(NULLIF(urutan, '') + 0, 9999)")
             ->orderBy('nama_mapel')
             ->get();
         $gurus = Guru::orderBy('nama')->get();
         $tahunOptions = TahunAjaran::orderByDesc('is_active')->orderByDesc('tahun_mulai')->get();
+
+        // Jumlah jadwal mengajar tiap tahun ajaran pada semester yang sedang aktif,
+        // dipakai untuk menandai tahun ajaran yang benar-benar bisa disalin.
+        $jadwalPerTahun = Mengajar::when($semester, fn ($query) => $query->where('semester', $semester))
+            ->selectRaw('tahun_ajaran_id, COUNT(*) as jumlah_jadwal')
+            ->groupBy('tahun_ajaran_id')
+            ->pluck('jumlah_jadwal', 'tahun_ajaran_id');
 
         return view('mengajar.index', compact(
             'tingkats',
@@ -78,6 +87,7 @@ class MengajarController extends Controller
             'mataPelajarans',
             'gurus',
             'tahunOptions',
+            'jadwalPerTahun',
             'tahunId',
             'semester'
         ));

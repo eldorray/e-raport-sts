@@ -228,29 +228,42 @@
                         class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Sumber Tahun Ajaran') }}</label>
                     <select name="source_tahun_ajaran_id" required
                         class="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
-                        @foreach ($tahunOptions as $option)
+                        @forelse ($tahunOptions as $option)
                             @continue($option->id == $tahunId)
+                            @php($jumlahJadwal = (int) $jadwalPerTahun->get($option->id, 0))
                             <option value="{{ $option->id }}">
-                                {{ $option->nama }}{{ $option->is_active ? ' — Aktif' : '' }}</option>
-                        @endforeach
+                                {{ $option->nama }}{{ $option->is_active ? ' — Aktif' : '' }} —
+                                {{ $jumlahJadwal > 0
+                                    ? __(':jumlah jadwal semester :semester', ['jumlah' => $jumlahJadwal, 'semester' => $semester ?: '-'])
+                                    : __('belum ada jadwal semester :semester', ['semester' => $semester ?: '-']) }}
+                            </option>
+                        @empty
+                            <option value="">{{ __('Belum ada tahun ajaran lain.') }}</option>
+                        @endforelse
                     </select>
                 </div>
                 <div class="space-y-2">
                     <label class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Kelas') }}</label>
-                    <select name="kelas_id" required
-                        class="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
-                        @foreach ($kelasList as $kelas)
-                            <option value="{{ $kelas->id }}" @selected($kelas->id == $selectedKelasId)>{{ $kelas->nama }}
-                            </option>
-                        @endforeach
-                    </select>
+                    @if ($kelasList->isEmpty())
+                        <p class="rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-700 dark:bg-amber-900/40 dark:text-amber-200">
+                            {{ __('Tahun ajaran aktif belum punya kelas. Tambahkan kelas atau jalankan sync siswa terlebih dahulu.') }}
+                        </p>
+                    @else
+                        <select name="kelas_id" required
+                            class="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+                            @foreach ($kelasList as $kelas)
+                                <option value="{{ $kelas->id }}" @selected($kelas->id == $selectedKelasId)>{{ $kelas->nama }}
+                                </option>
+                            @endforeach
+                        </select>
+                    @endif
                 </div>
                 <div
                     class="mt-4 flex items-center justify-end gap-3 border-t border-gray-100 pt-4 dark:border-gray-700">
                     <button type="button" data-close-modal
                         class="rounded-lg border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-600 transition hover:border-gray-300 hover:text-gray-800 dark:border-gray-700 dark:text-gray-300">{{ __('Batal') }}</button>
-                    <button type="submit"
-                        class="inline-flex items-center gap-2 rounded-lg bg-orange-500 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-orange-600 focus:outline-none focus:ring-4 focus:ring-orange-500/30">
+                    <button type="submit" @disabled($kelasList->isEmpty())
+                        class="inline-flex items-center gap-2 rounded-lg bg-orange-500 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-orange-600 focus:outline-none focus:ring-4 focus:ring-orange-500/30 disabled:cursor-not-allowed disabled:bg-gray-300 dark:disabled:bg-gray-700">
                         {{ __('Salin') }}
                     </button>
                 </div>
@@ -276,17 +289,23 @@
                 </div>
                 <div class="space-y-2">
                     <label class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Salin dari Kelas') }}</label>
-                    <select name="source_kelas_id" required
-                        class="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
-                        <option value="">- {{ __('Pilih Kelas Sumber') }} -</option>
-                        @foreach ($kelasList as $kelas)
-                            @continue($kelas->id == $selectedKelasId)
-                            <option value="{{ $kelas->id }}">{{ $kelas->nama }}</option>
-                        @endforeach
-                    </select>
+                    @if ($kelasList->count() < 2)
+                        <p class="rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-700 dark:bg-amber-900/40 dark:text-amber-200">
+                            {{ __('Tahun ajaran aktif baru punya satu kelas, jadi belum ada kelas lain yang bisa dijadikan sumber.') }}
+                        </p>
+                    @else
+                        <select name="source_kelas_id" required
+                            class="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+                            <option value="">- {{ __('Pilih Kelas Sumber') }} -</option>
+                            @foreach ($kelasList as $kelas)
+                                @continue($kelas->id == $selectedKelasId)
+                                <option value="{{ $kelas->id }}">{{ $kelas->nama }}</option>
+                            @endforeach
+                        </select>
+                    @endif
                 </div>
                 <p class="text-xs text-gray-500 dark:text-gray-400">
-                    {{ __('Data mengajar (guru & JTM) dari kelas sumber akan disalin ke kelas tujuan. Data yang sudah ada akan di-update.') }}
+                    {{ __('Data mengajar (guru & JTM) dari kelas sumber akan disalin ke kelas tujuan pada semester yang sedang aktif. Data yang sudah ada akan di-update.') }}
                 </p>
                 <div class="mt-4 flex items-center justify-end gap-3 border-t border-gray-100 pt-4 dark:border-gray-700">
                     <button type="button" data-close-copy-kelas

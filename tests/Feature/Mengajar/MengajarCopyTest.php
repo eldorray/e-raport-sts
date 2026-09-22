@@ -243,3 +243,55 @@ it('tetap bisa menyalin jadwal dari kelas lain di tahun ajaran yang sama', funct
 
     expect(Mengajar::where('tahun_ajaran_id', $this->tahunTarget->id)->where('kelas_id', $kelasTarget->id)->count())->toBe(1);
 });
+
+it('menampilkan pesan error flash pada halaman mengajar', function () {
+    buatKelasSalin($this->tahunTarget, '1A', 'I');
+
+    $this->actingAs($this->admin)
+        ->withSession([
+            'selected_tahun_ajaran_id' => $this->tahunTarget->id,
+            'selected_semester' => 'Ganjil',
+            'error' => 'Kelas 1A tidak ditemukan pada tahun ajaran sumber.',
+        ])
+        ->get(route('mengajar.index'))
+        ->assertSuccessful()
+        ->assertSee('tidak ditemukan pada tahun ajaran sumber');
+});
+
+it('menampilkan jumlah jadwal tiap tahun ajaran pada modal salin', function () {
+    $kelasSumber = buatKelasSalin($this->tahunSumber, '1A', 'I');
+    buatKelasSalin($this->tahunTarget, '1A', 'I');
+
+    $guru = buatGuruSalin('Guru Satu');
+    $mapelSatu = buatMapelSalin('Matematika', 'MTK');
+    $mapelDua = buatMapelSalin('Bahasa Indonesia', 'BIN');
+    buatJadwalSalin($this->tahunSumber->id, $kelasSumber->id, $mapelSatu->id, $guru->id, 4);
+    buatJadwalSalin($this->tahunSumber->id, $kelasSumber->id, $mapelDua->id, $guru->id, 3);
+
+    $this->actingAs($this->admin)
+        ->withSession([
+            'selected_tahun_ajaran_id' => $this->tahunTarget->id,
+            'selected_semester' => 'Ganjil',
+        ])
+        ->get(route('mengajar.index'))
+        ->assertSuccessful()
+        ->assertSee('2 jadwal semester Ganjil');
+});
+
+it('memberi tahu saat tahun ajaran aktif belum punya kelas pada modal salin', function () {
+    buatKelasSalin($this->tahunSumber, '1A', 'I');
+    $guru = buatGuruSalin('Guru Satu');
+    $mapel = buatMapelSalin('Matematika', 'MTK');
+    $kelasSumber = Kelas::where('tahun_ajaran_id', $this->tahunSumber->id)->firstOrFail();
+    buatJadwalSalin($this->tahunSumber->id, $kelasSumber->id, $mapel->id, $guru->id, 4);
+
+    $this->actingAs($this->admin)
+        ->withSession([
+            'selected_tahun_ajaran_id' => $this->tahunTarget->id,
+            'selected_semester' => 'Ganjil',
+        ])
+        ->get(route('mengajar.index'))
+        ->assertSuccessful()
+        ->assertSee('Tahun ajaran aktif belum punya kelas')
+        ->assertSee('1 jadwal semester Ganjil');
+});
