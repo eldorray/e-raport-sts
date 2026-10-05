@@ -142,16 +142,16 @@ class TahunAjaranController extends Controller
     {
         $data = $request->validate([
             'tahun_ajaran_id' => ['required', 'exists:tahun_ajarans,id'],
-            'semester' => ['nullable', 'string', 'max:20'],
         ]);
 
         /** @var TahunAjaran $tahun */
         $tahun = TahunAjaran::findOrFail($data['tahun_ajaran_id']);
-        $semester = ($data['semester'] ?? null) ?: $tahun->semester;
 
+        // Setiap record tahun ajaran mewakili satu semester (unik nama + semester),
+        // jadi semester diambil dari record, bukan dari input.
         $request->session()->put([
             'selected_tahun_ajaran_id' => $tahun->id,
-            'selected_semester' => $semester,
+            'selected_semester' => $tahun->semester,
             'selected_tahun_ajaran_is_active' => (bool) $tahun->is_active,
         ]);
 

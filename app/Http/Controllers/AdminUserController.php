@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Guru;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -53,15 +54,28 @@ class AdminUserController extends Controller
             'is_active' => ['nullable', 'boolean'],
         ]);
 
-        if ($selfUpdate && isset($data['is_active']) && $data['is_active'] === false) {
-            return back()->withErrors(['is_active' => __('Anda tidak dapat menonaktifkan akun sendiri.')]);
+        // Checkbox yang tidak dicentang tidak ikut terkirim, jadi baca sebagai boolean.
+        $isActive = $request->boolean('is_active');
+
+        if ($selfUpdate && ! $isActive) {
+            return back()->withErrors(['is_active' => __('Anda tidak dapat menonaktifkan akun sendiri.')])->withInput();
+        }
+
+        if ($selfUpdate && $data['role'] !== $user->role) {
+            return back()->withErrors(['role' => __('Anda tidak dapat mengubah peran akun sendiri.')])->withInput();
+        }
+
+        $tetapAdminAktif = $data['role'] === 'admin' && $isActive;
+
+        if ($this->isActiveAdmin($user) && ! $tetapAdminAktif && $this->activeAdminCount() <= 1) {
+            return back()->withErrors(['user' => __('Minimal harus ada satu admin aktif. Tambahkan atau aktifkan admin lain terlebih dahulu.')])->withInput();
         }
 
         if (empty($data['password'])) {
             unset($data['password']);
         }
 
-        $data['is_active'] = $data['is_active'] ?? false;
+        $data['is_active'] = $isActive;
 
         $user->update($data);
 
@@ -74,8 +88,30 @@ class AdminUserController extends Controller
             return back()->withErrors(['user' => __('Anda tidak dapat menghapus akun sendiri.')]);
         }
 
+        if ($this->isActiveAdmin($user) && $this->activeAdminCount() <= 1) {
+            return back()->withErrors(['user' => __('Admin aktif terakhir tidak dapat dihapus. Tambahkan atau aktifkan admin lain terlebih dahulu.')]);
+        }
+
+        // Menghapus user ikut menghapus data guru beserta nilai ekskulnya (cascade).
+        if (Guru::query()->where('user_id', $user->id)->exists()) {
+            return back()->withErrors(['user' => __('Pengguna ini terhubung dengan data guru. Nonaktifkan akunnya, atau hapus guru melalui menu Guru.')]);
+        }
+
         $user->delete();
 
         return back()->with('status', __('Pengguna berhasil dihapus.'));
+    }
+
+    private function isActiveAdmin(User $user): bool
+    {
+        return $user->role === 'admin' && $user->is_active;
+    }
+
+    private function activeAdminCount(): int
+    {
+        return User::query()
+            ->where('role', 'admin')
+            ->where('is_active', true)
+            ->count();
     }
 }

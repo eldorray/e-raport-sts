@@ -123,8 +123,10 @@ class LoginController extends Controller
 
         $seconds = RateLimiter::availableIn($this->throttleKey($request));
 
+        // Ditampilkan di field 'login' karena form login hanya menampilkan
+        // error untuk login, password, dan tahun_ajaran_id.
         throw ValidationException::withMessages([
-            'email' => trans('auth.throttle', [
+            'login' => trans('auth.throttle', [
                 'seconds' => $seconds,
                 'minutes' => ceil($seconds / 60),
             ]),

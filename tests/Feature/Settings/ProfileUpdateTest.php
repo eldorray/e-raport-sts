@@ -46,17 +46,21 @@ test('email verification status is unchanged when email address is unchanged', f
     expect($user->refresh()->email_verified_at)->not->toBeNull();
 });
 
-test('user can delete their account', function () {
-    $user = User::factory()->create();
+test('user can no longer delete their own account', function () {
+    $user = User::factory()->create(['role' => 'guru']);
 
-    $response = $this
+    $status = $this
         ->actingAs($user)
-        ->delete('/settings/profile');
+        ->delete('/settings/profile')
+        ->status();
 
-    $response
-        ->assertSessionHasNoErrors()
-        ->assertRedirect('/');
+    expect($status)->toBeIn([404, 405]);
 
-    $this->assertGuest();
-    expect($user->fresh())->toBeNull();
+    $this->assertAuthenticatedAs($user);
+    expect($user->fresh())->not->toBeNull();
+
+    $this->actingAs($user)
+        ->get('/settings/profile')
+        ->assertOk()
+        ->assertDontSee(__('Delete account'));
 });

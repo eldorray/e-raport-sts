@@ -38,13 +38,12 @@ Route::middleware(['auth'])->group(function () {
     // Settings & profile (shared)
     Route::get('settings/profile', [Settings\ProfileController::class, 'edit'])->name('settings.profile.edit');
     Route::put('settings/profile', [Settings\ProfileController::class, 'update'])->name('settings.profile.update');
-    Route::delete('settings/profile', [Settings\ProfileController::class, 'destroy'])->name('settings.profile.destroy');
     Route::get('settings/password', [Settings\PasswordController::class, 'edit'])->name('settings.password.edit');
     Route::put('settings/password', [Settings\PasswordController::class, 'update'])->name('settings.password.update');
     Route::get('settings/appearance', [Settings\AppearanceController::class, 'edit'])->name('settings.appearance.edit');
 
     // All authenticated users can switch context (tahun ajaran & semester)
-    Route::match(['get', 'patch'], 'tahun-ajaran/switch-session', [TahunAjaranController::class, 'switchSession'])
+    Route::patch('tahun-ajaran/switch-session', [TahunAjaranController::class, 'switchSession'])
         ->name('tahun-ajaran.switch-session');
 
     // Admin-only
@@ -93,10 +92,9 @@ Route::middleware(['auth'])->group(function () {
         Route::post('rapor/pengaturan-cetak', [PrintSettingController::class, 'update'])->name('rapor.print-settings.update');
         Route::resource('users', AdminUserController::class)->except(['show']);
 
-        // Backup & Restore
+        // Backup (restore dilakukan dari panel hosting, bukan dari aplikasi)
         Route::get('backup', [BackupController::class, 'index'])->name('backup.index');
         Route::get('backup/download', [BackupController::class, 'download'])->name('backup.download');
-        Route::post('backup/restore', [BackupController::class, 'restore'])->name('backup.restore');
     });
 
     // Admin & Guru: pengaturan bobot dan cetak rapor

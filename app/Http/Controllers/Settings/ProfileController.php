@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
@@ -44,19 +43,5 @@ class ProfileController extends Controller
         $user->save();
 
         return to_route('settings.profile.edit')->with('status', __('Profile updated successfully'));
-    }
-
-    public function destroy(Request $request): RedirectResponse
-    {
-        $user = $request->user();
-
-        Auth::logout();
-
-        $user->delete();
-
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
-        return to_route('home');
     }
 }

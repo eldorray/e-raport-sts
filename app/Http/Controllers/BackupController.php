@@ -2,13 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
- * Controller untuk backup dan restore database.
+ * Controller untuk backup database.
+ *
+ * Restore tidak dilakukan dari aplikasi, melainkan dari panel hosting
+ * (phpMyAdmin / mysql import) memakai file hasil download.
  *
  * Hanya dapat diakses oleh admin.
  */
@@ -16,9 +18,11 @@ class BackupController extends Controller
 {
     /**
      * Tables to exclude from backup (usually Laravel internal tables).
+     *
+     * Tabel `migrations` sengaja ikut di-backup agar database hasil restore
+     * mengetahui versi skemanya.
      */
     private const EXCLUDED_TABLES = [
-        'migrations',
         'password_reset_tokens',
         'sessions',
         'cache',
@@ -29,7 +33,7 @@ class BackupController extends Controller
     ];
 
     /**
-     * Menampilkan halaman backup/restore.
+     * Menampilkan halaman backup.
      */
     public function index(): View
     {
@@ -48,92 +52,6 @@ class BackupController extends Controller
         }, $filename, [
             'Content-Type' => 'application/sql',
         ]);
-    }
-
-    /**
-     * Restore database dari file SQL yang diupload.
-     */
-    public function restore(Request $request): \Illuminate\Http\RedirectResponse
-    {
-        $request->validate([
-            'backup_file' => ['required', 'file', 'max:51200'], // Max 50MB
-        ]);
-
-        $file = $request->file('backup_file');
-        $extension = strtolower($file->getClientOriginalExtension());
-
-        if (! in_array($extension, ['sql', 'txt'])) {
-            return back()->with('error', __('File harus berformat .sql'));
-        }
-
-        try {
-            $sql = file_get_contents($file->getRealPath());
-
-            if ($sql === false || trim($sql) === '') {
-                return back()->with('error', __('File tidak dapat dibaca atau kosong.'));
-            }
-
-            // Validate it looks like SQL
-            if (! str_contains($sql, 'INSERT INTO') && ! str_contains($sql, 'CREATE TABLE')) {
-                return back()->with('error', __('File tidak valid atau kosong.'));
-            }
-
-            // Disable foreign key checks during restore
-            DB::statement('SET FOREIGN_KEY_CHECKS=0');
-
-            // Drop all existing tables first (except excluded ones)
-            $existingTables = $this->getTables();
-            foreach ($existingTables as $table) {
-                if (! in_array($table, self::EXCLUDED_TABLES)) {
-                    DB::statement("DROP TABLE IF EXISTS `{$table}`");
-                }
-            }
-
-            // Remove comments and normalize line endings
-            $sql = preg_replace('/--.*$/m', '', $sql);
-            if ($sql === null) {
-                DB::statement('SET FOREIGN_KEY_CHECKS=1');
-
-                return back()->with('error', __('Gagal memproses file SQL.'));
-            }
-            $sql = str_replace("\r\n", "\n", $sql);
-
-            // Split by semicolon followed by newline to avoid splitting on semicolons inside statements
-            $statements = preg_split('/;\s*\n/', $sql);
-            if ($statements === false) {
-                DB::statement('SET FOREIGN_KEY_CHECKS=1');
-
-                return back()->with('error', __('Gagal memproses file SQL.'));
-            }
-
-            foreach ($statements as $statement) {
-                $statement = trim($statement);
-                if ($statement === '' || str_starts_with($statement, '--')) {
-                    continue;
-                }
-
-                // Skip SET statements that might conflict
-                if (preg_match('/^SET\s+/i', $statement)) {
-                    continue;
-                }
-
-                // Hanya izinkan statement dari file backup yang sah:
-                // struktur tabel dan data. Blokir statement berbahaya lainnya.
-                if (! preg_match('/^(CREATE\s+TABLE|INSERT\s+INTO|DROP\s+TABLE)/i', $statement)) {
-                    continue;
-                }
-
-                DB::unprepared($statement);
-            }
-
-            DB::statement('SET FOREIGN_KEY_CHECKS=1');
-
-            return back()->with('status', __('Database berhasil di-restore dari backup.'));
-        } catch (\Exception $e) {
-            DB::statement('SET FOREIGN_KEY_CHECKS=1');
-
-            return back()->with('error', __('Gagal restore: ').$e->getMessage());
-        }
     }
 
     /**
@@ -174,43 +92,71 @@ class BackupController extends Controller
             echo $createStatement.";\n\n";
         }
 
-        // Get table data
-        $rows = DB::table($table)->get();
+        $this->writeTableData($table);
+    }
 
-        if ($rows->isEmpty()) {
+    /**
+     * Tulis data tabel sebagai INSERT per 100 baris.
+     *
+     * Baris dibaca dengan cursor agar seluruh tabel tidak dimuat ke memori.
+     */
+    protected function writeTableData(string $table): void
+    {
+        $columnList = null;
+        $values = [];
+
+        foreach (DB::table($table)->cursor() as $row) {
+            $row = (array) $row;
+
+            if ($columnList === null) {
+                $columnList = '`'.implode('`, `', array_keys($row)).'`';
+                echo "-- Data for {$table}\n";
+            }
+
+            $values[] = '('.implode(', ', array_map($this->sqlValue(...), array_values($row))).')';
+
+            if (count($values) === 100) {
+                $this->writeInsert($table, $columnList, $values);
+                $values = [];
+            }
+        }
+
+        if ($columnList === null) {
             echo "-- No data in {$table}\n\n";
 
             return;
         }
 
-        // Get column names
-        $columns = array_keys((array) $rows->first());
-        $columnList = '`'.implode('`, `', $columns).'`';
-
-        echo "-- Data for {$table}\n";
-
-        foreach ($rows->chunk(100) as $chunk) {
-            $values = [];
-
-            foreach ($chunk as $row) {
-                $rowValues = [];
-                foreach ((array) $row as $value) {
-                    if ($value === null) {
-                        $rowValues[] = 'NULL';
-                    } elseif (is_numeric($value)) {
-                        $rowValues[] = $value;
-                    } else {
-                        $rowValues[] = "'".addslashes((string) $value)."'";
-                    }
-                }
-                $values[] = '('.implode(', ', $rowValues).')';
-            }
-
-            echo "INSERT INTO `{$table}` ({$columnList}) VALUES\n";
-            echo implode(",\n", $values).";\n";
+        if ($values !== []) {
+            $this->writeInsert($table, $columnList, $values);
         }
 
         echo "\n";
+    }
+
+    /**
+     * Format satu nilai kolom menjadi literal SQL.
+     *
+     * Semua nilai non-null dikutip lewat PDO agar varchar berangka (NISN/NIP
+     * dengan nol di depan) tidak berubah menjadi angka, dan karakter khusus
+     * (baris baru, NUL, kutip) di-escape sesuai driver database.
+     */
+    protected function sqlValue(int|float|string|bool|null $value): string
+    {
+        if ($value === null) {
+            return 'NULL';
+        }
+
+        return DB::getPdo()->quote((string) $value);
+    }
+
+    /**
+     * @param  list<string>  $values
+     */
+    private function writeInsert(string $table, string $columnList, array $values): void
+    {
+        echo "INSERT INTO `{$table}` ({$columnList}) VALUES\n";
+        echo implode(",\n", $values).";\n";
     }
 
     /**
