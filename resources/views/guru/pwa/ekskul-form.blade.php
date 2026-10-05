@@ -3,7 +3,10 @@
 @endphp
 
 <x-layouts.pwa :title="$ekskul->nama" :subtitle="__('Ekskul').' • '.($tahunAjaran?->nama ?? '').' • '.($semester ?: '-')" :back="route('guru.pwa.ekskul')">
-    <div x-data="ekskulNilai({{ Illuminate\Support\Js::from(['total' => $jumlahPeserta]) }})" x-init="siap()">
+    <div x-data="ekskulNilai({{ Illuminate\Support\Js::from([
+        'total' => $jumlahPeserta,
+        'belumTersimpan' => $errors->any() && session()->hasOldInput('nilai'),
+    ]) }})" x-init="siap()">
         {{-- Ringkasan --}}
         <section
             class="mb-3 rounded-3xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
@@ -69,8 +72,10 @@
             </div>
         @else
             <form method="POST" action="{{ route('guru.ekskul.store', $ekskul) }}" x-ref="form"
-                @submit="menyimpan = true" class="pb-28">
+                @submit="kirim()" class="pb-28">
                 @csrf
+                <input type="hidden" name="tahun_ajaran_id" value="{{ $tahunId }}">
+                <input type="hidden" name="semester" value="{{ $semester }}">
 
                 <ul class="space-y-2" @input="hitung()" @change="hitung()">
                     @foreach ($peserta as $index => $siswa)
@@ -92,8 +97,9 @@
                                     <span class="sr-only">{{ __('Nilai') }}</span>
                                     <input type="text" inputmode="decimal" enterkeyhint="next" autocomplete="off"
                                         data-nilai="ekskul" name="nilai[{{ $siswa->id }}]"
-                                        value="{{ $baris?->nilai !== null ? rtrim(rtrim(number_format((float) $baris->nilai, 2, '.', ''), '0'), '.') : '' }}"
-                                        @blur="normalisasi($event)" @disabled(! $canEdit) placeholder="—"
+                                        value="{{ old('nilai.'.$siswa->id, $baris?->nilai !== null ? rtrim(rtrim(number_format((float) $baris->nilai, 2, '.', ''), '0'), '.') : '') }}"
+                                        @blur="normalisasi($event)" @keydown.enter.prevent="kolomBerikut($event)"
+                                        @disabled(! $canEdit) placeholder="—"
                                         class="h-12 w-20 rounded-2xl border border-slate-200 bg-slate-50 text-center text-lg font-bold tabular-nums outline-none transition focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/30 disabled:opacity-60 dark:border-slate-700 dark:bg-slate-950 dark:focus:bg-slate-900" />
                                 </label>
                             </div>
@@ -117,7 +123,7 @@
                             <div x-cloak x-show="catatanTerbuka[{{ $siswa->id }}]" x-transition class="mt-2">
                                 <textarea name="catatan[{{ $siswa->id }}]" rows="2" maxlength="255" @disabled(! $canEdit)
                                     placeholder="{{ __('Catatan pembina, mis. sangat aktif') }}"
-                                    class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none transition focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/30 dark:border-slate-700 dark:bg-slate-950">{{ $baris?->catatan }}</textarea>
+                                    class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm outline-none transition focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/30 dark:border-slate-700 dark:bg-slate-950">{{ old('catatan.'.$siswa->id, $baris?->catatan) }}</textarea>
                             </div>
                         </li>
                     @endforeach
@@ -151,6 +157,8 @@
                 <form id="remove-{{ $siswa->id }}" method="POST" action="{{ route('guru.ekskul.store', $ekskul) }}"
                     class="hidden">
                     @csrf
+                    <input type="hidden" name="tahun_ajaran_id" value="{{ $tahunId }}">
+                    <input type="hidden" name="semester" value="{{ $semester }}">
                     <input type="hidden" name="action" value="remove">
                     <input type="hidden" name="siswa_id" value="{{ $siswa->id }}">
                 </form>
@@ -184,6 +192,8 @@
                     <form method="POST" action="{{ route('guru.ekskul.store', $ekskul) }}" x-ref="formTambah"
                         class="flex min-h-0 flex-1 flex-col">
                         @csrf
+                        <input type="hidden" name="tahun_ajaran_id" value="{{ $tahunId }}">
+                        <input type="hidden" name="semester" value="{{ $semester }}">
                         <input type="hidden" name="action" value="add">
 
                         <div class="mt-3 min-h-0 flex-1 overflow-y-auto px-5">
@@ -240,7 +250,8 @@
 
                 siap() {
                     this.hitung();
-                    this.dirty = false;
+                    // Isian dari penyimpanan yang gagal (old input) memang belum tersimpan.
+                    this.dirty = konfigurasi.belumTersimpan;
 
                     this.$watch('cari', () => this.hitungTampil());
 
@@ -332,18 +343,61 @@
                     }
                 },
 
-                normalisasi(peristiwa) {
-                    const input = peristiwa.target;
-                    const angka = parseFloat(String(input.value).replace(',', '.'));
+                kolom() {
+                    if (!this.$refs.form) {
+                        return [];
+                    }
 
-                    if (String(input.value).trim() === '' || isNaN(angka)) {
-                        input.value = '';
+                    return Array.from(this.$refs.form.querySelectorAll('input[data-nilai="ekskul"]'));
+                },
+
+                kolomBerikut(peristiwa) {
+                    const kolom = this.kolom().filter((el) => {
+                        const baris = el.closest('li[data-siswa]');
+
+                        return !el.disabled && (!baris || this.cocok(baris.dataset.nama, baris.dataset.nis));
+                    });
+                    const posisi = kolom.indexOf(peristiwa.target);
+                    const berikut = posisi === -1 ? null : kolom[posisi + 1];
+
+                    if (berikut) {
+                        berikut.focus();
+                        berikut.select();
 
                         return;
                     }
 
-                    const dibatasi = Math.min(100, Math.max(0, angka));
-                    input.value = Number.isInteger(dibatasi) ? String(dibatasi) : dibatasi.toFixed(1);
+                    peristiwa.target.blur();
+                },
+
+                kirim() {
+                    // Server memvalidasi `numeric`, jadi "8,5" harus menjadi "8.5" sebelum dikirim.
+                    this.kolom().forEach((el) => this.rapikan(el));
+                    this.menyimpan = true;
+                },
+
+                rapikan(input) {
+                    const angka = parseFloat(String(input.value).trim().replace(',', '.'));
+                    let hasil = '';
+
+                    if (String(input.value).trim() !== '' && !isNaN(angka)) {
+                        const dibatasi = Math.min(100, Math.max(0, angka));
+                        hasil = Number.isInteger(dibatasi) ? String(dibatasi) : dibatasi.toFixed(1);
+                    }
+
+                    if (input.value === hasil) {
+                        return false;
+                    }
+
+                    input.value = hasil;
+
+                    return true;
+                },
+
+                normalisasi(peristiwa) {
+                    if (this.rapikan(peristiwa.target)) {
+                        this.hitung();
+                    }
                 },
             }));
         });

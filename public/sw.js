@@ -5,10 +5,12 @@
  * - Hanya permintaan GET yang ditangani; simpan/ubah nilai selalu online.
  * - Halaman HTML tidak disimpan di cache supaya nilai yang tampil tidak pernah
  *   basi; saat tidak ada koneksi, pengguna diarahkan ke halaman offline.
+ * - Respons navigasi diteruskan apa adanya, apa pun statusnya (redirect ke login,
+ *   403, 404, 419, 500). Halaman offline hanya untuk kegagalan jaringan sungguhan.
  * - Aset statis (hasil build Vite, gambar, font) disajikan dari cache lebih dulu
  *   karena namanya sudah ber-hash.
  */
-const VERSI_CACHE = 'eraport-guru-v1';
+const VERSI_CACHE = 'eraport-guru-v2';
 
 const ASET_DASAR = [
     '/offline.html',
@@ -63,15 +65,7 @@ self.addEventListener('fetch', (event) => {
 
     if (permintaan.mode === 'navigate') {
         event.respondWith(
-            fetch(permintaan)
-                .then((respons) => {
-                    if (respons && respons.status === 200) {
-                        return respons;
-                    }
-
-                    return caches.match('/offline.html');
-                })
-                .catch(() => caches.match(permintaan).then((tersimpan) => tersimpan || caches.match('/offline.html'))),
+            fetch(permintaan).catch(() => caches.match('/offline.html')),
         );
 
         return;

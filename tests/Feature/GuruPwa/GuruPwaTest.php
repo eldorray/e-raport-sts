@@ -248,7 +248,7 @@ it('menyediakan berkas manifest, service worker, dan halaman offline', function 
         ->and(collect($manifest['icons'])->pluck('purpose')->all())->toContain('maskable');
 
     expect(file_get_contents(public_path('sw.js')))
-        ->toContain('eraport-guru-v1')
+        ->toContain('eraport-guru-v2')
         ->toContain('/offline.html');
 
     expect(file_get_contents(public_path('offline.html')))->toContain('Tidak ada koneksi');

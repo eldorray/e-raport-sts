@@ -8,6 +8,10 @@
         'total' => $siswas->count(),
         'bobotSumatif' => $bobotSumatif,
         'bobotSts' => $bobotSts,
+        'bisaUbah' => $canEdit,
+        'kunciDraft' => 'nilai-draft:'.$mengajar->id.':'.$tahunId.':'.$semester,
+        'hapusDraft' => session()->has('status') && ! $errors->any(),
+        'belumTersimpan' => $errors->any() && session()->hasOldInput(),
     ]) }})"
         x-init="siap()">
         {{-- Ringkasan progres --}}
@@ -41,7 +45,7 @@
                     class="rounded-full bg-slate-100 px-2.5 py-1 font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
                     {{ __('STS :bobot%', ['bobot' => $bobotSts]) }}
                 </span>
-                <a href="{{ route('penilaian.bobot.edit') }}"
+                <a href="{{ route('guru.pwa.akun') }}#bobot"
                     class="ml-auto font-semibold text-emerald-600 dark:text-emerald-400">{{ __('Ubah bobot') }}</a>
             </div>
         </section>
@@ -54,9 +58,32 @@
             </div>
         @endif
 
+        @if ($canEdit)
+            {{-- Draf isian yang belum tersimpan (disimpan di perangkat) --}}
+            <div x-cloak x-show="adaDraft" x-transition
+                class="mb-3 rounded-2xl bg-amber-50 px-4 py-3 text-xs font-semibold text-amber-800 dark:bg-amber-950/50 dark:text-amber-200">
+                <div class="flex items-center gap-2">
+                    <i class="fas fa-clock-rotate-left"></i>
+                    <span x-text="@js(__('Ada isian yang belum tersimpan dari :jam.')).replace(':jam', jamDraft)"></span>
+                </div>
+                <div class="mt-2 flex gap-2">
+                    <button type="button" @click="pulihkanDraft()"
+                        class="h-10 flex-1 rounded-xl bg-amber-600 px-3 font-bold text-white transition active:scale-[0.98]">
+                        {{ __('Pulihkan') }}
+                    </button>
+                    <button type="button" @click="buangDraft()"
+                        class="h-10 flex-1 rounded-xl border border-amber-300 px-3 font-semibold text-amber-800 transition active:scale-[0.98] dark:border-amber-800 dark:text-amber-200">
+                        {{ __('Buang') }}
+                    </button>
+                </div>
+            </div>
+        @endif
+
         <form method="POST" action="{{ route('guru.penilaian.store', $mengajar) }}" x-ref="form"
-            @submit="menyimpan = true" class="pb-28">
+            @submit="kirim($event)" class="pb-28">
             @csrf
+            <input type="hidden" name="tahun_ajaran_id" value="{{ $tahunId }}">
+            <input type="hidden" name="semester" value="{{ $semester }}">
 
             {{-- Materi / tujuan pembelajaran --}}
             <details class="mb-3 rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
@@ -66,7 +93,7 @@
                 </summary>
                 <div class="px-4 pb-4">
                     <input type="text" name="materi_tp" maxlength="255" @disabled(! $canEdit)
-                        value="{{ $materiTp }}"
+                        value="{{ old('materi_tp', $materiTp) }}" @input="simpanDraft()"
                         placeholder="{{ __('mis. Bab 3 — Operasi Pecahan') }}"
                         class="h-12 w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 text-sm outline-none transition focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/30 dark:border-slate-700 dark:bg-slate-950 dark:focus:bg-slate-900" />
                 </div>
@@ -106,7 +133,7 @@
                         {{ __('Tambahkan siswa melalui menu Siswa atau Wali Kelas terlebih dahulu.') }}</p>
                 </div>
             @else
-                <ul class="space-y-2" @input="hitung()" @change="hitung()">
+                <ul class="space-y-2" @input="hitung(); simpanDraft()" @change="hitung()">
                     @foreach ($siswas as $index => $siswa)
                         @php
                             $baris = $nilaiBySiswa->get($siswa->id);
@@ -139,8 +166,9 @@
                                         class="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{{ __('Sumatif') }}</span>
                                     <input type="text" inputmode="decimal" enterkeyhint="next" autocomplete="off"
                                         data-nilai="sumatif" name="nilai_sumatif[{{ $siswa->id }}]"
-                                        value="{{ $nilaiAwal($baris?->nilai_sumatif) }}"
-                                        @blur="normalisasi($event)" @disabled(! $canEdit) placeholder="—"
+                                        value="{{ old('nilai_sumatif.'.$siswa->id, $nilaiAwal($baris?->nilai_sumatif)) }}"
+                                        @blur="normalisasi($event)" @keydown.enter.prevent="kolomBerikut($event)"
+                                        @disabled(! $canEdit) placeholder="—"
                                         class="h-12 w-full rounded-2xl border border-slate-200 bg-slate-50 text-center text-lg font-bold tabular-nums outline-none transition focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/30 disabled:opacity-60 dark:border-slate-700 dark:bg-slate-950 dark:focus:bg-slate-900" />
                                 </label>
 
@@ -149,8 +177,9 @@
                                         class="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{{ __('STS') }}</span>
                                     <input type="text" inputmode="decimal" enterkeyhint="next" autocomplete="off"
                                         data-nilai="sts" name="nilai_sts[{{ $siswa->id }}]"
-                                        value="{{ $nilaiAwal($baris?->nilai_sts) }}"
-                                        @blur="normalisasi($event)" @disabled(! $canEdit) placeholder="—"
+                                        value="{{ old('nilai_sts.'.$siswa->id, $nilaiAwal($baris?->nilai_sts)) }}"
+                                        @blur="normalisasi($event)" @keydown.enter.prevent="kolomBerikut($event)"
+                                        @disabled(! $canEdit) placeholder="—"
                                         class="h-12 w-full rounded-2xl border border-slate-200 bg-slate-50 text-center text-lg font-bold tabular-nums outline-none transition focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/30 disabled:opacity-60 dark:border-slate-700 dark:bg-slate-950 dark:focus:bg-slate-900" />
                                 </label>
                             </div>
@@ -174,10 +203,13 @@
                             </p>
                         </div>
 
-                        <button type="submit" :disabled="menyimpan"
+                        {{-- `offline` berasal dari komponen Alpine pada layout PWA (scope induk) --}}
+                        <button type="submit" :disabled="menyimpan || offline"
                             class="flex h-12 items-center gap-2 rounded-2xl bg-emerald-600 px-5 text-sm font-bold text-white transition hover:bg-emerald-700 active:scale-[0.98] disabled:opacity-60">
-                            <i class="fas" :class="menyimpan ? 'fa-spinner fa-spin' : 'fa-floppy-disk'"></i>
-                            <span x-text="menyimpan ? '{{ __('Menyimpan…') }}' : '{{ __('Simpan') }}'"></span>
+                            <i class="fas"
+                                :class="menyimpan ? 'fa-spinner fa-spin' : (offline ? 'fa-wifi' : 'fa-floppy-disk')"></i>
+                            <span
+                                x-text="menyimpan ? '{{ __('Menyimpan…') }}' : (offline ? '{{ __('Offline') }}' : '{{ __('Simpan') }}')"></span>
                         </button>
                     </div>
                 </div>
@@ -281,10 +313,21 @@
                 nilaiCepat: '',
                 targetCepat: 'kosong',
                 bidangCepat: 'keduanya',
+                kunciDraft: konfigurasi.kunciDraft,
+                draft: null,
+                adaDraft: false,
+                jamDraft: '',
 
                 siap() {
                     this.hitung();
-                    this.dirty = false;
+                    // Isian dari penyimpanan yang gagal (old input) memang belum tersimpan.
+                    this.dirty = konfigurasi.belumTersimpan;
+
+                    if (konfigurasi.hapusDraft) {
+                        this.buangDraft();
+                    } else if (konfigurasi.bisaUbah) {
+                        this.periksaDraft();
+                    }
 
                     this.$watch('cari', () => this.hitungTampil());
 
@@ -319,6 +362,147 @@
 
                 kolom() {
                     return Array.from(this.$refs.form.querySelectorAll('input[data-nilai]'));
+                },
+
+                kolomMateri() {
+                    return this.$refs.form.querySelector('input[name="materi_tp"]');
+                },
+
+                isianSaatIni() {
+                    const isian = {
+                        sumatif: {},
+                        sts: {},
+                        materi: this.kolomMateri()?.value ?? '',
+                    };
+
+                    this.baris().forEach((baris) => {
+                        const id = baris.dataset.siswa;
+
+                        isian.sumatif[id] = baris.querySelector('input[data-nilai="sumatif"]').value;
+                        isian.sts[id] = baris.querySelector('input[data-nilai="sts"]').value;
+                    });
+
+                    return isian;
+                },
+
+                simpanDraft() {
+                    try {
+                        window.localStorage.setItem(this.kunciDraft, JSON.stringify({
+                            ...this.isianSaatIni(),
+                            savedAt: Date.now(),
+                        }));
+                    } catch (galat) {
+                        // Penyimpanan perangkat tidak tersedia (mis. mode privat); draf dilewati.
+                    }
+                },
+
+                bacaDraft() {
+                    try {
+                        const mentah = window.localStorage.getItem(this.kunciDraft);
+
+                        return mentah ? JSON.parse(mentah) : null;
+                    } catch (galat) {
+                        return null;
+                    }
+                },
+
+                periksaDraft() {
+                    const draft = this.bacaDraft();
+
+                    if (!draft || typeof draft !== 'object') {
+                        return;
+                    }
+
+                    const isian = this.isianSaatIni();
+                    const berbeda = (simpanan, sekarang) => Object.keys(simpanan ?? {})
+                        .some((id) => id in sekarang && String(simpanan[id] ?? '') !== sekarang[id]);
+
+                    const adaPerbedaan = berbeda(draft.sumatif, isian.sumatif) ||
+                        berbeda(draft.sts, isian.sts) ||
+                        (typeof draft.materi === 'string' && draft.materi !== isian.materi);
+
+                    if (!adaPerbedaan) {
+                        return;
+                    }
+
+                    const waktu = new Date(Number(draft.savedAt) || Date.now());
+
+                    this.draft = draft;
+                    this.jamDraft = String(waktu.getHours()).padStart(2, '0') + ':' +
+                        String(waktu.getMinutes()).padStart(2, '0');
+                    this.adaDraft = true;
+                },
+
+                pulihkanDraft() {
+                    const draft = this.draft;
+
+                    if (!draft) {
+                        return;
+                    }
+
+                    this.baris().forEach((baris) => {
+                        const id = baris.dataset.siswa;
+
+                        if (draft.sumatif && id in draft.sumatif) {
+                            baris.querySelector('input[data-nilai="sumatif"]').value = String(draft.sumatif[id] ?? '');
+                        }
+
+                        if (draft.sts && id in draft.sts) {
+                            baris.querySelector('input[data-nilai="sts"]').value = String(draft.sts[id] ?? '');
+                        }
+                    });
+
+                    const materi = this.kolomMateri();
+
+                    if (materi && typeof draft.materi === 'string') {
+                        materi.value = draft.materi;
+                    }
+
+                    this.adaDraft = false;
+                    this.draft = null;
+                    this.hitung();
+                },
+
+                buangDraft() {
+                    try {
+                        window.localStorage.removeItem(this.kunciDraft);
+                    } catch (galat) {
+                        // Abaikan: penyimpanan perangkat tidak tersedia.
+                    }
+
+                    this.adaDraft = false;
+                    this.draft = null;
+                },
+
+                kolomBerikut(peristiwa) {
+                    const kolom = this.kolom().filter((el) => {
+                        const baris = el.closest('li[data-siswa]');
+
+                        return !el.disabled && (!baris || this.cocok(baris.dataset.nama, baris.dataset.nis));
+                    });
+                    const posisi = kolom.indexOf(peristiwa.target);
+                    const berikut = posisi === -1 ? null : kolom[posisi + 1];
+
+                    if (berikut) {
+                        berikut.focus();
+                        berikut.select();
+
+                        return;
+                    }
+
+                    peristiwa.target.blur();
+                },
+
+                kirim(peristiwa) {
+                    if (!navigator.onLine) {
+                        peristiwa.preventDefault();
+
+                        return;
+                    }
+
+                    // Server memvalidasi `numeric`, jadi "8,5" harus menjadi "8.5" sebelum dikirim.
+                    this.kolom().forEach((el) => this.rapikan(el));
+                    this.menyimpan = true;
                 },
 
                 baris() {
@@ -358,14 +542,19 @@
                     this.dirty = true;
                 },
 
-                nilaiAkhir(sumatif, sts) {
-                    const kosong = (nilai) => nilai.trim() === '' || isNaN(parseFloat(nilai));
+                angka(nilai) {
+                    return parseFloat(String(nilai).trim().replace(',', '.'));
+                },
 
-                    if (kosong(sumatif) || kosong(sts)) {
+                nilaiAkhir(sumatif, sts) {
+                    const angkaSumatif = this.angka(sumatif);
+                    const angkaSts = this.angka(sts);
+
+                    if (isNaN(angkaSumatif) || isNaN(angkaSts)) {
                         return '—';
                     }
 
-                    const total = (parseFloat(sumatif) * this.bobotSumatif + parseFloat(sts) * this.bobotSts) / 100;
+                    const total = (angkaSumatif * this.bobotSumatif + angkaSts * this.bobotSts) / 100;
 
                     return Number.isInteger(total) ? String(total) : total.toFixed(1);
                 },
@@ -381,22 +570,33 @@
                         String(nis ?? '').toLowerCase().includes(kata);
                 },
 
-                normalisasi(peristiwa) {
-                    const input = peristiwa.target;
-                    const angka = parseFloat(String(input.value).replace(',', '.'));
+                rapikan(input) {
+                    const angka = this.angka(input.value);
+                    let hasil = '';
 
-                    if (String(input.value).trim() === '' || isNaN(angka)) {
-                        input.value = '';
-
-                        return;
+                    if (String(input.value).trim() !== '' && !isNaN(angka)) {
+                        const dibatasi = Math.min(100, Math.max(0, angka));
+                        hasil = Number.isInteger(dibatasi) ? String(dibatasi) : dibatasi.toFixed(1);
                     }
 
-                    const dibatasi = Math.min(100, Math.max(0, angka));
-                    input.value = Number.isInteger(dibatasi) ? String(dibatasi) : dibatasi.toFixed(1);
+                    if (input.value === hasil) {
+                        return false;
+                    }
+
+                    input.value = hasil;
+
+                    return true;
+                },
+
+                normalisasi(peristiwa) {
+                    if (this.rapikan(peristiwa.target)) {
+                        this.hitung();
+                        this.simpanDraft();
+                    }
                 },
 
                 terapkanIsiCepat() {
-                    const angka = parseFloat(String(this.nilaiCepat).replace(',', '.'));
+                    const angka = this.angka(this.nilaiCepat);
 
                     if (isNaN(angka)) {
                         return;
@@ -420,6 +620,7 @@
 
                     this.sheetIsiCepat = false;
                     this.hitung();
+                    this.simpanDraft();
                 },
             }));
         });

@@ -177,10 +177,15 @@ class PwaGuruController extends Controller
             ? Siswa::with('kelas')->whereIn('id', $nilaiBySiswa->keys())->orderBy('nama')->get()
             : collect();
 
-        $tersedia = Siswa::with('kelas')
-            ->whereNotIn('id', $nilaiBySiswa->keys())
-            ->orderBy('nama')
-            ->get();
+        // Data siswa disalin per tahun ajaran, jadi hanya tawarkan salinan tahun ajaran terpilih.
+        $tersedia = $konteks['tahunId']
+            ? Siswa::with('kelas')
+                ->where('tahun_ajaran_id', $konteks['tahunId'])
+                ->where('is_active', true)
+                ->whereNotIn('id', $nilaiBySiswa->keys())
+                ->orderBy('nama')
+                ->get()
+            : collect();
 
         return view('guru.pwa.ekskul-form', [
             'ekskul' => $ekskul,
@@ -479,7 +484,7 @@ class PwaGuruController extends Controller
     }
 
     /**
-     * Penugasan yang paling perlu diisi (nilai belum lengkap).
+     * Penugasan yang paling perlu diisi (nilai belum lengkap), persentase terkecil lebih dulu.
      *
      * @param  Collection<int, Mengajar>  $penugasan
      * @param  array{guru: Guru|null, tahunId: int|null, semester: string|null, tahunAjaran: TahunAjaran|null}  $konteks
@@ -491,8 +496,12 @@ class PwaGuruController extends Controller
         $progres = $this->progres($penugasan, $konteks);
 
         return $penugasan
-            ->filter(fn (Mengajar $item): bool => ($jumlahSiswa[$item->kelas_id] ?? 0) > 0)
-            ->sortBy(fn (Mengajar $item): int => $progres[$item->id]['lengkap'] ?? 0)
+            ->filter(function (Mengajar $item) use ($jumlahSiswa, $progres): bool {
+                $jumlah = $jumlahSiswa[$item->kelas_id] ?? 0;
+
+                return $jumlah > 0 && ($progres[$item->id]['lengkap'] ?? 0) < $jumlah;
+            })
+            ->sortBy(fn (Mengajar $item): float => ($progres[$item->id]['lengkap'] ?? 0) / max(1, $jumlahSiswa[$item->kelas_id] ?? 0))
             ->map(fn (Mengajar $item): array => [
                 'mengajar' => $item,
                 'jumlahSiswa' => $jumlahSiswa[$item->kelas_id] ?? 0,
