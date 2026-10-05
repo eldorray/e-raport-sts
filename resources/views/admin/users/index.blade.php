@@ -1,4 +1,11 @@
 <x-layouts.app>
+    @php
+        // Form tambah dan modal edit memakai nama field yang sama, jadi isian
+        // lama hanya dikembalikan ke form yang gagal disimpan.
+        $modalGagal = $errors->any() ? (string) old('_modal', '') : '';
+        $gagalTambah = $modalGagal === 'create';
+        $gagalEdit = str_starts_with($modalGagal, 'edit-');
+    @endphp
     <div class="mb-8 flex flex-col gap-2">
         <h1 class="text-3xl font-semibold text-gray-900 dark:text-gray-100">Manajemen User</h1>
         <p class="text-sm text-gray-600 dark:text-gray-400">Kelola akun dan tambahkan admin baru.</p>
@@ -10,15 +17,16 @@
             <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Tambah User</h2>
             <form action="{{ route('users.store') }}" method="POST" class="space-y-4">
                 @csrf
+                <input type="hidden" name="_modal" value="create">
                 <div class="space-y-2">
                     <label class="text-sm font-semibold text-gray-800 dark:text-gray-100">Nama</label>
-                    <input name="name" type="text" value="{{ old('name') }}"
+                    <input name="name" type="text" value="{{ $gagalTambah ? old('name') : '' }}"
                         class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
                         required>
                 </div>
                 <div class="space-y-2">
                     <label class="text-sm font-semibold text-gray-800 dark:text-gray-100">Email</label>
-                    <input name="email" type="email" value="{{ old('email') }}"
+                    <input name="email" type="email" value="{{ $gagalTambah ? old('email') : '' }}"
                         class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
                         required>
                 </div>
@@ -43,7 +51,7 @@
                         <select name="role"
                             class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100">
                             @foreach ($roleOptions as $value => $label)
-                                <option value="{{ $value }}" {{ old('role') === $value ? 'selected' : '' }}>
+                                <option value="{{ $value }}" @selected($gagalTambah && old('role') === $value)>
                                     {{ $label }}</option>
                             @endforeach
                         </select>
@@ -51,7 +59,7 @@
                     <div class="flex items-center gap-2 pt-6">
                         <input id="is_active" name="is_active" type="checkbox" value="1"
                             class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                            {{ old('is_active', true) ? 'checked' : '' }}>
+                            @checked($gagalTambah ? (bool) old('is_active') : true)>
                         <label for="is_active"
                             class="text-sm font-semibold text-gray-800 dark:text-gray-100">Aktif</label>
                     </div>
@@ -105,6 +113,7 @@
                                         <button type="button"
                                             class="inline-flex items-center gap-1 rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-600"
                                             data-action="edit" data-update-url="{{ route('users.update', $user) }}"
+                                            data-modal="edit-{{ $user->id }}"
                                             data-name="{{ $user->name }}" data-email="{{ $user->email }}"
                                             data-role="{{ $user->role }}"
                                             data-active="{{ $user->is_active ? '1' : '0' }}">
@@ -137,7 +146,8 @@
         </div>
     </div>
 
-    <div id="userModalOverlay" class="fixed inset-0 z-40 hidden items-center justify-center bg-gray-900/60 px-4">
+    <div id="userModalOverlay" class="fixed inset-0 z-40 hidden items-center justify-center bg-gray-900/60 px-4"
+        data-open-modal="{{ $modalGagal }}">
         <div id="editUserModal"
             class="hidden w-full max-w-3xl overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-900">
             <div class="border-b border-gray-100 bg-gray-50 px-6 py-4 dark:border-gray-700 dark:bg-gray-900/40">
@@ -146,16 +156,17 @@
             <form id="editUserForm" method="POST" class="space-y-4 px-6 py-6">
                 @csrf
                 @method('PUT')
+                <input id="edit_modal" type="hidden" name="_modal" value="{{ $gagalEdit ? $modalGagal : '' }}">
                 <div class="grid gap-4 md:grid-cols-2">
                     <div class="space-y-2">
                         <label class="text-sm font-semibold text-gray-800 dark:text-gray-100">Nama</label>
-                        <input id="edit_name" name="name" type="text"
+                        <input id="edit_name" name="name" type="text" value="{{ $gagalEdit ? old('name') : '' }}"
                             class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
                             required>
                     </div>
                     <div class="space-y-2">
                         <label class="text-sm font-semibold text-gray-800 dark:text-gray-100">Email</label>
-                        <input id="edit_email" name="email" type="email"
+                        <input id="edit_email" name="email" type="email" value="{{ $gagalEdit ? old('email') : '' }}"
                             class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
                             required>
                     </div>
@@ -166,13 +177,14 @@
                         <select id="edit_role" name="role"
                             class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm transition focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100">
                             @foreach ($roleOptions as $value => $label)
-                                <option value="{{ $value }}">{{ $label }}</option>
+                                <option value="{{ $value }}" @selected($gagalEdit && old('role') === $value)>{{ $label }}</option>
                             @endforeach
                         </select>
                     </div>
                     <div class="flex items-center gap-2 pt-6">
                         <input id="edit_active" name="is_active" type="checkbox" value="1"
-                            class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                            class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                            @checked($gagalEdit && (bool) old('is_active'))>
                         <label for="edit_active"
                             class="text-sm font-semibold text-gray-800 dark:text-gray-100">Aktif</label>
                     </div>
@@ -240,6 +252,7 @@
                 btn.addEventListener('click', () => {
                     const updateUrl = btn.getAttribute('data-update-url');
                     form.setAttribute('action', updateUrl);
+                    document.getElementById('edit_modal').value = btn.getAttribute('data-modal');
 
                     document.getElementById('edit_name').value = btn.getAttribute('data-name') || '';
                     document.getElementById('edit_email').value = btn.getAttribute('data-email') || '';
@@ -253,6 +266,17 @@
                     openModal();
                 });
             });
+
+            // Buka ulang modal edit yang gagal disimpan; isian lamanya sudah dirender server.
+            const modalGagal = overlay.dataset.openModal;
+            if (modalGagal && modalGagal.startsWith('edit-')) {
+                const tombolEdit = Array.from(document.querySelectorAll('[data-action="edit"]'))
+                    .find((btn) => btn.getAttribute('data-modal') === modalGagal);
+                if (tombolEdit) {
+                    form.setAttribute('action', tombolEdit.getAttribute('data-update-url'));
+                    openModal();
+                }
+            }
         })();
     </script>
 </x-layouts.app>

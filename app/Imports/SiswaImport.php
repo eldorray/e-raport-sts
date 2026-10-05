@@ -7,6 +7,7 @@ use App\Models\Siswa;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Session;
+use Maatwebsite\Excel\Concerns\SkipsEmptyRows;
 use Maatwebsite\Excel\Concerns\SkipsFailures;
 use Maatwebsite\Excel\Concerns\SkipsOnFailure;
 use Maatwebsite\Excel\Concerns\ToCollection;
@@ -18,9 +19,21 @@ use Maatwebsite\Excel\Concerns\WithValidation;
  *
  * Menangani import massal data siswa dengan validasi dan skip duplikat.
  */
-class SiswaImport implements SkipsOnFailure, ToCollection, WithHeadingRow, WithValidation
+class SiswaImport implements SkipsEmptyRows, SkipsOnFailure, ToCollection, WithHeadingRow, WithValidation
 {
     use SkipsFailures;
+
+    /**
+     * Kolom teks yang sering terbaca sebagai angka oleh Excel.
+     *
+     * @var list<string>
+     */
+    private const TEXT_COLUMNS = ['nis', 'nisn', 'kelas', 'tingkat', 'telpon', 'kelas_diterima'];
+
+    /**
+     * Batas angka yang masih presisi di Excel (15 digit signifikan).
+     */
+    private const EXCEL_PRECISION_LIMIT = 1e15;
 
     /** @var int Jumlah siswa yang berhasil diimpor */
     public int $imported = 0;
@@ -84,6 +97,41 @@ class SiswaImport implements SkipsOnFailure, ToCollection, WithHeadingRow, WithV
     }
 
     /**
+     * Mengubah sel angka pada kolom teks menjadi string sebelum validasi.
+     *
+     * Angka bulat diubah apa adanya. Angka desimal/eksponen yang bisa sudah
+     * kehilangan digit dibiarkan agar gagal validasi `string` dengan pesan
+     * yang meminta kolom diformat sebagai Teks.
+     *
+     * @param  array<string, mixed>  $data  Data satu baris
+     * @param  int  $index  Nomor baris di file
+     * @return array<string, mixed>
+     */
+    public function prepareForValidation(array $data, int $index): array
+    {
+        foreach (self::TEXT_COLUMNS as $column) {
+            if (array_key_exists($column, $data)) {
+                $data[$column] = $this->numberToString($data[$column]);
+            }
+        }
+
+        return $data;
+    }
+
+    /**
+     * Pesan validasi khusus untuk kolom identitas yang terbaca sebagai angka.
+     *
+     * @return array<string, string>
+     */
+    public function customValidationMessages(): array
+    {
+        return [
+            'nis.string' => __('NIS terbaca sebagai angka desimal/eksponen sehingga digitnya bisa berubah. Ubah format kolom NIS sebagai Teks di Excel, lalu ketik ulang nilainya.'),
+            'nisn.string' => __('NISN terbaca sebagai angka desimal/eksponen sehingga digitnya bisa berubah. Ubah format kolom NISN sebagai Teks di Excel, lalu ketik ulang nilainya.'),
+        ];
+    }
+
+    /**
      * Memproses satu baris data siswa.
      *
      * @param  mixed  $row  Data baris
@@ -94,13 +142,21 @@ class SiswaImport implements SkipsOnFailure, ToCollection, WithHeadingRow, WithV
         $nis = $this->trimString($row['nis'] ?? '');
 
         if ($nis === '') {
-            $this->skipped[] = ['nis' => null, 'reason' => 'NIS kosong'];
+            $this->skipped[] = ['nis' => null, 'reason' => __('NIS kosong')];
 
             return;
         }
 
-        if (Siswa::where('nis', $nis)->exists()) {
-            $this->skipped[] = ['nis' => $nis, 'reason' => 'NIS sudah ada'];
+        if (Siswa::where('tahun_ajaran_id', $tahunId)->where('nis', $nis)->exists()) {
+            $this->skipped[] = ['nis' => $nis, 'reason' => __('NIS :nis sudah terdaftar di tahun ajaran ini', ['nis' => $nis])];
+
+            return;
+        }
+
+        $nisn = $this->trimString($row['nisn'] ?? '');
+
+        if ($nisn !== '' && Siswa::where('tahun_ajaran_id', $tahunId)->where('nisn', $nisn)->exists()) {
+            $this->skipped[] = ['nis' => $nis, 'reason' => __('NISN :nisn sudah terdaftar di tahun ajaran ini', ['nisn' => $nisn])];
 
             return;
         }
@@ -108,7 +164,7 @@ class SiswaImport implements SkipsOnFailure, ToCollection, WithHeadingRow, WithV
         $data = $this->parseRowData($row, $tahunId);
 
         if ($data === null) {
-            $this->skipped[] = ['nis' => $nis, 'reason' => 'Tanggal tidak valid'];
+            $this->skipped[] = ['nis' => $nis, 'reason' => __('NIS :nis: tanggal tidak valid', ['nis' => $nis])];
 
             return;
         }
@@ -201,6 +257,28 @@ class SiswaImport implements SkipsOnFailure, ToCollection, WithHeadingRow, WithV
     private function trimString($value): string
     {
         return trim((string) $value);
+    }
+
+    /**
+     * Mengubah angka dari sel Excel menjadi string tanpa kehilangan digit.
+     *
+     * Angka desimal atau angka di atas batas presisi Excel dikembalikan apa
+     * adanya karena digit aslinya tidak bisa dipastikan.
+     *
+     * @param  mixed  $value  Nilai sel
+     * @return mixed String untuk angka yang aman, nilai asli untuk lainnya
+     */
+    private function numberToString(mixed $value): mixed
+    {
+        if (is_int($value)) {
+            return (string) $value;
+        }
+
+        if (is_float($value) && is_finite($value) && floor($value) === $value && abs($value) < self::EXCEL_PRECISION_LIMIT) {
+            return sprintf('%.0f', $value);
+        }
+
+        return $value;
     }
 
     /**

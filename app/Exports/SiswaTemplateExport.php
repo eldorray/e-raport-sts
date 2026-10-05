@@ -3,9 +3,16 @@
 namespace App\Exports;
 
 use Maatwebsite\Excel\Concerns\FromArray;
+use Maatwebsite\Excel\Concerns\WithColumnFormatting;
+use Maatwebsite\Excel\Concerns\WithCustomValueBinder;
 use Maatwebsite\Excel\Concerns\WithHeadings;
+use PhpOffice\PhpSpreadsheet\Cell\StringValueBinder;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 
-class SiswaTemplateExport implements FromArray, WithHeadings
+/**
+ * Kolom identitas ditulis dan diformat sebagai teks supaya nol di depan (mis. NISN "0081…") tidak hilang di Excel.
+ */
+class SiswaTemplateExport extends StringValueBinder implements FromArray, WithColumnFormatting, WithCustomValueBinder, WithHeadings
 {
     /**
      * @return list<string>
@@ -72,6 +79,17 @@ class SiswaTemplateExport implements FromArray, WithHeadings
                 'Wiraswasta',
                 'Jl. Wali No. 2',
             ],
+        ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public function columnFormats(): array
+    {
+        return [
+            'A1:B1000' => NumberFormat::FORMAT_TEXT,
+            'L1:L1000' => NumberFormat::FORMAT_TEXT,
         ];
     }
 }

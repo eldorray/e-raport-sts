@@ -8,6 +8,7 @@ use App\Models\Siswa;
 use App\Models\TahunAjaran;
 use App\Services\KelasResolverService;
 use App\Services\PenghapusanDataService;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -196,13 +197,33 @@ class SiswaController extends Controller
 
         try {
             Excel::import($import, $request->file('file'));
+        } catch (QueryException $e) {
+            Log::error('Import siswa gagal karena bentrok data di database.', ['exception' => $e]);
+
+            return back()->withErrors([
+                'file' => __('Import dibatalkan karena data bentrok dengan data yang sudah ada (NIS/NISN sudah terdaftar di tahun ajaran ini). Tidak ada data yang disimpan; periksa kembali file lalu ulangi.'),
+            ]);
         } catch (\Throwable $e) {
             return back()->withErrors([
                 'file' => __('Gagal memproses file: :message', ['message' => $e->getMessage()]),
             ]);
         }
 
-        return $this->buildImportResponse($import, 'siswa');
+        $response = $this->buildImportResponse($import, 'siswa');
+
+        $alasanDilewati = collect($import->skipped)->pluck('reason');
+
+        if ($alasanDilewati->isNotEmpty()) {
+            $rincian = $alasanDilewati->take(10)->implode('; ');
+
+            if ($alasanDilewati->count() > 10) {
+                $rincian .= ' '.__('(dan :count baris lainnya)', ['count' => $alasanDilewati->count() - 10]);
+            }
+
+            $response->with('warning', __('Baris dilewati: :rincian', ['rincian' => $rincian]));
+        }
+
+        return $response;
     }
 
     /**

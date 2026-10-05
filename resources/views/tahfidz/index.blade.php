@@ -27,11 +27,6 @@
         </div>
     </div>
 
-    @if (session('success'))
-        <div class="mb-4 rounded-lg bg-green-100 p-4 text-sm text-green-700 dark:bg-green-900 dark:text-green-200">
-            {{ session('success') }}
-        </div>
-    @endif
 
     @if (!$canEdit)
         <div class="mb-4 rounded-lg border border-amber-300 bg-amber-50 p-4 dark:border-amber-700 dark:bg-amber-900/30">

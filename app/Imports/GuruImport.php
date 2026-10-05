@@ -8,15 +8,28 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Maatwebsite\Excel\Concerns\SkipsEmptyRows;
 use Maatwebsite\Excel\Concerns\SkipsFailures;
 use Maatwebsite\Excel\Concerns\SkipsOnFailure;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
 
-class GuruImport implements SkipsOnFailure, ToCollection, WithHeadingRow, WithValidation
+class GuruImport implements SkipsEmptyRows, SkipsOnFailure, ToCollection, WithHeadingRow, WithValidation
 {
     use SkipsFailures;
+
+    /**
+     * Kolom teks yang sering terbaca sebagai angka oleh Excel.
+     *
+     * @var list<string>
+     */
+    private const TEXT_COLUMNS = ['nip', 'nik', 'wali_kelas', 'password'];
+
+    /**
+     * Batas angka yang masih presisi di Excel (15 digit signifikan).
+     */
+    private const EXCEL_PRECISION_LIMIT = 1e15;
 
     public int $imported = 0;
 
@@ -32,13 +45,13 @@ class GuruImport implements SkipsOnFailure, ToCollection, WithHeadingRow, WithVa
             $nip = trim((string) ($row['nip'] ?? ''));
 
             if ($nip === '') {
-                $this->skipped[] = ['nip' => null, 'reason' => 'NIP kosong'];
+                $this->skipped[] = ['nip' => null, 'reason' => __('NIP kosong')];
 
                 continue;
             }
 
             if (Guru::where('nip', $nip)->exists()) {
-                $this->skipped[] = ['nip' => $nip, 'reason' => 'NIP sudah ada'];
+                $this->skipped[] = ['nip' => $nip, 'reason' => __('NIP :nip sudah terdaftar', ['nip' => $nip])];
 
                 continue;
             }
@@ -49,14 +62,15 @@ class GuruImport implements SkipsOnFailure, ToCollection, WithHeadingRow, WithVa
             $tempat = trim((string) ($row['tempat_lahir'] ?? '')) ?: null;
             $pendidikan = trim((string) ($row['pendidikan'] ?? '')) ?: null;
             $wali = trim((string) ($row['wali_kelas'] ?? '')) ?: null;
-            $jtm = $row['jtm'] !== null && $row['jtm'] !== '' ? (int) $row['jtm'] : null;
+            $jtmRaw = $row['jtm'] ?? null;
+            $jtm = $jtmRaw !== null && $jtmRaw !== '' ? (int) $jtmRaw : null;
             $passwordPlain = trim((string) ($row['password'] ?? '')) ?: $nip;
             $isActive = $this->toBoolean($row['is_active'] ?? null);
 
             try {
                 $tanggalLahir = $this->parseDate($row['tanggal_lahir'] ?? null);
             } catch (\Throwable $e) {
-                $this->skipped[] = ['nip' => $nip, 'reason' => 'Tanggal lahir tidak valid'];
+                $this->skipped[] = ['nip' => $nip, 'reason' => __('NIP :nip: tanggal lahir tidak valid', ['nip' => $nip])];
 
                 continue;
             }
@@ -108,6 +122,63 @@ class GuruImport implements SkipsOnFailure, ToCollection, WithHeadingRow, WithVa
             '*.password' => ['nullable', 'string', 'min:3'],
             '*.is_active' => ['nullable'],
         ];
+    }
+
+    /**
+     * Mengubah sel angka pada kolom teks menjadi string sebelum validasi.
+     *
+     * Angka bulat diubah apa adanya. Angka desimal/eksponen yang bisa sudah
+     * kehilangan digit (mis. NIP 18 digit) dibiarkan agar gagal validasi
+     * `string` dengan pesan yang meminta kolom diformat sebagai Teks.
+     *
+     * @param  array<string, mixed>  $data  Data satu baris
+     * @param  int  $index  Nomor baris di file
+     * @return array<string, mixed>
+     */
+    public function prepareForValidation(array $data, int $index): array
+    {
+        foreach (self::TEXT_COLUMNS as $column) {
+            if (array_key_exists($column, $data)) {
+                $data[$column] = $this->numberToString($data[$column]);
+            }
+        }
+
+        return $data;
+    }
+
+    /**
+     * Pesan validasi khusus untuk kolom identitas yang terbaca sebagai angka.
+     *
+     * @return array<string, string>
+     */
+    public function customValidationMessages(): array
+    {
+        return [
+            'nip.string' => __('NIP terbaca sebagai angka desimal/eksponen sehingga digitnya bisa berubah. Ubah format kolom NIP sebagai Teks di Excel, lalu ketik ulang nilainya.'),
+            'nik.string' => __('NIK terbaca sebagai angka desimal/eksponen sehingga digitnya bisa berubah. Ubah format kolom NIK sebagai Teks di Excel, lalu ketik ulang nilainya.'),
+        ];
+    }
+
+    /**
+     * Mengubah angka dari sel Excel menjadi string tanpa kehilangan digit.
+     *
+     * Angka desimal atau angka di atas batas presisi Excel dikembalikan apa
+     * adanya karena digit aslinya tidak bisa dipastikan.
+     *
+     * @param  mixed  $value  Nilai sel
+     * @return mixed String untuk angka yang aman, nilai asli untuk lainnya
+     */
+    private function numberToString(mixed $value): mixed
+    {
+        if (is_int($value)) {
+            return (string) $value;
+        }
+
+        if (is_float($value) && is_finite($value) && floor($value) === $value && abs($value) < self::EXCEL_PRECISION_LIMIT) {
+            return sprintf('%.0f', $value);
+        }
+
+        return $value;
     }
 
     private function parseDate(mixed $value): ?Carbon

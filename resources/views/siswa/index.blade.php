@@ -117,6 +117,7 @@
                                     <button type="button"
                                         class="inline-flex items-center gap-1 rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-600"
                                         data-action="edit" data-update-url="{{ route('siswa.update', $siswa) }}"
+                                        data-modal="edit-{{ $siswa->id }}"
                                         data-nis="{{ $siswa->nis }}" data-nisn="{{ $siswa->nisn }}"
                                         data-nama="{{ $siswa->nama }}" data-gender="{{ $siswa->jenis_kelamin }}"
                                         data-tempat="{{ $siswa->tempat_lahir }}"
@@ -180,7 +181,8 @@
 
     </div>
 
-    <div id="modalOverlay" class="fixed inset-0 z-40 hidden items-center justify-center bg-gray-900/60 px-4">
+    <div id="modalOverlay" class="fixed inset-0 z-40 hidden items-center justify-center bg-gray-900/60 px-4"
+        data-open-modal="{{ $errors->any() ? old('_modal') : '' }}">
         <div id="createModal"
             class="modal-card hidden w-full max-w-5xl overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-900">
             <div class="border-b border-gray-100 bg-gray-50 px-6 py-4 dark:border-gray-700 dark:bg-gray-900/40">
@@ -286,6 +288,7 @@
             document.querySelectorAll('[data-action="edit"]').forEach((button) => {
                 button.addEventListener('click', () => {
                     editForm.setAttribute('action', button.getAttribute('data-update-url'));
+                    editForm.querySelector('input[name="_modal"]').value = button.getAttribute('data-modal');
 
                     document.getElementById('edit_nis').value = button.getAttribute('data-nis') || '';
                     document.getElementById('edit_nisn').value = button.getAttribute('data-nisn') || '';
@@ -336,6 +339,20 @@
             document.addEventListener('keydown', (event) => {
                 if (event.key === 'Escape') closeModal();
             });
+
+            // Buka ulang modal yang gagal disimpan; isian lamanya sudah dirender server.
+            const modalGagal = modalOverlay.dataset.openModal;
+            if (modalGagal === 'create') {
+                openModal(createModal);
+            } else if (modalGagal) {
+                const tombolEdit = Array.from(document.querySelectorAll('[data-action="edit"]'))
+                    .find((button) => button.getAttribute('data-modal') === modalGagal);
+                if (tombolEdit) {
+                    editForm.setAttribute('action', tombolEdit.getAttribute('data-update-url'));
+                    editForm.querySelector('input[name="_modal"]').value = modalGagal;
+                    openModal(editModal);
+                }
+            }
 
             const importForm = document.getElementById('importForm');
             const importButton = document.getElementById('triggerImport');

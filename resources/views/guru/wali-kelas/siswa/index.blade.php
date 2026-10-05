@@ -31,25 +31,6 @@
         </div>
     </div>
 
-    @if (session('status'))
-        <div
-            class="mb-4 rounded-lg bg-green-50 px-4 py-3 text-sm text-green-700 dark:bg-green-900/30 dark:text-green-300">
-            {{ session('status') }}
-        </div>
-    @endif
-
-    @if (session('error'))
-        <div class="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700 dark:bg-red-900/30 dark:text-red-300">
-            {{ session('error') }}
-        </div>
-    @endif
-
-    @error('tahun_ajaran')
-        <div class="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700 dark:bg-red-900/30 dark:text-red-300">
-            {{ $message }}
-        </div>
-    @enderror
-
     <div
         class="px-6 pb-6 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
         <div class="overflow-x-auto">
@@ -100,6 +81,7 @@
                                         class="inline-flex items-center gap-1 rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-600"
                                         data-action="edit"
                                         data-update-url="{{ route('wali-kelas.siswa.update', $siswa) }}"
+                                        data-modal="edit-{{ $siswa->id }}"
                                         data-nis="{{ $siswa->nis }}" data-nisn="{{ $siswa->nisn }}"
                                         data-nama="{{ $siswa->nama }}" data-gender="{{ $siswa->jenis_kelamin }}"
                                         data-tempat="{{ $siswa->tempat_lahir }}"
@@ -119,12 +101,12 @@
                                         {{ __('Edit') }}
                                     </button>
                                     <form action="{{ route('wali-kelas.siswa.destroy', $siswa) }}" method="POST"
-                                        onsubmit="return confirm('{{ __('Hapus siswa ini?') }}');">
+                                        onsubmit="return confirm(@js(__('Keluarkan :nama dari kelas ini? Data siswa tidak dihapus dan bisa di-claim kembali.', ['nama' => $siswa->nama])));">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit"
                                             class="inline-flex items-center gap-1 rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-600">
-                                            {{ __('Hapus') }}
+                                            {{ __('Keluarkan dari kelas') }}
                                         </button>
                                     </form>
                                     <form action="{{ route('wali-kelas.siswa.toggle', $siswa) }}" method="POST">
@@ -151,7 +133,8 @@
 
     </div>
 
-    <div id="modalOverlay" class="fixed inset-0 z-40 hidden items-center justify-center bg-gray-900/60 px-4">
+    <div id="modalOverlay" class="fixed inset-0 z-40 hidden items-center justify-center bg-gray-900/60 px-4"
+        data-open-modal="{{ $errors->any() ? old('_modal') : '' }}">
         <div id="createModal"
             class="modal-card hidden w-full max-w-5xl overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-900">
             <div class="border-b border-gray-100 bg-gray-50 px-6 py-4 dark:border-gray-700 dark:bg-gray-900/40">
@@ -212,6 +195,7 @@
             document.querySelectorAll('[data-action="edit"]').forEach((button) => {
                 button.addEventListener('click', () => {
                     editForm.setAttribute('action', button.getAttribute('data-update-url'));
+                    editForm.querySelector('input[name="_modal"]').value = button.getAttribute('data-modal');
 
                     document.getElementById('edit_nis').value = button.getAttribute('data-nis') || '';
                     document.getElementById('edit_nisn').value = button.getAttribute('data-nisn') || '';
@@ -262,6 +246,20 @@
             document.addEventListener('keydown', (event) => {
                 if (event.key === 'Escape') closeModal();
             });
+
+            // Buka ulang modal yang gagal disimpan; isian lamanya sudah dirender server.
+            const modalGagal = modalOverlay.dataset.openModal;
+            if (modalGagal === 'create') {
+                openModal(createModal);
+            } else if (modalGagal) {
+                const tombolEdit = Array.from(document.querySelectorAll('[data-action="edit"]'))
+                    .find((button) => button.getAttribute('data-modal') === modalGagal);
+                if (tombolEdit) {
+                    editForm.setAttribute('action', tombolEdit.getAttribute('data-update-url'));
+                    editForm.querySelector('input[name="_modal"]').value = modalGagal;
+                    openModal(editModal);
+                }
+            }
         })();
     </script>
 </x-layouts.app>

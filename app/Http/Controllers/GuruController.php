@@ -11,6 +11,7 @@ use App\Models\TahunAjaran;
 use App\Models\User;
 use App\Services\PenghapusanDataService;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -231,13 +232,32 @@ class GuruController extends Controller
 
         try {
             Excel::import($import, $request->file('file'));
+        } catch (QueryException $e) {
+            Log::error('Import guru gagal karena bentrok data di database.', ['exception' => $e]);
+
+            return back()->withErrors([
+                'file' => __('Import dibatalkan karena data bentrok dengan data yang sudah ada (NIP/NIK sudah terdaftar). Tidak ada data yang disimpan; periksa kembali file lalu ulangi.'),
+            ]);
         } catch (\Throwable $e) {
             return back()->withErrors([
                 'file' => __('Gagal memproses file: :message', ['message' => $e->getMessage()]),
             ]);
         }
 
-        return $this->buildImportResponse($import);
+        $response = $this->buildImportResponse($import);
+        $alasanDilewati = collect($import->skipped)->pluck('reason');
+
+        if ($alasanDilewati->isNotEmpty()) {
+            $rincian = $alasanDilewati->take(10)->implode('; ');
+
+            if ($alasanDilewati->count() > 10) {
+                $rincian .= ' '.__('(dan :count baris lainnya)', ['count' => $alasanDilewati->count() - 10]);
+            }
+
+            $response->with('warning', __('Baris dilewati: :rincian', ['rincian' => $rincian]));
+        }
+
+        return $response;
     }
 
     /**

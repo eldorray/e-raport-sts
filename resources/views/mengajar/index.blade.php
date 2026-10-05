@@ -176,7 +176,7 @@
                     <div>
                         <label
                             class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Mata Pelajaran') }}</label>
-                        <select name="mata_pelajaran_id" required
+                        <select name="items[0][mata_pelajaran_id]" required
                             class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
                             @foreach ($mataPelajarans as $mapel)
                                 <option value="{{ $mapel->id }}">{{ $mapel->nama_mapel }}</option>
@@ -186,7 +186,7 @@
                     <div>
                         <label
                             class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Guru') }}</label>
-                        <select name="guru_id"
+                        <select name="items[0][guru_id]"
                             class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
                             <option value="">- {{ __('Pilih Guru') }} -</option>
                             @foreach ($gurus as $guru)
@@ -197,7 +197,7 @@
                     <div>
                         <label
                             class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('JTM') }}</label>
-                        <input type="number" name="jtm" min="0"
+                        <input type="number" name="items[0][jtm]" min="0"
                             class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
                     </div>
                 </div>

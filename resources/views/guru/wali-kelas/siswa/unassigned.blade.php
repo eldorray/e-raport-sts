@@ -21,25 +21,8 @@
         </div>
     </div>
 
-    @if (session('status'))
-        <div
-            class="mb-4 rounded-lg bg-green-50 px-4 py-3 text-sm text-green-700 dark:bg-green-900/30 dark:text-green-300">
-            {{ session('status') }}
-        </div>
-    @endif
 
-    @if (session('warning'))
-        <div
-            class="mb-4 rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
-            {{ session('warning') }}
-        </div>
-    @endif
 
-    @if (session('error'))
-        <div class="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700 dark:bg-red-900/30 dark:text-red-300">
-            {{ session('error') }}
-        </div>
-    @endif
 
     @error('siswa_ids')
         <div class="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700 dark:bg-red-900/30 dark:text-red-300">
