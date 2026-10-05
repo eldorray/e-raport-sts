@@ -258,14 +258,26 @@ class WaliKelasSiswaController extends Controller
      */
     private function validatedData(Request $request, ?int $ignoreId = null): array
     {
+        // NIS/NISN unik per tahun ajaran (mengikuti unique index DB & SiswaController)
+        $tahunId = session('selected_tahun_ajaran_id');
+
         return $request->validate([
             'nis' => [
                 'required',
                 'string',
                 'max:'.self::MAX_NIS_LENGTH,
-                Rule::unique('siswas', 'nis')->ignore($ignoreId),
+                Rule::unique('siswas', 'nis')
+                    ->where(fn ($q) => $q->where('tahun_ajaran_id', $tahunId))
+                    ->ignore($ignoreId),
             ],
-            'nisn' => ['nullable', 'string', 'max:'.self::MAX_NIS_LENGTH],
+            'nisn' => [
+                'nullable',
+                'string',
+                'max:'.self::MAX_NIS_LENGTH,
+                Rule::unique('siswas', 'nisn')
+                    ->where(fn ($q) => $q->where('tahun_ajaran_id', $tahunId))
+                    ->ignore($ignoreId),
+            ],
             'nama' => ['required', 'string', 'max:'.self::MAX_NAME_LENGTH],
             'jenis_kelamin' => ['required', 'in:L,P'],
             'tempat_lahir' => ['nullable', 'string', 'max:100'],

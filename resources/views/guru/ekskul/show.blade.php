@@ -7,7 +7,7 @@
         </div>
         <div
             class="rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-xs text-blue-700 dark:border-blue-800 dark:bg-blue-900/40 dark:text-blue-100">
-            Tahun ajaran: {{ $tahunId ?? '–' }} @if ($semester)
+            Tahun ajaran: {{ $tahunAjaran?->nama ?? '–' }} @if ($semester)
                 • Semester: {{ $semester }}
             @endif
         </div>
@@ -36,6 +36,8 @@
     <form method="POST" action="{{ route('guru.ekskul.store', $ekskul) }}"
         class="rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
         @csrf
+        <input type="hidden" name="tahun_ajaran_id" value="{{ $tahunId }}">
+        <input type="hidden" name="semester" value="{{ $semester }}">
         <div class="overflow-x-auto px-6 py-4">
             <table
                 class="min-w-full divide-y divide-gray-200 text-left text-sm text-gray-700 dark:divide-gray-700 dark:text-gray-200">
@@ -60,7 +62,8 @@
                             <td class="px-3 py-3">{{ $siswa->kelas->nama ?? '—' }}</td>
                             <td class="px-3 py-3">
                                 <input type="number" name="nilai[{{ $siswa->id }}]" min="0" max="100"
-                                    step="0.01" value="{{ $record?->nilai }}" @disabled(!$canEdit)
+                                    step="0.01" value="{{ old('nilai.' . $siswa->id, $record?->nilai) }}"
+                                    @disabled(!$canEdit)
                                     class="w-28 rounded-md border border-gray-300 px-2 py-1 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 disabled:opacity-60 disabled:cursor-not-allowed">
                             </td>
                             <td class="px-3 py-3">
@@ -79,7 +82,7 @@
                             </td>
                             <td class="px-3 py-3">
                                 <input type="text" name="catatan[{{ $siswa->id }}]"
-                                    value="{{ $record?->catatan }}" @disabled(!$canEdit)
+                                    value="{{ old('catatan.' . $siswa->id, $record?->catatan) }}" @disabled(!$canEdit)
                                     class="w-full rounded-md border border-gray-300 px-2 py-1 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 disabled:opacity-60 disabled:cursor-not-allowed">
                             </td>
                             <td class="px-3 py-3 text-center">
@@ -117,6 +120,8 @@
         <form id="remove-{{ $siswa->id }}" method="POST" action="{{ route('guru.ekskul.store', $ekskul) }}"
             class="hidden">
             @csrf
+            <input type="hidden" name="tahun_ajaran_id" value="{{ $tahunId }}">
+            <input type="hidden" name="semester" value="{{ $semester }}">
             <input type="hidden" name="action" value="remove">
             <input type="hidden" name="siswa_id" value="{{ $siswa->id }}">
         </form>
@@ -131,12 +136,14 @@
             </div>
             <form method="POST" action="{{ route('guru.ekskul.store', $ekskul) }}" class="space-y-4 px-6 py-6">
                 @csrf
+                <input type="hidden" name="tahun_ajaran_id" value="{{ $tahunId }}">
+                <input type="hidden" name="semester" value="{{ $semester }}">
                 <input type="hidden" name="action" value="add">
                 <div class="flex items-center gap-2">
                     <div class="relative w-full max-w-sm">
                         <i
                             class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                        <input type="text" id="searchSiswa" placeholder="Cari nama atau kelas"
+                        <input type="text" id="searchSiswa" @keydown.enter.prevent placeholder="Cari nama atau kelas"
                             class="w-full rounded-lg border border-gray-300 bg-white px-9 py-2 text-sm text-gray-800 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
                     </div>
                     <span class="text-xs text-gray-500 dark:text-gray-400">Ketik untuk memfilter daftar</span>

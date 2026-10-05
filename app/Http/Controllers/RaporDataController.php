@@ -8,6 +8,7 @@ use App\Models\RaporMetadata;
 use App\Models\TahunAjaran;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class RaporDataController extends Controller
@@ -90,6 +91,37 @@ class RaporDataController extends Controller
         }
     }
 
+    /**
+     * Cek apakah form disimpan pada konteks yang berbeda dengan session.
+     *
+     * Terjadi bila tahun ajaran/semester diganti di tab lain setelah form dibuka:
+     * kelas milik tahun ajaran lain, atau field tersembunyi `tahun_ajaran_id`/`semester`
+     * (opsional) dari form berbeda dengan session.
+     */
+    private function isKonteksBerubah(Request $request, Kelas $kelas, int $tahunId, string $semester): bool
+    {
+        if ((int) $kelas->tahun_ajaran_id !== $tahunId) {
+            return true;
+        }
+
+        if ($request->filled('tahun_ajaran_id') && $request->integer('tahun_ajaran_id') !== $tahunId) {
+            return true;
+        }
+
+        return $request->filled('semester')
+            && strcasecmp(trim((string) $request->input('semester')), trim($semester)) !== 0;
+    }
+
+    /**
+     * Redirect kembali dengan pesan bahwa konteks sudah diganti di tab lain.
+     */
+    private function konteksBerubahResponse(): RedirectResponse
+    {
+        return back()
+            ->withErrors(['tahun_ajaran' => __('Tahun ajaran atau semester sudah diganti di tab lain. Muat ulang halaman ini, lalu simpan lagi.')])
+            ->withInput();
+    }
+
     public function absen(Request $request): View
     {
         [$tahunId, $semester, $tahun] = $this->ensureContext();
@@ -130,54 +162,63 @@ class RaporDataController extends Controller
         if ($request->user()->role !== 'admin') {
             $tahun = TahunAjaran::find($tahunId);
             if (! $tahun || ! $tahun->is_active) {
-                return back()->withErrors(['tahun_ajaran' => __('Tidak dapat menyimpan data pada tahun ajaran yang tidak aktif.')]);
+                return back()
+                    ->withErrors(['tahun_ajaran' => __('Tidak dapat menyimpan data pada tahun ajaran yang tidak aktif.')])
+                    ->withInput();
             }
         }
 
         $kelasId = $request->integer('kelas_id');
         if (! $kelasId) {
-            return back()->withErrors(['kelas_id' => __('Pilih kelas terlebih dahulu.')]);
+            return back()->withErrors(['kelas_id' => __('Pilih kelas terlebih dahulu.')])->withInput();
         }
 
         $request->validate([
             'absen' => ['required', 'array'],
-            'absen.*.sakit' => ['nullable', 'integer', 'min:0', 'max:365'],
-            'absen.*.izin' => ['nullable', 'integer', 'min:0', 'max:365'],
-            'absen.*.alpa' => ['nullable', 'integer', 'min:0', 'max:365'],
+            'absen.*.sakit' => ['nullable', 'integer', 'min:0', 'max:255'],
+            'absen.*.izin' => ['nullable', 'integer', 'min:0', 'max:255'],
+            'absen.*.alpa' => ['nullable', 'integer', 'min:0', 'max:255'],
         ]);
 
         $kelas = Kelas::findOrFail($kelasId);
         $this->authorizeKelasStore($request, $kelas);
+
+        if ($this->isKonteksBerubah($request, $kelas, $tahunId, $semester)) {
+            return $this->konteksBerubahResponse();
+        }
+
         $waliId = $kelas->guru_id;
 
         // Hanya izinkan siswa yang memang anggota kelas ini
         $validSiswaIds = $kelas->siswas()->pluck('id');
 
-        foreach ($request->input('absen') as $siswaId => $row) {
-            if (! $validSiswaIds->contains((int) $siswaId)) {
-                continue;
+        DB::transaction(function () use ($request, $validSiswaIds, $tahunId, $semester, $kelas, $waliId) {
+            foreach ($request->input('absen') as $siswaId => $row) {
+                if (! $validSiswaIds->contains((int) $siswaId)) {
+                    continue;
+                }
+
+                $meta = RaporMetadata::firstOrCreate(
+                    [
+                        'tahun_ajaran_id' => $tahunId,
+                        'semester' => $semester,
+                        'siswa_id' => $siswaId,
+                    ],
+                    [
+                        'kelas_id' => $kelas->id,
+                        'wali_guru_id' => $waliId,
+                        'tanggal_rapor' => now(),
+                    ]
+                );
+
+                $meta->kelas_id = $kelas->id;
+                $meta->wali_guru_id = $waliId;
+                $meta->sakit = (int) ($row['sakit'] ?? 0);
+                $meta->izin = (int) ($row['izin'] ?? 0);
+                $meta->alpa = (int) ($row['alpa'] ?? 0);
+                $meta->save();
             }
-
-            $meta = RaporMetadata::firstOrCreate(
-                [
-                    'tahun_ajaran_id' => $tahunId,
-                    'semester' => $semester,
-                    'siswa_id' => $siswaId,
-                ],
-                [
-                    'kelas_id' => $kelas->id,
-                    'wali_guru_id' => $waliId,
-                    'tanggal_rapor' => now(),
-                ]
-            );
-
-            $meta->kelas_id = $kelas->id;
-            $meta->wali_guru_id = $waliId;
-            $meta->sakit = (int) ($row['sakit'] ?? 0);
-            $meta->izin = (int) ($row['izin'] ?? 0);
-            $meta->alpa = (int) ($row['alpa'] ?? 0);
-            $meta->save();
-        }
+        });
 
         return back()->with('status', __('Data absen disimpan.'));
     }
@@ -218,13 +259,15 @@ class RaporDataController extends Controller
         if ($request->user()->role !== 'admin') {
             $tahun = TahunAjaran::find($tahunId);
             if (! $tahun || ! $tahun->is_active) {
-                return back()->withErrors(['tahun_ajaran' => __('Tidak dapat menyimpan data pada tahun ajaran yang tidak aktif.')]);
+                return back()
+                    ->withErrors(['tahun_ajaran' => __('Tidak dapat menyimpan data pada tahun ajaran yang tidak aktif.')])
+                    ->withInput();
             }
         }
 
         $kelasId = $request->integer('kelas_id');
         if (! $kelasId) {
-            return back()->withErrors(['kelas_id' => __('Pilih kelas terlebih dahulu.')]);
+            return back()->withErrors(['kelas_id' => __('Pilih kelas terlebih dahulu.')])->withInput();
         }
 
         $request->validate([
@@ -234,36 +277,43 @@ class RaporDataController extends Controller
 
         $kelas = Kelas::findOrFail($kelasId);
         $this->authorizeKelasStore($request, $kelas);
+
+        if ($this->isKonteksBerubah($request, $kelas, $tahunId, $semester)) {
+            return $this->konteksBerubahResponse();
+        }
+
         $waliId = $kelas->guru_id;
 
         // Hanya izinkan siswa yang memang anggota kelas ini
         $validSiswaIds = $kelas->siswas()->pluck('id');
 
-        foreach ($request->input('prestasi') as $siswaId => $val) {
-            if (! $validSiswaIds->contains((int) $siswaId)) {
-                continue;
+        DB::transaction(function () use ($request, $validSiswaIds, $tahunId, $semester, $kelas, $waliId) {
+            foreach ($request->input('prestasi') as $siswaId => $val) {
+                if (! $validSiswaIds->contains((int) $siswaId)) {
+                    continue;
+                }
+
+                $meta = RaporMetadata::firstOrCreate(
+                    [
+                        'tahun_ajaran_id' => $tahunId,
+                        'semester' => $semester,
+                        'siswa_id' => $siswaId,
+                    ],
+                    [
+                        'kelas_id' => $kelas->id,
+                        'wali_guru_id' => $waliId,
+                        'tanggal_rapor' => now(),
+                    ]
+                );
+
+                $meta->kelas_id = $kelas->id;
+                $meta->wali_guru_id = $waliId;
+
+                $text = trim((string) $val);
+                $meta->prestasi = $text === '' ? [] : [['jenis' => $text, 'keterangan' => null]];
+                $meta->save();
             }
-
-            $meta = RaporMetadata::firstOrCreate(
-                [
-                    'tahun_ajaran_id' => $tahunId,
-                    'semester' => $semester,
-                    'siswa_id' => $siswaId,
-                ],
-                [
-                    'kelas_id' => $kelas->id,
-                    'wali_guru_id' => $waliId,
-                    'tanggal_rapor' => now(),
-                ]
-            );
-
-            $meta->kelas_id = $kelas->id;
-            $meta->wali_guru_id = $waliId;
-
-            $text = trim((string) $val);
-            $meta->prestasi = $text === '' ? [] : [['jenis' => $text, 'keterangan' => null]];
-            $meta->save();
-        }
+        });
 
         return back()->with('status', __('Data prestasi disimpan.'));
     }
@@ -304,13 +354,15 @@ class RaporDataController extends Controller
         if ($request->user()->role !== 'admin') {
             $tahun = TahunAjaran::find($tahunId);
             if (! $tahun || ! $tahun->is_active) {
-                return back()->withErrors(['tahun_ajaran' => __('Tidak dapat menyimpan data pada tahun ajaran yang tidak aktif.')]);
+                return back()
+                    ->withErrors(['tahun_ajaran' => __('Tidak dapat menyimpan data pada tahun ajaran yang tidak aktif.')])
+                    ->withInput();
             }
         }
 
         $kelasId = $request->integer('kelas_id');
         if (! $kelasId) {
-            return back()->withErrors(['kelas_id' => __('Pilih kelas terlebih dahulu.')]);
+            return back()->withErrors(['kelas_id' => __('Pilih kelas terlebih dahulu.')])->withInput();
         }
 
         $request->validate([
@@ -320,34 +372,41 @@ class RaporDataController extends Controller
 
         $kelas = Kelas::findOrFail($kelasId);
         $this->authorizeKelasStore($request, $kelas);
+
+        if ($this->isKonteksBerubah($request, $kelas, $tahunId, $semester)) {
+            return $this->konteksBerubahResponse();
+        }
+
         $waliId = $kelas->guru_id;
 
         // Hanya izinkan siswa yang memang anggota kelas ini
         $validSiswaIds = $kelas->siswas()->pluck('id');
 
-        foreach ($request->input('catatan') as $siswaId => $val) {
-            if (! $validSiswaIds->contains((int) $siswaId)) {
-                continue;
+        DB::transaction(function () use ($request, $validSiswaIds, $tahunId, $semester, $kelas, $waliId) {
+            foreach ($request->input('catatan') as $siswaId => $val) {
+                if (! $validSiswaIds->contains((int) $siswaId)) {
+                    continue;
+                }
+
+                $meta = RaporMetadata::firstOrCreate(
+                    [
+                        'tahun_ajaran_id' => $tahunId,
+                        'semester' => $semester,
+                        'siswa_id' => $siswaId,
+                    ],
+                    [
+                        'kelas_id' => $kelas->id,
+                        'wali_guru_id' => $waliId,
+                        'tanggal_rapor' => now(),
+                    ]
+                );
+
+                $meta->kelas_id = $kelas->id;
+                $meta->wali_guru_id = $waliId;
+                $meta->catatan_wali = trim((string) $val);
+                $meta->save();
             }
-
-            $meta = RaporMetadata::firstOrCreate(
-                [
-                    'tahun_ajaran_id' => $tahunId,
-                    'semester' => $semester,
-                    'siswa_id' => $siswaId,
-                ],
-                [
-                    'kelas_id' => $kelas->id,
-                    'wali_guru_id' => $waliId,
-                    'tanggal_rapor' => now(),
-                ]
-            );
-
-            $meta->kelas_id = $kelas->id;
-            $meta->wali_guru_id = $waliId;
-            $meta->catatan_wali = trim((string) $val);
-            $meta->save();
-        }
+        });
 
         return back()->with('status', __('Catatan wali disimpan.'));
     }

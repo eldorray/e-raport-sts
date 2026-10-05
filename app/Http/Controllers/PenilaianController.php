@@ -7,6 +7,7 @@ use App\Models\Mengajar;
 use App\Models\Penilaian;
 use App\Models\Siswa;
 use App\Models\TahunAjaran;
+use App\Services\GradeDescriptorService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -109,6 +110,7 @@ class PenilaianController extends Controller
             'bobotSumatif' => $bobotSumatif,
             'bobotSts' => $bobotSts,
             'canEdit' => $canEdit,
+            'gradeService' => new GradeDescriptorService,
         ]);
     }
 
@@ -126,16 +128,27 @@ class PenilaianController extends Controller
         $guru = Guru::where('user_id', $request->user()->id)->first();
 
         if (! $tahunId || ! $semester) {
-            return back()->withErrors(['tahun_ajaran' => __('Pilih tahun ajaran & semester terlebih dahulu.')]);
+            return back()
+                ->withErrors(['tahun_ajaran' => __('Pilih tahun ajaran & semester terlebih dahulu.')])
+                ->withInput();
         }
 
         $this->authorizeGuruAccess($guru, $mengajar);
+
+        // Tolak bila tahun ajaran/semester sudah diganti di tab lain
+        if ($this->isKonteksBerubah($request, $mengajar, $tahunId, $semester)) {
+            return back()
+                ->withErrors(['tahun_ajaran' => __('Tahun ajaran atau semester sudah diganti di tab lain. Muat ulang halaman ini, lalu simpan lagi.')])
+                ->withInput();
+        }
 
         // Block guru from editing inactive tahun ajaran
         /** @var TahunAjaran|null $tahunAjaran */
         $tahunAjaran = TahunAjaran::find($tahunId);
         if (! $tahunAjaran || ! $tahunAjaran->is_active) {
-            return back()->withErrors(['tahun_ajaran' => __('Tidak dapat menyimpan data pada tahun ajaran yang tidak aktif.')]);
+            return back()
+                ->withErrors(['tahun_ajaran' => __('Tidak dapat menyimpan data pada tahun ajaran yang tidak aktif.')])
+                ->withInput();
         }
 
         $validated = $request->validate([
@@ -274,6 +287,46 @@ class PenilaianController extends Controller
     }
 
     /**
+     * Cek apakah konteks simpan tidak cocok dengan tahun ajaran/semester di session.
+     *
+     * Terjadi bila tahun ajaran/semester diganti di tab lain setelah form dibuka:
+     * jadwal mengajar milik tahun/semester lain, atau field tersembunyi
+     * `tahun_ajaran_id`/`semester` (opsional) dari form berbeda dengan session.
+     *
+     * @param  Request  $request  HTTP request
+     * @param  Mengajar  $mengajar  Instance mengajar
+     * @param  int  $tahunId  ID tahun ajaran dari session
+     * @param  string  $semester  Semester dari session
+     * @return bool True jika konteks berubah dan penyimpanan harus ditolak
+     */
+    private function isKonteksBerubah(Request $request, Mengajar $mengajar, int $tahunId, string $semester): bool
+    {
+        if ((int) $mengajar->tahun_ajaran_id !== $tahunId) {
+            return true;
+        }
+
+        // Jadwal lama tanpa semester berlaku untuk semester mana pun
+        $semesterMengajar = (string) $mengajar->semester;
+        if ($semesterMengajar !== '' && ! $this->isSemesterSama($semesterMengajar, $semester)) {
+            return true;
+        }
+
+        if ($request->filled('tahun_ajaran_id') && (int) $request->input('tahun_ajaran_id') !== $tahunId) {
+            return true;
+        }
+
+        return $request->filled('semester') && ! $this->isSemesterSama((string) $request->input('semester'), $semester);
+    }
+
+    /**
+     * Bandingkan dua nilai semester tanpa membedakan huruf besar/kecil (mengikuti collation database).
+     */
+    private function isSemesterSama(string $a, string $b): bool
+    {
+        return strcasecmp(trim($a), trim($b)) === 0;
+    }
+
+    /**
      * Menyimpan nilai semua siswa.
      *
      * @param  array<string, mixed>  $validated  Data nilai yang sudah divalidasi
@@ -295,7 +348,7 @@ class PenilaianController extends Controller
         $stsPayload = $validated['nilai_sts'] ?? [];
         $materiTp = isset($validated['materi_tp']) ? trim($validated['materi_tp']) : null;
 
-        $allKeys = collect(array_keys($sumatifPayload) + array_keys($stsPayload))->unique();
+        $allKeys = array_unique(array_merge(array_keys($sumatifPayload), array_keys($stsPayload)));
 
         foreach ($allKeys as $siswaId) {
             if (! $siswas->contains((int) $siswaId)) {
@@ -343,6 +396,11 @@ class PenilaianController extends Controller
         }
 
         $this->authorizeGuruAccess($guru, $mengajar);
+
+        // Tolak bila tahun ajaran/semester sudah diganti di tab lain
+        if ($this->isKonteksBerubah($request, $mengajar, $tahunId, $semester)) {
+            return back()->withErrors(['tahun_ajaran' => __('Tahun ajaran atau semester sudah diganti di tab lain. Muat ulang halaman ini, lalu simpan lagi.')]);
+        }
 
         // Block guru from resetting inactive tahun ajaran
         /** @var TahunAjaran|null $tahunAjaran */

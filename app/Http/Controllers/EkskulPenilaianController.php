@@ -10,6 +10,7 @@ use App\Models\TahunAjaran;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class EkskulPenilaianController extends Controller
@@ -54,10 +55,15 @@ class EkskulPenilaianController extends Controller
             ? Siswa::with('kelas')->whereIn('id', $selectedIds)->orderBy('nama')->get()
             : collect();
 
-        $availableSiswas = Siswa::with('kelas')
-            ->when($selectedIds->isNotEmpty(), fn ($q) => $q->whereNotIn('id', $selectedIds))
-            ->orderBy('nama')
-            ->get();
+        // Calon peserta hanya siswa aktif pada tahun ajaran yang dipilih
+        $availableSiswas = $tahunId
+            ? Siswa::with('kelas')
+                ->where('tahun_ajaran_id', $tahunId)
+                ->where('is_active', true)
+                ->when($selectedIds->isNotEmpty(), fn ($q) => $q->whereNotIn('id', $selectedIds))
+                ->orderBy('nama')
+                ->get()
+            : collect();
 
         // Check if tahun ajaran is active (guru can only edit on active tahun ajaran)
         /** @var TahunAjaran|null $tahunAjaran */
@@ -70,6 +76,7 @@ class EkskulPenilaianController extends Controller
             'availableSiswas' => $availableSiswas,
             'existing' => $existing,
             'tahunId' => $tahunId,
+            'tahunAjaran' => $tahunAjaran,
             'semester' => $semester,
             'canEdit' => $canEdit,
         ]);
@@ -86,14 +93,23 @@ class EkskulPenilaianController extends Controller
         }
 
         if (! $tahunId || ! $semester) {
-            return back()->withErrors(['tahun_ajaran' => __('Pilih tahun ajaran & semester terlebih dahulu.')]);
+            return back()->withErrors(['tahun_ajaran' => __('Pilih tahun ajaran & semester terlebih dahulu.')])->withInput();
         }
 
         // Block guru from editing inactive tahun ajaran
         /** @var TahunAjaran|null $tahunAjaran */
         $tahunAjaran = TahunAjaran::find($tahunId);
         if (! $tahunAjaran || ! $tahunAjaran->is_active) {
-            return back()->withErrors(['tahun_ajaran' => __('Tidak dapat menyimpan data pada tahun ajaran yang tidak aktif.')]);
+            return back()->withErrors(['tahun_ajaran' => __('Tidak dapat menyimpan data pada tahun ajaran yang tidak aktif.')])->withInput();
+        }
+
+        // Form lama (dibuka sebelum tahun ajaran/semester diganti di tab lain) jangan disimpan diam-diam
+        $tahunBerubah = $request->filled('tahun_ajaran_id') && (int) $request->input('tahun_ajaran_id') !== (int) $tahunId;
+        $semesterBerubah = $request->filled('semester')
+            && strcasecmp(trim((string) $request->input('semester')), trim((string) $semester)) !== 0;
+
+        if ($tahunBerubah || $semesterBerubah) {
+            return back()->withErrors(['tahun_ajaran' => __('Tahun ajaran atau semester sudah diganti di tab lain. Muat ulang halaman ini, lalu simpan lagi.')])->withInput();
         }
 
         $action = $request->input('action', 'save');
@@ -101,7 +117,9 @@ class EkskulPenilaianController extends Controller
         if ($action === 'add') {
             $data = $request->validate([
                 'siswa_ids' => ['required', 'array'],
-                'siswa_ids.*' => ['exists:siswas,id'],
+                'siswa_ids.*' => [Rule::exists('siswas', 'id')->where('tahun_ajaran_id', $tahunId)],
+            ], [
+                'siswa_ids.*.exists' => __('Siswa yang dipilih tidak terdaftar pada tahun ajaran yang sedang dipilih.'),
             ]);
 
             DB::transaction(function () use ($data, $ekskul, $guru, $tahunId, $semester) {
@@ -143,7 +161,19 @@ class EkskulPenilaianController extends Controller
 
         $nilaiPayload = $validated['nilai'] ?? [];
         $catatanPayload = $validated['catatan'] ?? [];
-        $siswaIds = array_unique(array_merge(array_keys($nilaiPayload), array_keys($catatanPayload)));
+        // Hanya terima nilai/catatan untuk siswa yang sudah menjadi peserta ekskul ini
+        $pesertaIds = EkskulPenilaian::where('ekskul_id', $ekskul->id)
+            ->where('guru_id', $guru->id)
+            ->where('tahun_ajaran_id', $tahunId)
+            ->where('semester', $semester)
+            ->pluck('siswa_id')
+            ->map(fn ($id) => (int) $id)
+            ->all();
+
+        $siswaIds = array_values(array_filter(
+            array_unique(array_merge(array_keys($nilaiPayload), array_keys($catatanPayload))),
+            fn ($siswaId) => in_array((int) $siswaId, $pesertaIds, true)
+        ));
 
         DB::transaction(function () use ($siswaIds, $nilaiPayload, $catatanPayload, $ekskul, $guru, $tahunId, $semester) {
             foreach ($siswaIds as $siswaId) {

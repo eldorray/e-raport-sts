@@ -44,6 +44,8 @@
             class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
             @csrf
             <input type="hidden" name="kelas_id" value="{{ $kelas->id }}">
+            <input type="hidden" name="tahun_ajaran_id" value="{{ $tahunId }}">
+            <input type="hidden" name="semester" value="{{ $semester }}">
             <div class="overflow-x-auto">
                 <table
                     class="min-w-full divide-y divide-gray-200 text-sm text-gray-700 dark:divide-gray-700 dark:text-gray-200">

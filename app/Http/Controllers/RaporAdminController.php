@@ -182,7 +182,11 @@ class RaporAdminController extends Controller
      */
     private function getSiswasByFilter(?string $tingkat, ?int $kelasId, ?Guru $guru)
     {
+        // Siswa disalin per tahun ajaran; tampilkan hanya salinan tahun ajaran yang dipilih
+        $tahunId = session('selected_tahun_ajaran_id');
+
         return Siswa::with('kelas')
+            ->when($tahunId, fn ($q) => $q->where('tahun_ajaran_id', $tahunId))
             ->when($tingkat, fn ($q) => $q->whereHas('kelas', fn ($qq) => $qq->where('tingkat', $tingkat)))
             ->when($kelasId, fn ($q) => $q->where('kelas_id', $kelasId))
             ->when($guru, function ($q) use ($guru) {

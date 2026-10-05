@@ -68,7 +68,7 @@
                     class="w-full max-w-md rounded-lg border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 disabled:opacity-60 disabled:cursor-not-allowed">
                     <option value="">-- Pilih Pembimbing --</option>
                     @foreach ($pembimbingList as $guru)
-                        <option value="{{ $guru->id }}" @selected(($penilaian->pembimbing_id ?? null) == $guru->id)>{{ $guru->nama }}</option>
+                        <option value="{{ $guru->id }}" @selected(old('pembimbing_id', $penilaian->pembimbing_id ?? null) == $guru->id)>{{ $guru->nama }}</option>
                     @endforeach
                 </select>
             </div>
@@ -97,14 +97,14 @@
                                         class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 disabled:opacity-60 disabled:cursor-not-allowed">
                                         <option value="">-</option>
                                         @foreach ($predikatList as $key => $label)
-                                            <option value="{{ $key }}" @selected(($penilaian->predikat_adab ?? '') == $key)>
+                                            <option value="{{ $key }}" @selected(old('predikat_adab', $penilaian->predikat_adab ?? '') == $key)>
                                                 {{ $key }}</option>
                                         @endforeach
                                     </select>
                                 </td>
                                 <td class="px-4 py-3">
-                                    <input type="text" name="deskripsi_adab" @disabled(!$canEdit)
-                                        value="{{ $penilaian->deskripsi_adab ?? 'Baik' }}"
+                                    <input type="text" name="deskripsi_adab" maxlength="100" @disabled(!$canEdit)
+                                        value="{{ old('deskripsi_adab', $penilaian->deskripsi_adab ?? 'Baik') }}"
                                         class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 disabled:opacity-60 disabled:cursor-not-allowed"
                                         placeholder="Deskripsi...">
                                 </td>
@@ -117,14 +117,14 @@
                                         class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 disabled:opacity-60 disabled:cursor-not-allowed">
                                         <option value="">-</option>
                                         @foreach ($predikatList as $key => $label)
-                                            <option value="{{ $key }}" @selected(($penilaian->predikat_tajwid ?? '') == $key)>
+                                            <option value="{{ $key }}" @selected(old('predikat_tajwid', $penilaian->predikat_tajwid ?? '') == $key)>
                                                 {{ $key }}</option>
                                         @endforeach
                                     </select>
                                 </td>
                                 <td class="px-4 py-3">
-                                    <input type="text" name="deskripsi_tajwid" @disabled(!$canEdit)
-                                        value="{{ $penilaian->deskripsi_tajwid ?? 'Baik' }}"
+                                    <input type="text" name="deskripsi_tajwid" maxlength="100" @disabled(!$canEdit)
+                                        value="{{ old('deskripsi_tajwid', $penilaian->deskripsi_tajwid ?? 'Baik') }}"
                                         class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 disabled:opacity-60 disabled:cursor-not-allowed"
                                         placeholder="Deskripsi...">
                                 </td>
@@ -137,14 +137,14 @@
                                         class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 disabled:opacity-60 disabled:cursor-not-allowed">
                                         <option value="">-</option>
                                         @foreach ($predikatList as $key => $label)
-                                            <option value="{{ $key }}" @selected(($penilaian->predikat_makhorijul ?? '') == $key)>
+                                            <option value="{{ $key }}" @selected(old('predikat_makhorijul', $penilaian->predikat_makhorijul ?? '') == $key)>
                                                 {{ $key }}</option>
                                         @endforeach
                                     </select>
                                 </td>
                                 <td class="px-4 py-3">
-                                    <input type="text" name="deskripsi_makhorijul" @disabled(!$canEdit)
-                                        value="{{ $penilaian->deskripsi_makhorijul ?? 'Cukup' }}"
+                                    <input type="text" name="deskripsi_makhorijul" maxlength="100" @disabled(!$canEdit)
+                                        value="{{ old('deskripsi_makhorijul', $penilaian->deskripsi_makhorijul ?? 'Cukup') }}"
                                         class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 disabled:opacity-60 disabled:cursor-not-allowed"
                                         placeholder="Deskripsi...">
                                 </td>
@@ -155,7 +155,16 @@
             </div>
 
             <!-- Hafalan Surah -->
+            @php
+                // Pakai pilihan yang baru dikirim bila kembali karena gagal simpan
+                $pakaiInputLama = (int) old('juz', 0) === $juz;
+            @endphp
             @if ($juz === 30)
+                @php
+                    $surahHafalan = $pakaiInputLama
+                        ? (array) old('surah_hafalan', [])
+                        : $penilaian->surah_hafalan ?? [];
+                @endphp
                 <div
                     class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
                     <div class="mb-4 flex items-center justify-between">
@@ -165,11 +174,10 @@
                         </h3>
                         <span id="surah-count"
                             class="rounded-full bg-blue-100 px-3 py-1 text-sm font-semibold text-blue-700 dark:bg-blue-900 dark:text-blue-200">
-                            {{ count($penilaian->surah_hafalan ?? []) }} / 38
+                            {{ count($surahHafalan) }} / 38
                         </span>
                     </div>
                     <div class="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-                        @php $surahHafalan = $penilaian->surah_hafalan ?? []; @endphp
                         @foreach ($surahList as $key => $nama)
                             <label
                                 class="flex cursor-pointer items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 transition-colors hover:bg-gray-100 has-[:checked]:border-green-500 has-[:checked]:bg-green-50 dark:border-gray-700 dark:bg-gray-900/50 dark:hover:bg-gray-800 dark:has-[:checked]:border-green-600 dark:has-[:checked]:bg-green-900/30 {{ !$canEdit ? 'opacity-60 cursor-not-allowed' : '' }}">
@@ -184,6 +192,11 @@
                     </div>
                 </div>
             @else
+                @php
+                    $surahHafalan29 = $pakaiInputLama
+                        ? (array) old('surah_hafalan_29', [])
+                        : $penilaian->surah_hafalan_29 ?? [];
+                @endphp
                 <div
                     class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
                     <div class="mb-4 flex items-center justify-between">
@@ -193,11 +206,10 @@
                         </h3>
                         <span id="surah-count"
                             class="rounded-full bg-purple-100 px-3 py-1 text-sm font-semibold text-purple-700 dark:bg-purple-900 dark:text-purple-200">
-                            {{ count($penilaian->surah_hafalan_29 ?? []) }} / 11
+                            {{ count($surahHafalan29) }} / 11
                         </span>
                     </div>
                     <div class="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-                        @php $surahHafalan29 = $penilaian->surah_hafalan_29 ?? []; @endphp
                         @foreach ($surahListJuz29 as $key => $nama)
                             <label
                                 class="flex cursor-pointer items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 transition-colors hover:bg-gray-100 has-[:checked]:border-purple-500 has-[:checked]:bg-purple-50 dark:border-gray-700 dark:bg-gray-900/50 dark:hover:bg-gray-800 dark:has-[:checked]:border-purple-600 dark:has-[:checked]:bg-purple-900/30 {{ !$canEdit ? 'opacity-60 cursor-not-allowed' : '' }}">

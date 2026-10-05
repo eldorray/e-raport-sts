@@ -197,7 +197,9 @@ class TahfidzController extends Controller
             /** @var \App\Models\TahunAjaran|null $tahunAjaran */
             $tahunAjaran = TahunAjaran::find($tahunId);
             if (! $tahunAjaran || ! $tahunAjaran->is_active) {
-                return back()->withErrors(['tahun_ajaran' => __('Tidak dapat menyimpan data pada tahun ajaran yang tidak aktif.')]);
+                return back()
+                    ->withErrors(['tahun_ajaran' => __('Tidak dapat menyimpan data pada tahun ajaran yang tidak aktif.')])
+                    ->withInput();
             }
         }
 
@@ -281,7 +283,7 @@ class TahfidzController extends Controller
 
         return redirect()
             ->route('tahfidz.show', $siswa)
-            ->with('success', __('Penilaian tahfidz berhasil direset.'));
+            ->with('status', __('Penilaian tahfidz berhasil direset.'));
     }
 
     /**

@@ -24,8 +24,11 @@
 
     <div
         class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
-        <form method="POST" action="{{ route('guru.penilaian.store', $mengajar) }}">
+        <form method="POST" action="{{ route('guru.penilaian.store', $mengajar) }}"
+            x-data="{ menyimpan: false }" @submit="menyimpan = true" @pageshow.window="menyimpan = false">
             @csrf
+            <input type="hidden" name="tahun_ajaran_id" value="{{ $tahunId }}">
+            <input type="hidden" name="semester" value="{{ $semester }}">
             {{-- Both Sumatif & STS saved together --}}
 
             @php
@@ -46,7 +49,7 @@
                     </div>
                     <div class="flex flex-1 flex-col gap-1 md:max-w-xl">
                         <input id="materi_tp" name="materi_tp" type="text" value="{{ $currentMateriTp }}"
-                            @disabled(!$canEdit)
+                            maxlength="255" @disabled(!$canEdit)
                             class="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm font-medium shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 disabled:opacity-60 disabled:cursor-not-allowed"
                             placeholder="{{ __('Contoh: Persamaan linear satu variabel') }}">
                         <p class="text-xs text-gray-500 dark:text-gray-400">
@@ -103,57 +106,15 @@
                                 $sumatif = $nilai?->nilai_sumatif;
                                 $sts = $nilai?->nilai_sts;
 
-                                $rapor = null;
-                                if ($sumatif !== null && $sts !== null && abs($bobotTotal - 100) <= 0.01) {
-                                    $rapor = round(($sumatif * $bobotSumatif + $sts * $bobotSts) / 100, 2);
-                                }
-
-                                $materiText = $currentMateriTp ?: __('Materi/TP belum diisi');
-                                $descriptor = null;
-
-                                if ($rapor !== null) {
-                                    if ($rapor >= 86) {
-                                        $descriptor = [
-                                            'predikat' => 'Sangat Baik',
-                                            'keterangan' => 'Sangat Menguasai',
-                                            'kalimat' => str_replace(
-                                                '[Materi/TP]',
-                                                $materiText,
-                                                'Peserta didik menunjukkan penguasaan yang sangat baik dalam [Materi/TP].',
-                                            ),
-                                        ];
-                                    } elseif ($rapor >= 76) {
-                                        $descriptor = [
-                                            'predikat' => 'Baik',
-                                            'keterangan' => 'Sudah Mampu',
-                                            'kalimat' => str_replace(
-                                                '[Materi/TP]',
-                                                $materiText,
-                                                'Peserta didik menunjukkan penguasaan yang baik dalam [Materi/TP].',
-                                            ),
-                                        ];
-                                    } elseif ($rapor >= 61) {
-                                        $descriptor = [
-                                            'predikat' => 'Cukup',
-                                            'keterangan' => 'Mulai Berkembang',
-                                            'kalimat' => str_replace(
-                                                ['[Materi/TP]', '[Sub-bagian tertentu]'],
-                                                [$materiText, 'bagian tertentu'],
-                                                'Peserta didik cukup mampu dalam [Materi/TP], namun masih perlu bimbingan pada [Sub-bagian tertentu].',
-                                            ),
-                                        ];
-                                    } else {
-                                        $descriptor = [
-                                            'predikat' => 'Perlu Bimbingan',
-                                            'keterangan' => 'Belum Mencapai',
-                                            'kalimat' => str_replace(
-                                                '[Materi/TP]',
-                                                $materiText,
-                                                'Peserta didik memerlukan bimbingan dalam [Materi/TP].',
-                                            ),
-                                        ];
-                                    }
-                                }
+                                $hasil = $gradeService->calculateWithDescriptor(
+                                    $sumatif,
+                                    $sts,
+                                    $currentMateriTp,
+                                    $bobotSumatif,
+                                    $bobotSts,
+                                );
+                                $rapor = $hasil['rapor'];
+                                $descriptor = $hasil['descriptor'];
                             @endphp
                             <tr>
                                 <td class="px-4 py-3">{{ $index + 1 }}</td>
@@ -161,13 +122,17 @@
                                 <td class="px-4 py-3">{{ $siswa->nama }}</td>
                                 <td class="px-4 py-3">
                                     <input type="number" step="0.01" min="0" max="100"
-                                        name="nilai_sumatif[{{ $siswa->id }}]" value="{{ $sumatif }}"
+                                        name="nilai_sumatif[{{ $siswa->id }}]"
+                                        value="{{ old('nilai_sumatif.' . $siswa->id, $sumatif) }}"
+                                        aria-label="{{ __('Nilai sumatif :nama', ['nama' => $siswa->nama]) }}"
                                         @disabled(!$canEdit)
                                         class="w-28 rounded-lg border border-gray-300 px-3 py-2 text-center text-sm font-medium shadow-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 dark:focus:border-blue-400 disabled:opacity-60 disabled:cursor-not-allowed">
                                 </td>
                                 <td class="px-4 py-3">
                                     <input type="number" step="0.01" min="0" max="100"
-                                        name="nilai_sts[{{ $siswa->id }}]" value="{{ $sts }}"
+                                        name="nilai_sts[{{ $siswa->id }}]"
+                                        value="{{ old('nilai_sts.' . $siswa->id, $sts) }}"
+                                        aria-label="{{ __('Nilai SAS / STS :nama', ['nama' => $siswa->nama]) }}"
                                         @disabled(!$canEdit)
                                         class="w-28 rounded-lg border border-gray-300 px-3 py-2 text-center text-sm font-medium shadow-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 dark:focus:border-blue-400 disabled:opacity-60 disabled:cursor-not-allowed">
                                 </td>
@@ -212,8 +177,8 @@
                             </svg>
                             {{ __('Reset Nilai') }}
                         </button>
-                        <button type="submit"
-                            class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus:ring-offset-gray-900">
+                        <button type="submit" :disabled="menyimpan"
+                            class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus:ring-offset-gray-900">
                             {{ __('Simpan Nilai') }}
                         </button>
                     @endif
@@ -227,6 +192,8 @@
         <form id="reset-form" method="POST" action="{{ route('guru.penilaian.reset', $mengajar) }}" class="hidden">
             @csrf
             @method('DELETE')
+            <input type="hidden" name="tahun_ajaran_id" value="{{ $tahunId }}">
+            <input type="hidden" name="semester" value="{{ $semester }}">
         </form>
 
         <script>
