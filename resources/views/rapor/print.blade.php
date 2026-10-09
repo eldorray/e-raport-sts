@@ -198,28 +198,34 @@
             font-size: 11px;
         }
 
-        .signature-row {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            margin-top: 18px;
+        .ttd {
+            margin-top: 20px;
             font-size: 12px;
+            line-height: 1.5;
+            break-inside: avoid;
+            page-break-inside: avoid;
         }
 
-        .signature {
-            text-align: center;
-            min-height: 130px;
-            position: relative;
+        .ttd-baris {
+            display: grid;
+            grid-template-columns: 1fr 34%;
         }
 
-        .signature .name {
+        .ttd-tengah {
+            display: flex;
+            justify-content: center;
+            margin-top: 18px;
+        }
+
+        .ttd-nama {
             margin-top: 64px;
             font-weight: 700;
-            text-decoration: underline;
         }
 
-        .signature .nip {
-            margin-top: 2px;
+        .ttd-garis {
+            width: 230px;
+            margin-top: 82px;
+            border-bottom: 1px solid #000;
         }
 
         .qr-box {
@@ -440,21 +446,28 @@
             </div>
         </div>
 
-        <div class="signature-row" style="margin-top:20px; grid-template-columns: repeat(3, 1fr);">
-            <div class="signature" style="text-align:left;">
-                <div>{{ $printPlace }}, {{ optional($raporDate)->translatedFormat('d F Y') }}</div>
-                <div style="margin-top:4px;">Orang Tua/Wali</div>
-                <div class="name" style="margin-top:70px;">___________________</div>
+        {{-- Tanda tangan: Orang Tua/Wali (kiri), tanggal + Wali Kelas (kanan), Kepala Madrasah (tengah bawah) --}}
+        <div class="ttd">
+            <div class="ttd-baris">
+                <div class="ttd-blok">
+                    <div>&nbsp;</div>
+                    <div>Orang Tua/Wali</div>
+                    <div class="ttd-garis"></div>
+                </div>
+                <div class="ttd-blok">
+                    <div>{{ $printPlace }}, {{ optional($raporDate)->translatedFormat('d F Y') }}</div>
+                    <div>Wali Kelas</div>
+                    <div class="ttd-nama">{{ $wali->nama ?? '—' }}</div>
+                    <div>NIP. {{ $wali?->nip ?: '-' }}</div>
+                </div>
             </div>
-            <div class="signature">
-                <div>Mengetahui</div>
-                <div style="margin-top:2px;">Kepala Madrasah</div>
-                <div class="name" style="margin-top:70px;">{{ $school->headmaster ?? '—' }}</div>
-            </div>
-            <div class="signature" style="text-align:right;">
-                <div>&nbsp;</div>
-                <div style="margin-top:4px;">Wali Kelas</div>
-                <div class="name" style="margin-top:70px;">{{ $wali->nama ?? '—' }}</div>
+            <div class="ttd-tengah">
+                <div class="ttd-blok">
+                    <div>Mengetahui</div>
+                    <div>Kepala Madrasah</div>
+                    <div class="ttd-nama">{{ $school?->headmaster ?: '—' }}</div>
+                    <div>NIP. {{ $school?->nip_headmaster ?: '-' }}</div>
+                </div>
             </div>
         </div>
     </div>
