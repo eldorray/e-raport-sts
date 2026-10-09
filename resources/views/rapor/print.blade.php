@@ -224,7 +224,7 @@
         }
 
         .ttd-garis {
-            width: 230px;
+            width: 160px;
             margin-top: 82px;
             border-bottom: 1px solid #000;
         }
