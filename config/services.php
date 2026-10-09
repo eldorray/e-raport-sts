@@ -44,6 +44,8 @@ return [
     |
     */
     'data_induk' => [
+        // false = tombol "Sync API" di menu Guru, Siswa, dan Mata Pelajaran disembunyikan dan rutenya ditutup
+        'enabled' => (bool) env('SYNC_API_ENABLED', true),
         'base_url' => env('SYNC_API_BASE_URL', 'https://datainduk.ypdhalmadani.sch.id'),
     ],
 

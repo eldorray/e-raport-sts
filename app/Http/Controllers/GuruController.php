@@ -291,6 +291,8 @@ class GuruController extends Controller
      */
     public function syncFromApi(Request $request): RedirectResponse
     {
+        abort_unless(config('services.data_induk.enabled'), 404);
+
         $request->validate([
             'source' => ['required', 'in:guru-mi,guru-smp'],
         ]);

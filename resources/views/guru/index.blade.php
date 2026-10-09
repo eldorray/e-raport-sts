@@ -58,6 +58,7 @@
                 </svg>
                 {{ __('Export PDF') }}
             </a>
+            @if (config('services.data_induk.enabled'))
             <button type="button" id="openSyncModal"
                 class="inline-flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-green-700 focus:outline-none focus:ring-4 focus:ring-green-500/30">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
@@ -67,6 +68,7 @@
                 </svg>
                 {{ __('Sync API') }}
             </button>
+            @endif
         </div>
     </div>
 
@@ -184,6 +186,7 @@
             </form>
         </div>
 
+        @if (config('services.data_induk.enabled'))
         <div id="syncModal"
             class="modal-card hidden w-full max-w-lg overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-900">
             <div class="border-b border-gray-100 bg-gray-50 px-6 py-4 dark:border-gray-700 dark:bg-gray-900/40">
@@ -202,7 +205,7 @@
                 <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 text-sm text-blue-800 dark:text-blue-300">
                     <p class="font-medium mb-2">{{ __('Informasi:') }}</p>
                     <ul class="list-disc list-inside space-y-1">
-                        <li>Data akan diambil dari: <code class="bg-blue-100 dark:bg-blue-800 px-1 rounded">{{ env('SYNC_API_BASE_URL', 'https://datainduk.ypdhalmadani.sch.id') }}/api/[source]/all</code></li>
+                        <li>Data akan diambil dari: <code class="bg-blue-100 dark:bg-blue-800 px-1 rounded">{{ config('services.data_induk.base_url') }}/api/[source]/all</code></li>
                         <li>Guru yang sudah ada (berdasarkan NIP) akan diperbarui</li>
                         <li>Guru baru akan ditambahkan beserta akun login</li>
                         <li>Password default: sama dengan NIP</li>
@@ -216,6 +219,7 @@
                 </div>
             </form>
         </div>
+        @endif
     </div>
 
     <script>

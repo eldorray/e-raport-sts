@@ -250,6 +250,8 @@ class SiswaController extends Controller
      */
     public function syncFromApi(Request $request): RedirectResponse
     {
+        abort_unless(config('services.data_induk.enabled'), 404);
+
         $tahunId = $this->tahunAjaranAktif();
         if (! $tahunId) {
             return back()->with('error', 'Pilih tahun ajaran terlebih dahulu.');
