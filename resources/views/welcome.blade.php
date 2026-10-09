@@ -1,514 +1,619 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark">
+<html lang="id">
 
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ config('app.name', 'E-Raport STS') }}</title>
+
+    @php
+        $sekolah = \App\Models\SchoolProfile::first();
+        $namaSekolah = $sekolah?->name ?? config('app.name', 'e-Raport');
+        $logoUrl = $sekolah?->logo ? asset('storage/'.$sekolah->logo) : null;
+        $tahunAktif = \App\Models\TahunAjaran::where('is_active', true)->orderByDesc('tahun_mulai')->first();
+        $alamat = $sekolah?->address ?: $sekolah?->city;
+    @endphp
+
+    <title>e-Raport · {{ $namaSekolah }}</title>
+    <meta name="description" content="e-Raport {{ $namaSekolah }}: pengisian nilai sumatif dan STS oleh guru, serta penyusunan rapor oleh wali kelas.">
+    <meta name="theme-color" content="#1E4D3A">
     <link rel="icon" type="image/png" href="{{ asset('images/eraport-icon.png') }}">
     <link rel="apple-touch-icon" href="{{ asset('images/eraport-icon.png') }}">
 
-    @php
-        $school = \App\Models\SchoolProfile::first();
-        $schoolName = $school?->name ?? 'Sekolah';
-        $logoUrl = $school?->logo ? asset('storage/' . $school->logo) : null;
-        $totalSiswa = \App\Models\Siswa::count();
-        $totalGuru = \App\Models\Guru::count();
-        $totalKelas = \App\Models\Kelas::count();
-    @endphp
-
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
-        rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Readex+Pro:wght@400;500;600&display=swap" rel="stylesheet">
 
-    @vite(['resources/css/app.css'])
-
+    {{-- ponytail: halaman depan berdiri sendiri (tanpa Vite), jadi tetap tampil walau aset build belum ada --}}
     <style>
-        @keyframes float {
+        :root {
+            --kertas: #F7F4EC;
+            --tinta: #1F2A24;
+            --redup: #56625B;
+            --hijau: #1E4D3A;
+            --hijau-tua: #163A2C;
+            --emas: #C9A24E;
+            --daun: #E3EADB;
+            --garis: #D9D6CA;
+            --judul: 'Marcellus', Georgia, serif;
+            --badan: 'Readex Pro', system-ui, -apple-system, 'Segoe UI', sans-serif;
+        }
 
-            0%,
-            100% {
-                transform: translateY(0px);
-            }
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
 
-            50% {
-                transform: translateY(-20px);
+        body {
+            margin: 0;
+            background: var(--kertas);
+            color: var(--tinta);
+            font-family: var(--badan);
+            font-size: 17px;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        img {
+            display: block;
+            max-width: 100%;
+        }
+
+        :focus-visible {
+            outline: 3px solid var(--hijau);
+            outline-offset: 3px;
+            border-radius: 8px;
+        }
+
+        .wadah {
+            max-width: 1120px;
+            margin: 0 auto;
+            padding-inline: 24px;
+        }
+
+        /* Kepala halaman */
+        .kepala {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            padding-block: 20px;
+        }
+
+        .identitas {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 0;
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .identitas__logo {
+            width: 48px;
+            height: 48px;
+            flex-shrink: 0;
+            border-radius: 12px;
+            object-fit: contain;
+        }
+
+        .identitas__logo--bawaan {
+            display: grid;
+            place-items: center;
+            background: var(--hijau);
+            color: var(--emas);
+        }
+
+        .identitas__nama {
+            display: block;
+            font-family: var(--judul);
+            font-size: 20px;
+            font-weight: 400;
+            line-height: 1.15;
+        }
+
+        .identitas__kota {
+            display: block;
+            font-size: 14px;
+            color: var(--redup);
+        }
+
+        /* Tombol */
+        .tombol {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 48px;
+            padding: 0 24px;
+            border: 1.5px solid var(--hijau);
+            border-radius: 999px;
+            font: 600 16px/1 var(--badan);
+            text-decoration: none;
+            white-space: nowrap;
+            transition: background-color .2s ease, color .2s ease;
+        }
+
+        .tombol--isi {
+            background: var(--hijau);
+            color: #fff;
+        }
+
+        .tombol--isi:hover {
+            background: var(--hijau-tua);
+            border-color: var(--hijau-tua);
+        }
+
+        .tombol--garis {
+            background: transparent;
+            color: var(--hijau);
+        }
+
+        .tombol--garis:hover {
+            background: var(--daun);
+        }
+
+        .tombol--kecil {
+            min-height: 44px;
+            padding: 0 20px;
+            font-size: 15px;
+        }
+
+        /* Pembuka */
+        .pembuka {
+            display: grid;
+            grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr);
+            align-items: center;
+            gap: 56px;
+            padding-block: 40px 80px;
+        }
+
+        .tanda {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin: 0 0 18px;
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--hijau);
+        }
+
+        .tanda svg {
+            color: var(--emas);
+        }
+
+        h1 {
+            margin: 0;
+            font-family: var(--judul);
+            font-size: clamp(2.5rem, 5.4vw, 4.25rem);
+            font-weight: 400;
+            line-height: 1.05;
+            letter-spacing: -0.01em;
+            text-wrap: balance;
+        }
+
+        .h1-atas {
+            display: block;
+            margin-bottom: .2em;
+            font-size: .5em;
+            font-weight: 400;
+            letter-spacing: .02em;
+            color: var(--hijau);
+        }
+
+        .pengantar {
+            max-width: 36ch;
+            margin: 24px 0 0;
+            font-size: 19px;
+            color: var(--redup);
+            text-wrap: pretty;
+        }
+
+        .aksi {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 32px;
+        }
+
+        .catatan {
+            margin: 20px 0 0;
+            font-size: 14px;
+            color: var(--redup);
+        }
+
+        /* Buku rapor */
+        .meja {
+            display: grid;
+            place-items: center;
+            min-height: 540px;
+            padding: 56px 24px;
+            border-radius: 32px;
+            background: var(--daun);
+        }
+
+        .buku {
+            position: relative;
+            width: min(320px, 70vw);
+            aspect-ratio: 3 / 4;
+            font-size: clamp(11px, 3.5vw, 16px);
+            transform: rotate(-3deg);
+            transition: transform .45s cubic-bezier(.2, .7, .2, 1);
+            animation: buku-datang .9s cubic-bezier(.2, .7, .2, 1) backwards;
+        }
+
+        .meja:hover .buku {
+            transform: rotate(-1deg) translateY(-6px);
+        }
+
+        @keyframes buku-datang {
+            from {
+                opacity: 0;
+                transform: translateY(28px) rotate(-8deg);
             }
         }
 
-        @keyframes float-delayed {
-
-            0%,
-            100% {
-                transform: translateY(0px);
-            }
-
-            50% {
-                transform: translateY(-15px);
-            }
+        /* Tumpukan halaman di sisi kanan */
+        .buku::before {
+            content: '';
+            position: absolute;
+            top: 8px;
+            right: -11px;
+            bottom: 8px;
+            width: 15px;
+            border-radius: 0 4px 4px 0;
+            background: repeating-linear-gradient(90deg, #FBF8F1 0 2px, #E4DDCC 2px 3px);
+            box-shadow: 0 12px 24px -10px rgba(22, 40, 30, .35);
         }
 
-        @keyframes pulse-slow {
-
-            0%,
-            100% {
-                opacity: 0.4;
-            }
-
-            50% {
-                opacity: 0.7;
-            }
+        .sampul {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1.1em;
+            padding: 3.5em 2.5em 3em 3.4em;
+            border-radius: 4px 12px 12px 4px;
+            text-align: center;
+            color: var(--emas);
+            background-color: var(--hijau);
+            background-image:
+                linear-gradient(90deg, rgba(0, 0, 0, .3) 0 .9em, rgba(255, 255, 255, .07) .9em 1em, transparent 1em),
+                repeating-linear-gradient(45deg, rgba(255, 255, 255, .035) 0 1px, transparent 1px 4px),
+                repeating-linear-gradient(-45deg, rgba(0, 0, 0, .07) 0 1px, transparent 1px 4px);
+            box-shadow:
+                inset 0 1px 0 rgba(255, 255, 255, .08),
+                0 40px 60px -24px rgba(22, 40, 30, .55),
+                0 14px 24px -12px rgba(22, 40, 30, .35);
         }
 
-        .animate-float {
-            animation: float 6s ease-in-out infinite;
+        .bingkai {
+            position: absolute;
+            inset: 1.25em 1.25em 1.25em 2.1em;
+            border: 1.5px solid rgba(201, 162, 78, .75);
+            border-radius: 6px;
+            pointer-events: none;
         }
 
-        .animate-float-delayed {
-            animation: float-delayed 5s ease-in-out infinite;
-            animation-delay: 1s;
+        .bingkai::after {
+            content: '';
+            position: absolute;
+            inset: 5px;
+            border: 1px solid rgba(201, 162, 78, .4);
+            border-radius: 3px;
         }
 
-        .animate-pulse-slow {
-            animation: pulse-slow 4s ease-in-out infinite;
+        .bingkai svg {
+            position: absolute;
+            width: 1.15em;
+            height: 1.15em;
+            background: var(--hijau);
         }
 
-        .gradient-text {
-            background: linear-gradient(135deg, #3b82f6, #06b6d4, #8b5cf6);
+        .bingkai svg:nth-child(1) {
+            top: 0;
+            left: 0;
+            transform: translate(-50%, -50%);
+        }
+
+        .bingkai svg:nth-child(2) {
+            top: 0;
+            right: 0;
+            transform: translate(50%, -50%);
+        }
+
+        .bingkai svg:nth-child(3) {
+            bottom: 0;
+            left: 0;
+            transform: translate(-50%, 50%);
+        }
+
+        .bingkai svg:nth-child(4) {
+            right: 0;
+            bottom: 0;
+            transform: translate(50%, 50%);
+        }
+
+        .emas {
+            background: linear-gradient(100deg, #B98C35 0%, #F1DC9F 42%, #C79A45 62%, #E6C98A 100%);
             -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
             background-clip: text;
+            color: transparent;
         }
 
-        .card-hover {
-            transition: all 0.3s ease;
+        .sampul__judul {
+            margin: 0;
+            font-family: var(--judul);
+            font-size: 1.375em;
+            font-weight: 400;
+            line-height: 1.35;
+            letter-spacing: .18em;
+            text-transform: uppercase;
         }
 
-        .card-hover:hover {
-            transform: translateY(-8px);
+        .sampul__lambang {
+            display: grid;
+            place-items: center;
+            width: 6em;
+            height: 6em;
         }
 
-        .glass {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+        .sampul__lambang img {
+            width: 100%;
+            height: 100%;
+            padding: .6em;
+            border-radius: 50%;
+            object-fit: contain;
+            background: #F3EBD3;
+            box-shadow: 0 0 0 2px var(--emas);
         }
 
-        /* Light mode styles */
-        html:not(.dark) .glass {
-            background: rgba(255, 255, 255, 0.8);
+        .sampul__sekolah {
+            margin: 0;
+            font-family: var(--judul);
+            font-size: 1.25em;
+            font-weight: 400;
+            line-height: 1.25;
+            letter-spacing: .06em;
+            text-transform: uppercase;
         }
 
-        html:not(.dark) .gradient-text {
-            background: linear-gradient(135deg, #2563eb, #0891b2, #7c3aed);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+        .sampul__tahun {
+            margin: -.4em 0 0;
+            font-size: .8em;
+            letter-spacing: .2em;
+            color: rgba(232, 210, 154, .85);
         }
 
-        /* Theme toggle button */
-        .theme-toggle {
-            transition: all 0.3s ease;
+        /* Peran */
+        .peran {
+            padding-block: 72px;
+            border-top: 1px solid var(--garis);
         }
 
-        .theme-toggle:hover {
-            transform: rotate(15deg) scale(1.1);
+        .peran h2 {
+            margin: 0 0 36px;
+            font-family: var(--judul);
+            font-size: clamp(1.75rem, 3vw, 2.25rem);
+            font-weight: 400;
+            line-height: 1.2;
+        }
+
+        .peran ul {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 36px 40px;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .peran li {
+            padding-top: 18px;
+            border-top: 1px solid var(--garis);
+        }
+
+        .peran h3 {
+            margin: 0 0 6px;
+            font-family: var(--judul);
+            font-size: 21px;
+            font-weight: 400;
+            color: var(--hijau);
+        }
+
+        .peran p {
+            margin: 0;
+            font-size: 16px;
+            color: var(--redup);
+        }
+
+        /* Kaki */
+        .kaki {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 8px 24px;
+            padding-block: 28px 44px;
+            border-top: 1px solid var(--garis);
+            font-size: 14px;
+            color: var(--redup);
+        }
+
+        .kaki p {
+            margin: 0;
+        }
+
+        @media (max-width: 1000px) {
+            .peran ul {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 860px) {
+            .pembuka {
+                grid-template-columns: minmax(0, 1fr);
+                gap: 40px;
+                padding-block: 16px 56px;
+            }
+
+            .meja {
+                min-height: 400px;
+                padding: 48px 16px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .peran ul {
+                grid-template-columns: minmax(0, 1fr);
+            }
+
+            .identitas__kota {
+                display: none;
+            }
+
+            .aksi .tombol {
+                flex: 1 1 100%;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .buku {
+                animation: none;
+                transition: none;
+            }
         }
     </style>
-
-    <script>
-        // Check for saved theme preference or system preference
-        if (localStorage.getItem('theme') === 'light' ||
-            (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: light)').matches)) {
-            document.documentElement.classList.remove('dark');
-        } else {
-            document.documentElement.classList.add('dark');
-        }
-    </script>
 </head>
 
-<body
-    class="min-h-screen bg-slate-50 text-slate-900 transition-colors duration-300 dark:bg-slate-950 dark:text-slate-50 font-['Plus_Jakarta_Sans']">
-    <div class="relative min-h-screen overflow-hidden">
+<body>
+    {{-- Bintang segi delapan, motif hias sampul rapor --}}
+    <svg width="0" height="0" style="position: absolute" aria-hidden="true">
+        <symbol id="bintang" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M12 1 15.2 4.2H19.8V8.8L23 12 19.8 15.2V19.8H15.2L12 23 8.8 19.8H4.2V15.2L1 12 4.2 8.8V4.2H8.8Z" />
+        </symbol>
+        <symbol id="bintang-garis" viewBox="0 0 24 24">
+            <g fill="none" stroke="currentColor" stroke-width=".9">
+                <path d="M12 1.5 22.5 12 12 22.5 1.5 12Z" />
+                <path d="M4.6 4.6H19.4V19.4H4.6Z" />
+                <circle cx="12" cy="12" r="3.2" />
+            </g>
+        </symbol>
+    </svg>
 
-        {{-- Animated Background --}}
-        <div class="pointer-events-none absolute inset-0">
-            <div
-                class="animate-pulse-slow absolute -right-40 -top-40 h-[500px] w-[500px] rounded-full bg-blue-500/10 blur-3xl dark:bg-blue-500/20">
-            </div>
-            <div class="animate-pulse-slow absolute -left-40 top-1/2 h-[400px] w-[400px] rounded-full bg-purple-500/10 blur-3xl dark:bg-purple-500/15"
-                style="animation-delay: 2s;"></div>
-            <div class="animate-pulse-slow absolute bottom-0 right-1/4 h-[300px] w-[300px] rounded-full bg-cyan-500/10 blur-3xl dark:bg-cyan-500/15"
-                style="animation-delay: 4s;"></div>
-        </div>
+    <header class="wadah kepala">
+        <a class="identitas" href="{{ url('/') }}">
+            @if ($logoUrl)
+                <img class="identitas__logo" src="{{ $logoUrl }}" alt="">
+            @else
+                <span class="identitas__logo identitas__logo--bawaan" aria-hidden="true">
+                    <svg width="26" height="26"><use href="#bintang-garis" /></svg>
+                </span>
+            @endif
+            <span>
+                <span class="identitas__nama">{{ $namaSekolah }}</span>
+                @if ($sekolah?->city)
+                    <span class="identitas__kota">{{ $sekolah->city }}</span>
+                @endif
+            </span>
+        </a>
 
-        {{-- Grid Pattern --}}
-        <div
-            class="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.03)_1px,transparent_1px)] bg-[size:64px_64px] dark:bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)]">
-        </div>
+        @auth
+            <a class="tombol tombol--isi tombol--kecil" href="{{ route('dashboard') }}">Buka dashboard</a>
+        @else
+            <a class="tombol tombol--isi tombol--kecil" href="{{ route('login') }}">Masuk</a>
+        @endauth
+    </header>
 
-        {{-- Header --}}
-        <header class="glass relative z-50 border-b border-slate-200 dark:border-white/10">
-            <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-                <div class="flex items-center gap-4">
-                    @if ($logoUrl)
-                        <img src="{{ $logoUrl }}" alt="Logo Sekolah"
-                            class="h-16 w-16 rounded-xl bg-slate-100 object-contain p-2 ring-1 ring-slate-200 dark:bg-white/10 dark:ring-white/20">
-                    @else
-                        <div
-                            class="flex h-16 w-16 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 shadow-lg shadow-blue-500/30">
-                            <i class="fa-solid fa-graduation-cap text-2xl text-white"></i>
-                        </div>
-                    @endif
-                    <div>
-                        <p class="text-xl font-bold text-slate-900 dark:text-white">
-                            {{ $school?->name ?? 'E-Raport STS' }}</p>
-                        <p class="text-sm text-slate-500 dark:text-slate-400">
-                            {{ $school?->city ?? 'Sumatif Tengah Semester' }}</p>
-                    </div>
-                </div>
-                <nav class="flex items-center gap-3">
-                    {{-- Theme Toggle --}}
-                    <button id="themeToggle" type="button"
-                        class="theme-toggle flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-600 ring-1 ring-slate-200 transition hover:bg-slate-200 dark:bg-white/10 dark:text-yellow-300 dark:ring-white/10 dark:hover:bg-white/20">
-                        <i class="fa-solid fa-sun hidden dark:block"></i>
-                        <i class="fa-solid fa-moon block dark:hidden"></i>
-                    </button>
-
-                    @auth
-                        <a href="{{ route('dashboard') }}"
-                            class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-500/30 transition hover:shadow-blue-500/50">
-                            <i class="fa-solid fa-arrow-right"></i> Dashboard
-                        </a>
-                    @else
-                        <a href="{{ route('login') }}"
-                            class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-blue-500 to-cyan-500 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-500/30 transition hover:shadow-blue-500/50">
-                            <i class="fa-solid fa-right-to-bracket"></i> Masuk
-                        </a>
-                    @endauth
-                </nav>
-            </div>
-        </header>
-
-        {{-- Hero Section --}}
-        <section class="relative z-10 px-6 py-16 lg:py-24">
-            <div class="mx-auto grid max-w-7xl items-center gap-12 lg:grid-cols-2">
-                <div class="text-center lg:text-left">
-                    <div
-                        class="mb-6 inline-flex items-center gap-2 rounded-full bg-blue-500/10 px-4 py-2 text-sm font-medium text-blue-600 ring-1 ring-inset ring-blue-400/30 dark:text-blue-300">
-                        <i class="fa-solid fa-sparkles"></i> Sistem Rapor Digital Modern
-                    </div>
-
-                    <h1
-                        class="text-4xl font-extrabold leading-tight text-slate-900 dark:text-white sm:text-5xl lg:text-6xl">
-                        Kelola Penilaian
-                        <span class="gradient-text">Lebih Mudah</span>
-                        & Efisien
-                    </h1>
-
-                    <p class="mx-auto mt-6 max-w-xl text-lg leading-relaxed text-slate-600 dark:text-slate-300 lg:mx-0">
-                        Aplikasi rapor digital berbasis web untuk mengelola nilai Sumatif Tengah Semester (STS) dengan
-                        fitur lengkap dan mudah digunakan.
+    <main>
+        <section class="wadah pembuka">
+            <div>
+                @if ($tahunAktif)
+                    <p class="tanda">
+                        <svg width="14" height="14" aria-hidden="true"><use href="#bintang" /></svg>
+                        Tahun ajaran {{ $tahunAktif->nama }}{{ $tahunAktif->semester ? ', semester '.$tahunAktif->semester : '' }}
                     </p>
+                @endif
 
-                    <div class="mt-10 flex flex-col items-center gap-4 sm:flex-row lg:justify-start">
-                        @auth
-                            <a href="{{ route('dashboard') }}"
-                                class="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-500 via-blue-600 to-cyan-500 px-8 py-4 text-base font-semibold text-white shadow-xl shadow-blue-500/30 transition hover:scale-105 hover:shadow-blue-500/50 sm:w-auto">
-                                <i class="fa-solid fa-arrow-right"></i> Buka Dashboard
-                            </a>
-                        @else
-                            <a href="{{ route('login') }}"
-                                class="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-blue-500 via-blue-600 to-cyan-500 px-8 py-4 text-base font-semibold text-white shadow-xl shadow-blue-500/30 transition hover:scale-105 hover:shadow-blue-500/50 sm:w-auto">
-                                <i class="fa-solid fa-right-to-bracket"></i> Mulai Sekarang
-                            </a>
-                        @endauth
-                        <a href="#features"
-                            class="inline-flex w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-slate-100 px-8 py-4 text-base font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-200 dark:border-white/20 dark:bg-white/5 dark:text-white dark:hover:border-white/30 dark:hover:bg-white/10 sm:w-auto">
-                            <i class="fa-solid fa-circle-info"></i> Pelajari Fitur
-                        </a>
-                    </div>
+                <h1>
+                    <span class="h1-atas">e-Raport</span>
+                    {{ $namaSekolah }}
+                </h1>
 
-                    {{-- Stats --}}
-                    <div class="mt-12 grid grid-cols-3 gap-6">
-                        <div class="text-center lg:text-left">
-                            <p class="text-3xl font-bold text-slate-900 dark:text-white">
-                                {{ number_format($totalSiswa) }}+</p>
-                            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Siswa Aktif</p>
-                        </div>
-                        <div class="text-center lg:text-left">
-                            <p class="text-3xl font-bold text-slate-900 dark:text-white">
-                                {{ number_format($totalGuru) }}+</p>
-                            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Guru Pengajar</p>
-                        </div>
-                        <div class="text-center lg:text-left">
-                            <p class="text-3xl font-bold text-slate-900 dark:text-white">
-                                {{ number_format($totalKelas) }}+</p>
-                            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">Kelas Aktif</p>
-                        </div>
-                    </div>
-                </div>
+                <p class="pengantar">
+                    Tempat guru mengisi nilai sumatif dan STS, dan wali kelas menyusun rapor siswa. Bisa dari laptop maupun HP.
+                </p>
 
-                {{-- Right Illustration --}}
-                <div class="relative hidden lg:block">
-                    {{-- Floating Cards --}}
-                    <div class="animate-float absolute -top-8 left-8">
-                        <div
-                            class="glass rounded-2xl border border-slate-200 bg-gradient-to-br from-emerald-500/10 to-emerald-600/5 p-4 shadow-2xl dark:border-white/10 dark:from-emerald-500/20 dark:to-emerald-600/10">
-                            <div class="flex items-center gap-3">
-                                <div
-                                    class="flex h-12 w-12 items-center justify-center rounded-xl bg-emerald-500 shadow-lg shadow-emerald-500/30">
-                                    <i class="fa-solid fa-check text-xl text-white"></i>
-                                </div>
-                                <div>
-                                    <p class="font-semibold text-slate-900 dark:text-white">Nilai Tersimpan</p>
-                                    <p class="text-xs text-emerald-600 dark:text-emerald-300">25 siswa telah dinilai</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="animate-float-delayed absolute -bottom-4 right-8">
-                        <div
-                            class="glass rounded-2xl border border-slate-200 bg-gradient-to-br from-purple-500/10 to-purple-600/5 p-4 shadow-2xl dark:border-white/10 dark:from-purple-500/20 dark:to-purple-600/10">
-                            <div class="flex items-center gap-3">
-                                <div
-                                    class="flex h-12 w-12 items-center justify-center rounded-xl bg-purple-500 shadow-lg shadow-purple-500/30">
-                                    <i class="fa-solid fa-print text-xl text-white"></i>
-                                </div>
-                                <div>
-                                    <p class="font-semibold text-slate-900 dark:text-white">Rapor Siap Cetak</p>
-                                    <p class="text-xs text-purple-600 dark:text-purple-300">Kelas 6A - 30 siswa</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {{-- Main Card --}}
-                    <div
-                        class="glass relative ml-12 mt-8 rounded-3xl border border-slate-200 bg-gradient-to-br from-slate-100/80 via-slate-50/50 to-transparent p-8 shadow-2xl dark:border-white/10 dark:from-white/10 dark:via-white/5">
-                        <div
-                            class="absolute -inset-px rounded-3xl bg-gradient-to-br from-blue-500/10 via-transparent to-purple-500/10 blur-xl dark:from-blue-500/20 dark:to-purple-500/20">
-                        </div>
-                        <div class="relative space-y-6">
-                            <div class="flex items-center justify-between">
-                                <span class="text-sm font-semibold text-blue-600 dark:text-blue-300">Alur
-                                    Penggunaan</span>
-                                <span
-                                    class="rounded-full bg-blue-500/10 px-3 py-1 text-xs font-semibold text-blue-600 ring-1 ring-blue-500/30 dark:bg-blue-500/20 dark:text-blue-300">E-Raport
-                                    STS</span>
-                            </div>
-
-                            <div class="space-y-4">
-                                <div
-                                    class="flex items-center gap-4 rounded-2xl border border-slate-200 bg-slate-100/50 p-4 transition hover:bg-slate-100 dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10">
-                                    <div
-                                        class="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg shadow-blue-500/30">
-                                        <i class="fa-solid fa-book-open text-white"></i>
-                                    </div>
-                                    <div class="flex-1">
-                                        <p class="font-semibold text-slate-900 dark:text-white">1. Pilih Mata Pelajaran
-                                        </p>
-                                        <p class="text-sm text-slate-500 dark:text-slate-400">Pilih mapel dan kelas
-                                            yang diampu</p>
-                                    </div>
-                                    <i class="fa-solid fa-chevron-right text-slate-400 dark:text-slate-500"></i>
-                                </div>
-
-                                <div
-                                    class="flex items-center gap-4 rounded-2xl border border-slate-200 bg-slate-100/50 p-4 transition hover:bg-slate-100 dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10">
-                                    <div
-                                        class="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-lg shadow-emerald-500/30">
-                                        <i class="fa-solid fa-pen-to-square text-white"></i>
-                                    </div>
-                                    <div class="flex-1">
-                                        <p class="font-semibold text-slate-900 dark:text-white">2. Input Nilai</p>
-                                        <p class="text-sm text-slate-500 dark:text-slate-400">Masukkan nilai Sumatif &
-                                            STS</p>
-                                    </div>
-                                    <i class="fa-solid fa-chevron-right text-slate-400 dark:text-slate-500"></i>
-                                </div>
-
-                                <div
-                                    class="flex items-center gap-4 rounded-2xl border border-slate-200 bg-slate-100/50 p-4 transition hover:bg-slate-100 dark:border-white/10 dark:bg-white/5 dark:hover:bg-white/10">
-                                    <div
-                                        class="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 shadow-lg shadow-purple-500/30">
-                                        <i class="fa-solid fa-file-lines text-white"></i>
-                                    </div>
-                                    <div class="flex-1">
-                                        <p class="font-semibold text-slate-900 dark:text-white">3. Cetak Rapor</p>
-                                        <p class="text-sm text-slate-500 dark:text-slate-400">Deskripsi capaian
-                                            otomatis</p>
-                                    </div>
-                                    <i class="fa-solid fa-check-circle text-emerald-500 dark:text-emerald-400"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        {{-- Features Section --}}
-        <section id="features"
-            class="relative z-10 border-t border-slate-200 bg-slate-100/50 py-24 dark:border-white/10 dark:bg-slate-900/50">
-            <div class="mx-auto max-w-7xl px-6">
-                <div class="mb-16 text-center">
-                    <span
-                        class="mb-4 inline-flex items-center gap-2 rounded-full bg-purple-500/10 px-4 py-2 text-sm font-medium text-purple-600 ring-1 ring-inset ring-purple-400/30 dark:text-purple-300">
-                        <i class="fa-solid fa-sparkles"></i> Fitur Unggulan
-                    </span>
-                    <h2 class="text-3xl font-bold text-slate-900 dark:text-white sm:text-4xl">Semua yang Anda Butuhkan
-                    </h2>
-                    <p class="mx-auto mt-4 max-w-2xl text-lg text-slate-600 dark:text-slate-400">Fitur lengkap untuk
-                        mengelola penilaian dan rapor siswa dengan efisien</p>
-                </div>
-
-                <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-                    {{-- Feature 1 --}}
-                    <div
-                        class="card-hover glass rounded-3xl border border-slate-200 bg-gradient-to-br from-slate-50/80 to-transparent p-8 dark:border-white/10 dark:from-white/5">
-                        <div
-                            class="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg shadow-blue-500/30">
-                            <i class="fa-solid fa-calculator text-xl text-white"></i>
-                        </div>
-                        <h3 class="mb-3 text-xl font-bold text-slate-900 dark:text-white">Kalkulasi Otomatis</h3>
-                        <p class="leading-relaxed text-slate-600 dark:text-slate-400">Nilai rata-rata rapor dihitung
-                            otomatis dari nilai Sumatif dan STS dengan bobot yang dapat dikonfigurasi.</p>
-                    </div>
-
-                    {{-- Feature 2 --}}
-                    <div
-                        class="card-hover glass rounded-3xl border border-slate-200 bg-gradient-to-br from-slate-50/80 to-transparent p-8 dark:border-white/10 dark:from-white/5">
-                        <div
-                            class="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-600 shadow-lg shadow-emerald-500/30">
-                            <i class="fa-solid fa-wand-magic-sparkles text-xl text-white"></i>
-                        </div>
-                        <h3 class="mb-3 text-xl font-bold text-slate-900 dark:text-white">Deskripsi Otomatis</h3>
-                        <p class="leading-relaxed text-slate-600 dark:text-slate-400">Predikat dan deskripsi capaian
-                            pembelajaran dibuat otomatis berdasarkan rentang nilai yang ditentukan.</p>
-                    </div>
-
-                    {{-- Feature 3 --}}
-                    <div
-                        class="card-hover glass rounded-3xl border border-slate-200 bg-gradient-to-br from-slate-50/80 to-transparent p-8 dark:border-white/10 dark:from-white/5">
-                        <div
-                            class="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-500 to-purple-600 shadow-lg shadow-purple-500/30">
-                            <i class="fa-solid fa-print text-xl text-white"></i>
-                        </div>
-                        <h3 class="mb-3 text-xl font-bold text-slate-900 dark:text-white">Cetak Rapor</h3>
-                        <p class="leading-relaxed text-slate-600 dark:text-slate-400">Cetak rapor dalam format PDF yang
-                            rapi dan sesuai dengan standar kurikulum terbaru.</p>
-                    </div>
-
-                    {{-- Feature 4 --}}
-                    <div
-                        class="card-hover glass rounded-3xl border border-slate-200 bg-gradient-to-br from-slate-50/80 to-transparent p-8 dark:border-white/10 dark:from-white/5">
-                        <div
-                            class="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 shadow-lg shadow-orange-500/30">
-                            <i class="fa-solid fa-users-gear text-xl text-white"></i>
-                        </div>
-                        <h3 class="mb-3 text-xl font-bold text-slate-900 dark:text-white">Manajemen Kelas</h3>
-                        <p class="leading-relaxed text-slate-600 dark:text-slate-400">Kelola data siswa, guru, dan
-                            kelas dengan mudah. Wali kelas dapat mengelola siswa di kelasnya.</p>
-                    </div>
-
-                    {{-- Feature 5 --}}
-                    <div
-                        class="card-hover glass rounded-3xl border border-slate-200 bg-gradient-to-br from-slate-50/80 to-transparent p-8 dark:border-white/10 dark:from-white/5">
-                        <div
-                            class="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-cyan-500 to-cyan-600 shadow-lg shadow-cyan-500/30">
-                            <i class="fa-solid fa-chart-line text-xl text-white"></i>
-                        </div>
-                        <h3 class="mb-3 text-xl font-bold text-slate-900 dark:text-white">Dashboard Analitik</h3>
-                        <p class="leading-relaxed text-slate-600 dark:text-slate-400">Pantau progres pengisian nilai
-                            dan statistik kelas melalui dashboard yang informatif.</p>
-                    </div>
-
-                    {{-- Feature 6 --}}
-                    <div
-                        class="card-hover glass rounded-3xl border border-slate-200 bg-gradient-to-br from-slate-50/80 to-transparent p-8 dark:border-white/10 dark:from-white/5">
-                        <div
-                            class="mb-6 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-pink-500 to-pink-600 shadow-lg shadow-pink-500/30">
-                            <i class="fa-solid fa-shield-halved text-xl text-white"></i>
-                        </div>
-                        <h3 class="mb-3 text-xl font-bold text-slate-900 dark:text-white">Aman & Terpercaya</h3>
-                        <p class="leading-relaxed text-slate-600 dark:text-slate-400">Data tersimpan aman dengan sistem
-                            backup dan restore untuk keamanan data sekolah.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        {{-- CTA Section --}}
-        <section class="relative z-10 py-24">
-            <div class="mx-auto max-w-4xl px-6 text-center">
-                <div
-                    class="glass rounded-3xl border border-slate-200 bg-gradient-to-br from-blue-500/5 via-purple-500/5 to-cyan-500/5 p-12 dark:border-white/10 dark:from-blue-500/10 dark:via-purple-500/10 dark:to-cyan-500/10">
-                    <h2 class="mb-4 text-3xl font-bold text-slate-900 dark:text-white sm:text-4xl">Siap Memulai?</h2>
-                    <p class="mx-auto mb-8 max-w-xl text-lg text-slate-600 dark:text-slate-300">Akses sistem rapor
-                        digital sekarang dan permudah proses penilaian di sekolah Anda.</p>
+                <div class="aksi">
                     @auth
-                        <a href="{{ route('dashboard') }}"
-                            class="inline-flex items-center gap-3 rounded-2xl bg-gradient-to-r from-blue-500 via-blue-600 to-cyan-500 px-10 py-4 text-lg font-semibold text-white shadow-xl shadow-blue-500/30 transition hover:scale-105 hover:shadow-blue-500/50">
-                            <i class="fa-solid fa-arrow-right"></i> Buka Dashboard
-                        </a>
+                        <a class="tombol tombol--isi" href="{{ route('dashboard') }}">Buka dashboard</a>
                     @else
-                        <a href="{{ route('login') }}"
-                            class="inline-flex items-center gap-3 rounded-2xl bg-gradient-to-r from-blue-500 via-blue-600 to-cyan-500 px-10 py-4 text-lg font-semibold text-white shadow-xl shadow-blue-500/30 transition hover:scale-105 hover:shadow-blue-500/50">
-                            <i class="fa-solid fa-arrow-right"></i> Masuk Sekarang
-                        </a>
+                        <a class="tombol tombol--isi" href="{{ route('login') }}">Masuk ke e-Raport</a>
                     @endauth
+                    <a class="tombol tombol--garis" href="{{ route('guru.pwa.beranda') }}">Aplikasi guru di HP</a>
                 </div>
-            </div>
-        </section>
 
-        {{-- Footer --}}
-        <footer
-            class="relative z-10 border-t border-slate-200 bg-slate-100/80 py-8 dark:border-white/10 dark:bg-slate-900/80">
-            <div class="mx-auto max-w-7xl px-6">
-                <div class="flex flex-col items-center justify-between gap-4 md:flex-row">
-                    <div class="flex items-center gap-3">
-                        @if ($logoUrl)
-                            <img src="{{ $logoUrl }}" alt="Logo"
-                                class="h-14 w-14 rounded-lg bg-slate-200 object-contain p-1.5 dark:bg-white/10">
-                        @else
-                            <div
-                                class="flex h-14 w-14 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500">
-                                <i class="fa-solid fa-graduation-cap text-xl text-white"></i>
-                            </div>
+                <p class="catatan">Akun dibuat oleh admin atau TU madrasah. Lupa kata sandi? Hubungi admin atau TU.</p>
+            </div>
+
+            <div class="meja" aria-hidden="true">
+                <div class="buku">
+                    <div class="sampul">
+                        <div class="bingkai">
+                            <svg><use href="#bintang" /></svg>
+                            <svg><use href="#bintang" /></svg>
+                            <svg><use href="#bintang" /></svg>
+                            <svg><use href="#bintang" /></svg>
+                        </div>
+
+                        <p class="sampul__judul emas">Laporan<br>Hasil Belajar</p>
+
+                        <div class="sampul__lambang">
+                            @if ($logoUrl)
+                                <img src="{{ $logoUrl }}" alt="">
+                            @else
+                                <svg width="100%" height="100%"><use href="#bintang-garis" /></svg>
+                            @endif
+                        </div>
+
+                        <p class="sampul__sekolah emas">{{ $namaSekolah }}</p>
+
+                        @if ($tahunAktif)
+                            <p class="sampul__tahun">{{ $tahunAktif->nama }}</p>
                         @endif
-                        <span class="text-lg font-semibold text-slate-900 dark:text-white">E-Raport STS</span>
                     </div>
-                    <p class="text-sm text-slate-500 dark:text-slate-400">
-                        © {{ date('Y') }} <span class="text-slate-900 dark:text-white">{{ $schoolName }}</span>
-                        • Dibuat dengan <span class="text-red-400">❤️</span> oleh
-                        <a href="https://github.com/eldorray" target="_blank"
-                            class="text-blue-600 transition hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300">F.A.K</a>
-                    </p>
                 </div>
             </div>
-        </footer>
-    </div>
+        </section>
 
-    <script>
-        // Theme toggle functionality
-        const themeToggle = document.getElementById('themeToggle');
+        <section class="wadah peran" aria-labelledby="judul-peran">
+            <h2 id="judul-peran">Siapa mengerjakan apa</h2>
+            <ul>
+                <li>
+                    <h3>Guru mata pelajaran</h3>
+                    <p>Mengisi nilai sumatif dan STS untuk setiap kelas yang diajar. Nilai akhir dan predikat dihitung otomatis.</p>
+                </li>
+                <li>
+                    <h3>Wali kelas</h3>
+                    <p>Melengkapi absen, prestasi, dan catatan siswa, lalu mencetak rapor dan leger kelas.</p>
+                </li>
+                <li>
+                    <h3>Pembimbing tahfidz</h3>
+                    <p>Mencatat hafalan surah setiap siswa dan mencetak rapor tahfidz.</p>
+                </li>
+                <li>
+                    <h3>Admin dan TU</h3>
+                    <p>Menyiapkan tahun ajaran, data siswa dan guru, kelas, serta jadwal mengajar.</p>
+                </li>
+            </ul>
+        </section>
+    </main>
 
-        themeToggle.addEventListener('click', () => {
-            const isDark = document.documentElement.classList.contains('dark');
-
-            if (isDark) {
-                document.documentElement.classList.remove('dark');
-                localStorage.setItem('theme', 'light');
-            } else {
-                document.documentElement.classList.add('dark');
-                localStorage.setItem('theme', 'dark');
-            }
-        });
-    </script>
+    <footer class="wadah kaki">
+        <p>{{ $namaSekolah }}{{ $alamat ? ' · '.$alamat : '' }}</p>
+        <p>&copy; {{ date('Y') }} e-Raport {{ $namaSekolah }}</p>
+    </footer>
 </body>
 
 </html>
