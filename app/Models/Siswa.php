@@ -197,4 +197,28 @@ class Siswa extends Model
             ->map(fn ($part) => Str::substr($part, 0, 1))
             ->implode('');
     }
+
+    /**
+     * Menghapus file foto hanya bila tidak dipakai siswa lain.
+     *
+     * Salinan siswa antar tahun ajaran (Salin Rombel) memakai file foto yang sama,
+     * jadi menghapus foto satu salinan tidak boleh menghilangkan foto di rapor tahun lain.
+     *
+     * @param  array<int, int>  $kecualiIds  ID siswa yang tidak dihitung (mis. siswa yang sedang diganti fotonya)
+     */
+    public static function hapusFotoBilaTakDipakai(?string $path, array $kecualiIds = []): void
+    {
+        if (! $path) {
+            return;
+        }
+
+        $masihDipakai = static::query()
+            ->where('photo_path', $path)
+            ->whereNotIn('id', $kecualiIds)
+            ->exists();
+
+        if (! $masihDipakai) {
+            Storage::disk(self::PHOTO_DISK)->delete($path);
+        }
+    }
 }

@@ -13,7 +13,6 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Maatwebsite\Excel\Facades\Excel;
@@ -116,7 +115,7 @@ class SiswaController extends Controller
 
         if ($request->hasFile('photo')) {
             $data['photo_path'] = $request->file('photo')->store(self::PHOTO_FOLDER, self::PHOTO_DISK);
-            $this->deletePhotoIfExists($siswa->photo_path);
+            Siswa::hapusFotoBilaTakDipakai($siswa->photo_path, [$siswa->id]);
         }
 
         $siswa->update($data);
@@ -162,12 +161,19 @@ class SiswaController extends Controller
      *
      * @return RedirectResponse Redirect ke halaman sebelumnya dengan pesan status
      */
-    public function destroyAll(): RedirectResponse
+    public function destroyAll(Request $request): RedirectResponse
     {
         $tahunId = $this->tahunAjaranAktif();
+        $tahun = $tahunId ? TahunAjaran::find($tahunId) : null;
 
-        if (! $tahunId) {
+        if (! $tahun) {
             return back()->withErrors(['tahun_ajaran' => __('Pilih tahun ajaran terlebih dahulu.')]);
+        }
+
+        // Wajib mengetik nama tahun ajaran supaya tidak salah menghapus tahun ajaran lain
+        $diketik = preg_replace('/\s+/', ' ', trim((string) $request->input('konfirmasi')));
+        if (strcasecmp((string) $diketik, $tahun->label()) !== 0) {
+            return back()->withErrors(['konfirmasi' => __('Siswa tidak dihapus. Ketik ":label" persis untuk mengonfirmasi.', ['label' => $tahun->label()])]);
         }
 
         $jumlah = (new PenghapusanDataService)->hapusSiswaTahunAjaran($tahunId);
@@ -479,18 +485,6 @@ class SiswaController extends Controller
     private function tahunAjaranAktif(): ?int
     {
         return session('selected_tahun_ajaran_id') ?? TahunAjaran::where('is_active', true)->value('id');
-    }
-
-    /**
-     * Menghapus foto siswa jika ada.
-     *
-     * @param  string|null  $photoPath  Path foto yang akan dihapus
-     */
-    private function deletePhotoIfExists(?string $photoPath): void
-    {
-        if ($photoPath) {
-            Storage::disk(self::PHOTO_DISK)->delete($photoPath);
-        }
     }
 
     /**

@@ -83,4 +83,12 @@ class TahunAjaran extends Model
     {
         return $this->hasMany(Kelas::class);
     }
+
+    /**
+     * Nama lengkap untuk ditampilkan, mis. "2026/2027 Genap" (nama saja tidak cukup: Ganjil dan Genap bernama sama).
+     */
+    public function label(): string
+    {
+        return trim($this->nama.' '.$this->semester);
+    }
 }

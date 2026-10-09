@@ -8,19 +8,22 @@
         <div class="flex flex-wrap gap-2">
             @php
                 $rincianHapus = (new \App\Services\PenghapusanDataService)->rangkuman($dampakHapus ?? []);
+                $labelTahun = $tahunAjaran?->label() ?? '-';
                 $konfirmasiHapusSemua = __('Hapus :jumlah siswa tahun ajaran :tahun?', [
                     'jumlah' => $siswas->count(),
-                    'tahun' => $tahunAjaran?->nama ?? '-',
+                    'tahun' => $labelTahun,
                 ]);
                 if ($rincianHapus) {
                     $konfirmasiHapusSemua .= ' '.__('Data nilai yang ikut terhapus: :rincian.', ['rincian' => $rincianHapus]);
                 }
+                $konfirmasiHapusSemua .= "\n\n".__('Ketik ":tahun" untuk melanjutkan.', ['tahun' => $labelTahun]);
             @endphp
             @if ($siswas->count() > 0)
                 <form action="{{ route('siswa.destroy-all') }}" method="POST"
-                    onsubmit="return confirm(@js($konfirmasiHapusSemua));">
+                    onsubmit="const ketik = prompt(@js($konfirmasiHapusSemua)); if (ketik === null) return false; this.konfirmasi.value = ketik; return true;">
                     @csrf
                     @method('DELETE')
+                    <input type="hidden" name="konfirmasi" value="">
                     <button type="submit"
                         class="inline-flex items-center gap-2 rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-rose-700 focus:outline-none focus:ring-4 focus:ring-rose-500/30">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"

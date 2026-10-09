@@ -142,7 +142,7 @@ it('hanya menghapus siswa pada tahun ajaran yang dipilih', function () {
 
     $this->actingAs($this->admin)
         ->withSession(['selected_tahun_ajaran_id' => $this->tahun->id])
-        ->delete(route('siswa.destroy-all'))
+        ->delete(route('siswa.destroy-all'), ['konfirmasi' => $this->tahun->label()])
         ->assertRedirect();
 
     expect(Siswa::whereKey($aktif['siswa']->id)->exists())->toBeFalse()
@@ -157,7 +157,7 @@ it('membersihkan nilai, rapor, tahfidz, dan ekskul siswa yang dihapus massal', f
 
     $this->actingAs($this->admin)
         ->withSession(['selected_tahun_ajaran_id' => $this->tahun->id])
-        ->delete(route('siswa.destroy-all'))
+        ->delete(route('siswa.destroy-all'), ['konfirmasi' => $this->tahun->label()])
         ->assertRedirect()
         ->assertSessionHas('status', fn (string $status) => str_contains($status, '1 siswa'));
 
@@ -289,7 +289,7 @@ it('menolak hapus tahun ajaran yang masih berisi data', function () {
     // Setelah datanya dibersihkan, tahun ajaran boleh dihapus.
     $this->actingAs($this->admin)
         ->withSession(['selected_tahun_ajaran_id' => $tahunLama->id])
-        ->delete(route('siswa.destroy-all'));
+        ->delete(route('siswa.destroy-all'), ['konfirmasi' => $tahunLama->label()]);
 
     Penilaian::query()->delete();
     RaporMetadata::query()->delete();
@@ -348,7 +348,7 @@ it('tidak menyentuh data tahun ajaran lama saat semua siswa tahun ajaran baru di
     // Tahun ajaran baru aktif dan sedang dipilih, lalu "Hapus Semua" ditekan.
     $this->actingAs($this->admin)
         ->withSession(['selected_tahun_ajaran_id' => $this->tahun->id])
-        ->delete(route('siswa.destroy-all'))
+        ->delete(route('siswa.destroy-all'), ['konfirmasi' => $this->tahun->label()])
         ->assertRedirect()
         ->assertSessionHas('status', fn (string $status) => str_contains($status, '1 siswa'));
 
@@ -380,7 +380,7 @@ it('memakai tahun ajaran aktif sebagai cadangan bila sesi tahun ajaran kosong', 
     buatKonteksNilai($this->tahun, 'Siswa Baru');
 
     $this->actingAs($this->admin)
-        ->delete(route('siswa.destroy-all'))
+        ->delete(route('siswa.destroy-all'), ['konfirmasi' => $this->tahun->label()])
         ->assertRedirect();
 
     expect(Siswa::where('tahun_ajaran_id', $this->tahun->id)->count())->toBe(0)

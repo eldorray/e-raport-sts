@@ -15,7 +15,6 @@ use App\Models\TahfidzPenilaian;
 use App\Models\TahunAjaran;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 
 /**
  * Penjaga penghapusan data master agar nilai rapor tidak hilang tanpa disadari.
@@ -30,9 +29,6 @@ class PenghapusanDataService
 {
     /** @var int Jumlah siswa per chunk saat penghapusan massal */
     private const CHUNK_SIZE = 200;
-
-    /** @var string Disk storage untuk foto siswa */
-    private const PHOTO_DISK = 'public';
 
     /**
      * Alasan kelas tidak boleh dihapus (null bila aman dihapus).
@@ -231,9 +227,10 @@ class PenghapusanDataService
     {
         DB::transaction(function () use ($siswa): void {
             $this->hapusDataNilai([$siswa->id]);
-            $this->hapusFoto($siswa->photo_path);
             $siswa->delete();
         });
+
+        Siswa::hapusFotoBilaTakDipakai($siswa->photo_path);
     }
 
     /**
@@ -257,13 +254,13 @@ class PenghapusanDataService
 
                     $this->hapusDataNilai($siswaIds);
 
-                    foreach ($siswas as $siswa) {
-                        $this->hapusFoto($siswa->photo_path);
-                    }
-
                     Siswa::whereIn('id', $siswaIds)->delete();
                     $total += count($siswaIds);
                 });
+
+                foreach ($siswas->pluck('photo_path')->filter()->unique() as $path) {
+                    Siswa::hapusFotoBilaTakDipakai($path);
+                }
             });
 
         return $total;
@@ -280,18 +277,6 @@ class PenghapusanDataService
         RaporMetadata::whereIn('siswa_id', $siswaIds)->delete();
         TahfidzPenilaian::whereIn('siswa_id', $siswaIds)->delete();
         EkskulPenilaian::whereIn('siswa_id', $siswaIds)->delete();
-    }
-
-    /**
-     * Menghapus foto siswa dari storage bila ada.
-     *
-     * @param  string|null  $photoPath  Path foto
-     */
-    private function hapusFoto(?string $photoPath): void
-    {
-        if ($photoPath) {
-            Storage::disk(self::PHOTO_DISK)->delete($photoPath);
-        }
     }
 
     /**

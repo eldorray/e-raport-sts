@@ -38,15 +38,21 @@ class TahunAjaranController extends Controller
     {
         $data = $this->validatedData($request);
 
-        DB::transaction(function () use ($data) {
+        $record = DB::transaction(function () use ($data) {
             $record = TahunAjaran::create($data);
 
             if ($record->is_active) {
                 TahunAjaran::where('id', '!=', $record->id)->update(['is_active' => false]);
             }
+
+            return $record;
         });
 
-        return back()->with('status', __('Tahun ajaran berhasil ditambahkan.'));
+        $this->samakanSesi($request, $record);
+
+        return back()->with('status', $record->is_active
+            ? __('Tahun ajaran :nama ditambahkan, diaktifkan, dan sekarang sedang dipilih.', ['nama' => $record->label()])
+            : __('Tahun ajaran berhasil ditambahkan.'));
     }
 
     public function update(Request $request, TahunAjaran $tahunAjaran): RedirectResponse
@@ -60,6 +66,8 @@ class TahunAjaranController extends Controller
                 TahunAjaran::where('id', '!=', $tahunAjaran->id)->update(['is_active' => false]);
             }
         });
+
+        $this->samakanSesi($request, $tahunAjaran->refresh());
 
         return back()->with('status', __('Tahun ajaran berhasil diperbarui.'));
     }
@@ -90,7 +98,7 @@ class TahunAjaranController extends Controller
         return back()->with('status', __('Tahun ajaran berhasil dihapus.'));
     }
 
-    public function toggleActive(TahunAjaran $tahunAjaran): RedirectResponse
+    public function toggleActive(Request $request, TahunAjaran $tahunAjaran): RedirectResponse
     {
         DB::transaction(function () use ($tahunAjaran) {
             if (! $tahunAjaran->is_active) {
@@ -103,9 +111,12 @@ class TahunAjaranController extends Controller
             }
         });
 
-        $status = $tahunAjaran->fresh()->is_active;
+        $tahunAjaran->refresh();
+        $this->samakanSesi($request, $tahunAjaran);
 
-        return back()->with('status', $status ? __('Tahun ajaran diaktifkan.') : __('Tahun ajaran dinonaktifkan.'));
+        return back()->with('status', $tahunAjaran->is_active
+            ? __('Tahun ajaran :nama diaktifkan dan sekarang sedang dipilih.', ['nama' => $tahunAjaran->label()])
+            : __('Tahun ajaran dinonaktifkan.'));
     }
 
     public function activate(Request $request, TahunAjaran $tahunAjaran): RedirectResponse
@@ -127,11 +138,7 @@ class TahunAjaranController extends Controller
             $target->refresh();
         }
 
-        $request->session()->put([
-            'selected_tahun_ajaran_id' => $target->id,
-            'selected_semester' => $target->semester,
-            'selected_tahun_ajaran_is_active' => (bool) $target->is_active,
-        ]);
+        $this->pilihDiSesi($request, $target);
 
         $request->session()->save();
 
@@ -195,5 +202,33 @@ class TahunAjaranController extends Controller
         $data['is_active'] = $request->boolean('is_active');
 
         return $data;
+    }
+
+    /**
+     * Menyamakan pilihan tahun ajaran di sesi setelah status aktif berubah.
+     *
+     * Tahun ajaran yang baru diaktifkan langsung dipilih, supaya menu seperti
+     * Siswa > Hapus Semua tidak diam-diam bekerja pada tahun ajaran lama.
+     */
+    private function samakanSesi(Request $request, TahunAjaran $tahun): void
+    {
+        if ($tahun->is_active) {
+            $this->pilihDiSesi($request, $tahun);
+
+            return;
+        }
+
+        if ((int) $request->session()->get('selected_tahun_ajaran_id') === $tahun->id) {
+            $request->session()->put('selected_tahun_ajaran_is_active', false);
+        }
+    }
+
+    private function pilihDiSesi(Request $request, TahunAjaran $tahun): void
+    {
+        $request->session()->put([
+            'selected_tahun_ajaran_id' => $tahun->id,
+            'selected_semester' => $tahun->semester,
+            'selected_tahun_ajaran_is_active' => (bool) $tahun->is_active,
+        ]);
     }
 }

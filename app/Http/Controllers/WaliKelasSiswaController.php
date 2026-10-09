@@ -7,7 +7,6 @@ use App\Models\Kelas;
 use App\Models\Siswa;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
@@ -180,7 +179,7 @@ class WaliKelasSiswaController extends Controller
 
         if ($request->hasFile('photo')) {
             $data['photo_path'] = $request->file('photo')->store(self::PHOTO_FOLDER, self::PHOTO_DISK);
-            $this->deletePhotoIfExists($siswa->photo_path);
+            Siswa::hapusFotoBilaTakDipakai($siswa->photo_path, [$siswa->id]);
         }
 
         $siswa->update($data);
@@ -300,18 +299,6 @@ class WaliKelasSiswaController extends Controller
             'alamat_wali' => ['nullable', 'string'],
             'photo' => ['nullable', 'image', 'max:'.self::MAX_PHOTO_SIZE_KB],
         ]);
-    }
-
-    /**
-     * Hapus file foto jika ada.
-     *
-     * @param  string|null  $path  Path file foto
-     */
-    private function deletePhotoIfExists(?string $path): void
-    {
-        if ($path && Storage::disk(self::PHOTO_DISK)->exists($path)) {
-            Storage::disk(self::PHOTO_DISK)->delete($path);
-        }
     }
 
     /**
