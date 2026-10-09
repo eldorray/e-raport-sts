@@ -214,9 +214,8 @@
         }
 
         .ttd-tengah {
-            display: flex;
-            justify-content: center;
             margin-top: 18px;
+            text-align: center;
         }
 
         .ttd-nama {
