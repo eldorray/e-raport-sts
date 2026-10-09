@@ -7,6 +7,7 @@ use App\Models\Kelas;
 use App\Models\Siswa;
 use App\Models\TahunAjaran;
 use App\Models\User;
+use Illuminate\Support\Str;
 
 /**
  * Membuat siswa minimal untuk pengujian form.
@@ -88,6 +89,9 @@ it('tidak membuka modal apa pun saat tidak ada error', function () {
 });
 
 it('membuka ulang modal tambah guru dengan isian lama setelah validasi gagal', function () {
+    // Sandi dibuat acak saat tes: jangan menulis kata sandi literal di repo
+    $sandi = Str::random(16);
+
     $html = $this->actingAs($this->admin)
         ->from(route('guru.index'))
         ->followingRedirects()
@@ -97,7 +101,7 @@ it('membuka ulang modal tambah guru dengan isian lama setelah validasi gagal', f
             'nip' => '',
             'jenis_kelamin' => 'P',
             'pendidikan' => 'S2 Pendidikan',
-            'password' => 'rahasia',
+            'password' => $sandi,
             'is_active' => '0',
         ])
         ->assertOk()
@@ -107,7 +111,7 @@ it('membuka ulang modal tambah guru dengan isian lama setelah validasi gagal', f
     expect(substr_count($html, 'value="Guru Isian Lama"'))->toBe(1)
         ->and(substr_count($html, 'value="S2 Pendidikan"'))->toBe(1)
         ->and($html)->toContain('value="P" selected')
-        ->and($html)->not->toContain('value="rahasia"');
+        ->and($html)->not->toContain($sandi);
 });
 
 it('membuka ulang modal tambah kelas dengan isian lama setelah validasi gagal', function () {

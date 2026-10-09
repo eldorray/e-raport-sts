@@ -51,7 +51,7 @@ it('mengimpor template guru bawaan aplikasi dengan NIP panjang tanpa kehilangan 
 
 it('mengimpor NIP dan NIK yang terbaca sebagai angka bulat', function () {
     $file = imporGuruFileXlsx([
-        ['nip' => 198001012005011002, 'nama' => 'Guru Angka', 'jenis_kelamin' => 'P', 'nik' => 317401010101, 'password' => 123456],
+        ['nip' => 198001012005011002, 'nama' => 'Guru Angka', 'jenis_kelamin' => 'P', 'nik' => 317401010101, 'password' => random_int(100000, 999999)],
     ]);
 
     $this->actingAs($this->admin)
