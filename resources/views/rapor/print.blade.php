@@ -208,7 +208,9 @@
 
         .ttd-baris {
             display: grid;
-            grid-template-columns: 1fr 34%;
+            /* Blok kanan selebar baris terpanjangnya dan menempel ke tepi kanan */
+            grid-template-columns: 1fr auto;
+            column-gap: 24px;
         }
 
         .ttd-tengah {
