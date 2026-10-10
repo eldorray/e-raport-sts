@@ -7,9 +7,9 @@
                 Kelola daftar mata pelajaran dengan mudah, lengkap dengan pencarian cepat dan pengurutan pintar.
             </p>
         </div>
-        <div class="flex items-center gap-3">
+        <div class="grid gap-2 md:flex md:items-center md:gap-3">
             <button type="button" id="openCreateModal"
-                class="inline-flex items-center gap-2 rounded-full bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-500/40">
+                class="inline-flex items-center gap-2 rounded-full bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-500/40 max-md:min-h-11 max-md:justify-center">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
                     stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 4v16m8-8H4" />
@@ -18,7 +18,7 @@
             </button>
             @if (config('services.data_induk.enabled'))
             <button type="button" id="openSyncModal"
-                class="inline-flex items-center gap-2 rounded-full bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-green-700 focus:outline-none focus:ring-4 focus:ring-green-500/40">
+                class="inline-flex items-center gap-2 rounded-full bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-green-700 focus:outline-none focus:ring-4 focus:ring-green-500/40 max-md:min-h-11 max-md:justify-center">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
                     stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -31,7 +31,7 @@
     </div>
 
     <div class="grid gap-6 lg:grid-cols-[360px,1fr]">
-        <div class="space-y-6">
+        <div class="space-y-6 max-md:hidden">
             <div
                 class="relative overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
                 <div aria-hidden="true" class="pointer-events-none absolute inset-0">
@@ -44,9 +44,88 @@
             </div>
         </div>
 
-        <div>
+        <div class="min-w-0">
+            {{-- HP: daftar kartu + pencarian cepat; tabel (DataTables) hanya untuk layar md ke atas --}}
+            <div class="space-y-3 md:hidden"
+                x-data="{
+                    q: '',
+                    kunci() { return this.q.trim().toLowerCase(); },
+                    cocok(teks) { return this.kunci() === '' || teks.includes(this.kunci()); },
+                    get kosong() {
+                        const k = this.kunci();
+                        return k !== '' && ! [...this.$root.querySelectorAll('[data-cari]')].some((el) => el.dataset.cari.includes(k));
+                    },
+                }">
+                @if ($mataPelajaran->isNotEmpty())
+                    <div class="relative">
+                        <i class="fas fa-search pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-gray-400"></i>
+                        <input type="search" x-model="q" placeholder="{{ __('Cari nama atau kode mapel') }}"
+                            aria-label="{{ __('Cari mata pelajaran') }}"
+                            class="min-h-11 w-full rounded-xl border border-gray-200 bg-white py-2 pl-10 pr-3 text-base text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+                    </div>
+                @endif
+
+                @forelse ($mataPelajaran as $mapel)
+                    <article data-cari="{{ mb_strtolower($mapel->nama_mapel.' '.$mapel->kode.' '.$mapel->kelompok.' '.$mapel->jurusan) }}"
+                        x-show="cocok($el.dataset.cari)"
+                        class="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="min-w-0">
+                                <p class="break-words font-semibold text-gray-900 dark:text-gray-100">{{ $mapel->nama_mapel }}</p>
+                                <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+                                    {{ __('Kelompok') }} {{ $mapel->kelompok ?? '—' }}@if ($mapel->jurusan) · {{ $mapel->jurusan }}@endif
+                                    · {{ $mapel->jumlah_jam ?? 0 }} {{ __('jam/minggu') }} · {{ __('Urutan') }} {{ $mapel->urutan ?? '—' }}
+                                </p>
+                            </div>
+                            <span
+                                class="inline-flex max-w-[40%] shrink-0 items-center truncate rounded-full bg-violet-50 px-2.5 py-1 font-mono text-xs font-semibold text-violet-700 dark:bg-violet-900/40 dark:text-violet-200">
+                                {{ $mapel->kode }}
+                            </span>
+                        </div>
+                        <div class="mt-3 grid grid-cols-2 gap-2 border-t border-gray-100 pt-3 dark:border-gray-700">
+                            <button type="button"
+                                class="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl bg-indigo-50 px-2 text-sm font-semibold text-indigo-700 transition active:scale-[0.98] dark:bg-indigo-900/40 dark:text-indigo-200"
+                                data-action="edit"
+                                data-update-url="{{ route('mata-pelajaran.update', $mapel) }}"
+                                data-kode="{{ $mapel->kode }}"
+                                data-nama="{{ $mapel->nama_mapel }}"
+                                data-jam="{{ $mapel->jumlah_jam }}"
+                                data-kelompok="{{ $mapel->kelompok }}"
+                                data-jurusan="{{ $mapel->jurusan }}"
+                                data-urutan="{{ $mapel->urutan }}">
+                                <i class="fas fa-pen text-xs"></i> {{ __('Edit') }}
+                            </button>
+                            @if ($mapel->penilaians_count > 0)
+                                <x-hapus-nilai-terkunci :jumlah="$mapel->penilaians_count"
+                                    class="inline-flex min-h-11 w-full cursor-not-allowed items-center justify-center gap-1.5 rounded-xl bg-gray-100 px-2 text-sm font-semibold text-gray-400 dark:bg-gray-700 dark:text-gray-400" />
+                            @else
+                                <form action="{{ route('mata-pelajaran.destroy', $mapel) }}" method="POST"
+                                    onsubmit="return confirm('{{ __('Hapus mata pelajaran ini?') }}');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit"
+                                        class="inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-xl bg-red-50 px-2 text-sm font-semibold text-red-600 transition active:scale-[0.98] dark:bg-red-900/40 dark:text-red-300">
+                                        <i class="fas fa-trash text-xs"></i> {{ __('Hapus') }}
+                                    </button>
+                                </form>
+                            @endif
+                        </div>
+                    </article>
+                @empty
+                    <div
+                        class="rounded-2xl border border-gray-200 bg-white px-4 py-8 text-center text-sm text-gray-500 shadow-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400">
+                        {{ __('Belum ada data mata pelajaran. Tambahkan data baru untuk mulai menyusun kurikulum.') }}
+                    </div>
+                @endforelse
+
+                <p x-show="kosong" style="display: none"
+                    class="rounded-2xl border border-dashed border-gray-300 px-4 py-6 text-center text-sm text-gray-500 dark:border-gray-700 dark:text-gray-400">
+                    {{ __('Tidak ada mata pelajaran yang cocok dengan pencarian.') }}
+                </p>
+            </div>
+
             <div
-                class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                class="hidden overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm md:block dark:border-gray-700 dark:bg-gray-800">
                 <div class="border-b border-gray-100 bg-gray-50 px-6 py-5 dark:border-gray-700 dark:bg-gray-900/40">
                     <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                         <div>
@@ -143,27 +222,27 @@
         </div>
     </div>
 
-    <div id="modalOverlay" class="fixed inset-0 z-40 hidden items-center justify-center bg-gray-900/60 px-4">
+    <div id="modalOverlay" class="fixed inset-0 z-40 hidden items-center justify-center bg-gray-900/60 px-4 max-md:items-end max-md:px-0">
         <div id="createModal"
-            class="modal-card hidden w-full max-w-xl overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-900">
-            <div class="border-b border-gray-100 bg-gray-50 px-6 py-4 dark:border-gray-700 dark:bg-gray-900/40">
+            class="modal-card hidden w-full max-w-xl overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-900 max-md:max-h-[92dvh] max-md:overflow-y-auto max-md:overscroll-contain max-md:rounded-b-none">
+            <div class="border-b border-gray-100 bg-gray-50 px-6 py-4 dark:border-gray-700 dark:bg-gray-900 max-md:sticky max-md:top-0 max-md:z-10 max-md:px-4">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ __('Tambah Mata Pelajaran') }}
                 </h3>
             </div>
-            <form action="{{ route('mata-pelajaran.store') }}" method="POST" class="space-y-4 px-6 py-6">
+            <form action="{{ route('mata-pelajaran.store') }}" method="POST" class="space-y-4 px-6 py-6 max-md:px-4 max-md:py-4">
                 @csrf
                 <div class="grid gap-4 sm:grid-cols-2">
                     <div>
                         <label for="create_kode"
                             class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Kode') }}</label>
                         <input id="create_kode" name="kode" type="text" required
-                            class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+                            class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 max-md:min-h-11 max-md:text-base">
                     </div>
                     <div>
                         <label for="create_nama_mapel"
                             class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Nama Mata Pelajaran') }}</label>
                         <input id="create_nama_mapel" name="nama_mapel" type="text" required
-                            class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+                            class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 max-md:min-h-11 max-md:text-base">
                     </div>
                 </div>
                 <div class="grid gap-4 sm:grid-cols-3">
@@ -171,33 +250,33 @@
                         <label for="create_jumlah_jam"
                             class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Jam / Minggu') }}</label>
                         <input id="create_jumlah_jam" name="jumlah_jam" type="number" min="0"
-                            class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+                            class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 max-md:min-h-11 max-md:text-base">
                     </div>
                     <div>
                         <label for="create_kelompok"
                             class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Kelompok') }}</label>
                         <input id="create_kelompok" name="kelompok" type="text"
-                            class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+                            class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 max-md:min-h-11 max-md:text-base">
                     </div>
                     <div>
                         <label for="create_jurusan"
                             class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Jurusan') }}</label>
                         <input id="create_jurusan" name="jurusan" type="text"
-                            class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+                            class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 max-md:min-h-11 max-md:text-base">
                     </div>
                 </div>
                 <div>
                     <label for="create_urutan"
                         class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Urutan Tampil') }}</label>
                     <input id="create_urutan" name="urutan" type="text"
-                        class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+                        class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 max-md:min-h-11 max-md:text-base">
                 </div>
-                <div class="flex items-center justify-end gap-3 border-t border-gray-100 pt-4 dark:border-gray-700">
+                <div class="flex items-center justify-end gap-3 border-t border-gray-100 bg-white pt-4 dark:border-gray-700 dark:bg-gray-900 max-md:sticky max-md:bottom-0 max-md:z-10 max-md:-mx-4 max-md:-mb-4 max-md:grid max-md:grid-cols-2 max-md:px-4 max-md:pb-[max(1rem,env(safe-area-inset-bottom))]">
                     <button type="button"
-                        class="rounded-lg border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-600 transition hover:border-gray-300 hover:text-gray-800 dark:border-gray-700 dark:text-gray-300"
+                        class="rounded-lg border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-600 transition hover:border-gray-300 hover:text-gray-800 dark:border-gray-700 dark:text-gray-300 max-md:min-h-11"
                         data-close-modal>{{ __('Batal') }}</button>
                     <button type="submit"
-                        class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-500/30">
+                        class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-500/30 max-md:min-h-11 max-md:justify-center">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
@@ -210,12 +289,12 @@
         </div>
 
         <div id="editModal"
-            class="modal-card hidden w-full max-w-xl overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-900">
-            <div class="border-b border-gray-100 bg-gray-50 px-6 py-4 dark:border-gray-700 dark:bg-gray-900/40">
+            class="modal-card hidden w-full max-w-xl overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-900 max-md:max-h-[92dvh] max-md:overflow-y-auto max-md:overscroll-contain max-md:rounded-b-none">
+            <div class="border-b border-gray-100 bg-gray-50 px-6 py-4 dark:border-gray-700 dark:bg-gray-900 max-md:sticky max-md:top-0 max-md:z-10 max-md:px-4">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ __('Edit Mata Pelajaran') }}
                 </h3>
             </div>
-            <form id="editMapelForm" method="POST" class="space-y-4 px-6 py-6">
+            <form id="editMapelForm" method="POST" class="space-y-4 px-6 py-6 max-md:px-4 max-md:py-4">
                 @csrf
                 @method('PUT')
                 <div class="grid gap-4 sm:grid-cols-2">
@@ -223,13 +302,13 @@
                         <label for="edit_kode"
                             class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Kode') }}</label>
                         <input id="edit_kode" name="kode" type="text" required
-                            class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+                            class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 max-md:min-h-11 max-md:text-base">
                     </div>
                     <div>
                         <label for="edit_nama_mapel"
                             class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Nama Mata Pelajaran') }}</label>
                         <input id="edit_nama_mapel" name="nama_mapel" type="text" required
-                            class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+                            class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 max-md:min-h-11 max-md:text-base">
                     </div>
                 </div>
                 <div class="grid gap-4 sm:grid-cols-3">
@@ -237,33 +316,33 @@
                         <label for="edit_jumlah_jam"
                             class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Jam / Minggu') }}</label>
                         <input id="edit_jumlah_jam" name="jumlah_jam" type="number" min="0"
-                            class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+                            class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 max-md:min-h-11 max-md:text-base">
                     </div>
                     <div>
                         <label for="edit_kelompok"
                             class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Kelompok') }}</label>
                         <input id="edit_kelompok" name="kelompok" type="text"
-                            class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+                            class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 max-md:min-h-11 max-md:text-base">
                     </div>
                     <div>
                         <label for="edit_jurusan"
                             class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Jurusan') }}</label>
                         <input id="edit_jurusan" name="jurusan" type="text"
-                            class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+                            class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 max-md:min-h-11 max-md:text-base">
                     </div>
                 </div>
                 <div>
                     <label for="edit_urutan"
                         class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Urutan Tampil') }}</label>
                     <input id="edit_urutan" name="urutan" type="text"
-                        class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+                        class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 max-md:min-h-11 max-md:text-base">
                 </div>
-                <div class="flex items-center justify-between border-t border-gray-100 pt-4 dark:border-gray-700">
+                <div class="flex items-center justify-between border-t border-gray-100 bg-white pt-4 dark:border-gray-700 dark:bg-gray-900 max-md:sticky max-md:bottom-0 max-md:z-10 max-md:-mx-4 max-md:-mb-4 max-md:grid max-md:grid-cols-2 max-md:gap-3 max-md:px-4 max-md:pb-[max(1rem,env(safe-area-inset-bottom))]">
                     <button type="button"
-                        class="rounded-lg border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-600 transition hover:border-gray-300 hover:text-gray-800 dark:border-gray-700 dark:text-gray-300"
+                        class="rounded-lg border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-600 transition hover:border-gray-300 hover:text-gray-800 dark:border-gray-700 dark:text-gray-300 max-md:min-h-11"
                         data-close-modal>{{ __('Batal') }}</button>
                     <button type="submit"
-                        class="inline-flex items-center gap-2 rounded-lg bg-purple-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-purple-700 focus:outline-none focus:ring-4 focus:ring-purple-500/30">
+                        class="inline-flex items-center gap-2 rounded-lg bg-purple-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-purple-700 focus:outline-none focus:ring-4 focus:ring-purple-500/30 max-md:min-h-11 max-md:justify-center">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
@@ -277,15 +356,15 @@
 
         @if (config('services.data_induk.enabled'))
         <div id="syncModal"
-            class="modal-card hidden w-full max-w-lg overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-900">
-            <div class="border-b border-gray-100 bg-gray-50 px-6 py-4 dark:border-gray-700 dark:bg-gray-900/40">
+            class="modal-card hidden w-full max-w-lg overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-900 max-md:max-h-[92dvh] max-md:overflow-y-auto max-md:overscroll-contain max-md:rounded-b-none">
+            <div class="border-b border-gray-100 bg-gray-50 px-6 py-4 dark:border-gray-700 dark:bg-gray-900 max-md:sticky max-md:top-0 max-md:z-10 max-md:px-4">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ __('Sync Data Mata Pelajaran dari API') }}</h3>
             </div>
-            <form action="{{ route('mata-pelajaran.sync') }}" method="POST" class="space-y-4 px-6 py-6">
+            <form action="{{ route('mata-pelajaran.sync') }}" method="POST" class="space-y-4 px-6 py-6 max-md:px-4 max-md:py-4">
                 @csrf
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('Pilih Sumber Data') }}</label>
-                    <select name="source" required class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100">
+                    <select name="source" required class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-100 max-md:min-h-11">
                         <option value="">-- Pilih Sumber --</option>
                         <option value="mapel-mi">Mapel MI</option>
                         <option value="mapel-smp">Mapel SMP</option>
@@ -294,26 +373,24 @@
                 <div class="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 text-sm text-blue-800 dark:text-blue-300">
                     <p class="font-medium mb-2">{{ __('Informasi:') }}</p>
                     <ul class="list-disc list-inside space-y-1">
-                        <li>Data akan diambil dari: <code class="bg-blue-100 dark:bg-blue-800 px-1 rounded">{{ config('services.data_induk.base_url') }}/api/[source]/all</code></li>
+                        <li>Data akan diambil dari: <code class="bg-blue-100 dark:bg-blue-800 px-1 rounded max-md:break-all">{{ config('services.data_induk.base_url') }}/api/[source]/all</code></li>
                         <li>Mapel yang sudah ada (berdasarkan kode) akan diperbarui</li>
                         <li>Mapel baru akan ditambahkan</li>
                     </ul>
                 </div>
-                <div class="flex justify-end gap-3">
+                <div class="flex justify-end gap-3 max-md:grid max-md:grid-cols-2">
                     <button type="button" data-close-modal
-                        class="rounded-lg bg-gray-100 px-4 py-2.5 text-sm font-semibold text-gray-800 hover:bg-gray-200">{{ __('Batal') }}</button>
+                        class="rounded-lg bg-gray-100 px-4 py-2.5 text-sm font-semibold text-gray-800 hover:bg-gray-200 max-md:min-h-11">{{ __('Batal') }}</button>
                     <button type="submit"
-                        class="rounded-lg bg-green-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-green-700">{{ __('Sync Sekarang') }}</button>
+                        class="rounded-lg bg-green-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-green-700 max-md:min-h-11">{{ __('Sync Sekarang') }}</button>
                 </div>
             </form>
         </div>
         @endif
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"
-        integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QMc7qk5o5mQ=" crossorigin="anonymous"></script>
+    {{-- jQuery + DataTables dimuat dari layout (components.layouts.app.datatables) --}}
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
-    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 
     <script>
         (function() {

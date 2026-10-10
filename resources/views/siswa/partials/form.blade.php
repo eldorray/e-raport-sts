@@ -13,26 +13,26 @@
             <label for="{{ $prefix }}nis"
                 class="block text-sm font-medium text-gray-700 dark:text-gray-300">NIS</label>
             <input id="{{ $prefix }}nis" name="nis" type="text" value="{{ $nilai('nis') }}" required
-                class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+                class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 max-md:min-h-11 max-md:text-base">
         </div>
         <div>
             <label for="{{ $prefix }}nisn"
                 class="block text-sm font-medium text-gray-700 dark:text-gray-300">NISN</label>
             <input id="{{ $prefix }}nisn" name="nisn" type="text" value="{{ $nilai('nisn') }}"
-                class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+                class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 max-md:min-h-11 max-md:text-base">
         </div>
         <div>
             <label for="{{ $prefix }}nama"
                 class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nama</label>
             <input id="{{ $prefix }}nama" name="nama" type="text" value="{{ $nilai('nama') }}" required
-                class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+                class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 max-md:min-h-11 max-md:text-base">
         </div>
         <div class="grid grid-cols-2 gap-3">
             <div>
                 <label for="{{ $prefix }}gender"
                     class="block text-sm font-medium text-gray-700 dark:text-gray-300">Jenis Kelamin</label>
                 <select id="{{ $prefix }}gender" name="jenis_kelamin" required
-                    class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+                    class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 max-md:min-h-11 max-md:text-base">
                     <option value="">-Pilih-</option>
                     <option value="L" @selected($nilai('jenis_kelamin') === 'L')>L</option>
                     <option value="P" @selected($nilai('jenis_kelamin') === 'P')>P</option>
@@ -42,7 +42,7 @@
                 <label for="{{ $prefix }}tempat"
                     class="block text-sm font-medium text-gray-700 dark:text-gray-300">Tempat Lahir</label>
                 <input id="{{ $prefix }}tempat" name="tempat_lahir" type="text" value="{{ $nilai('tempat_lahir') }}"
-                    class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+                    class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 max-md:min-h-11 max-md:text-base">
             </div>
         </div>
         <div class="grid grid-cols-2 gap-3">
@@ -50,13 +50,13 @@
                 <label for="{{ $prefix }}tanggal_lahir"
                     class="block text-sm font-medium text-gray-700 dark:text-gray-300">Tanggal Lahir</label>
                 <input id="{{ $prefix }}tanggal_lahir" name="tanggal_lahir" type="date" value="{{ $nilai('tanggal_lahir') }}"
-                    class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+                    class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 max-md:min-h-11 max-md:text-base">
             </div>
             <div>
                 <label for="{{ $prefix }}agama"
                     class="block text-sm font-medium text-gray-700 dark:text-gray-300">Agama</label>
                 <input id="{{ $prefix }}agama" name="agama" type="text" value="{{ $nilai('agama') }}"
-                    class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+                    class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 max-md:min-h-11 max-md:text-base">
             </div>
         </div>
         <div class="grid grid-cols-2 gap-3">
@@ -64,13 +64,13 @@
                 <label for="{{ $prefix }}status_keluarga"
                     class="block text-sm font-medium text-gray-700 dark:text-gray-300">Status Keluarga</label>
                 <input id="{{ $prefix }}status_keluarga" name="status_keluarga" type="text" value="{{ $nilai('status_keluarga') }}"
-                    class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+                    class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 max-md:min-h-11 max-md:text-base">
             </div>
             <div>
                 <label for="{{ $prefix }}anak_ke"
                     class="block text-sm font-medium text-gray-700 dark:text-gray-300">Anak Ke</label>
                 <input id="{{ $prefix }}anak_ke" name="anak_ke" type="number" value="{{ $nilai('anak_ke') }}" min="1"
-                    class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+                    class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 max-md:min-h-11 max-md:text-base">
             </div>
         </div>
         <div class="grid grid-cols-2 gap-3">
@@ -78,13 +78,13 @@
                 <label for="{{ $prefix }}telpon"
                     class="block text-sm font-medium text-gray-700 dark:text-gray-300">Telpon Siswa</label>
                 <input id="{{ $prefix }}telpon" name="telpon" type="text" value="{{ $nilai('telpon') }}"
-                    class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+                    class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 max-md:min-h-11 max-md:text-base">
             </div>
             <div>
                 <label for="{{ $prefix }}alamat"
                     class="block text-sm font-medium text-gray-700 dark:text-gray-300">Alamat Siswa</label>
                 <textarea id="{{ $prefix }}alamat" name="alamat" rows="2"
-                    class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">{{ $nilai('alamat') }}</textarea>
+                    class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 max-md:min-h-11 max-md:text-base">{{ $nilai('alamat') }}</textarea>
             </div>
         </div>
     </div>
@@ -94,33 +94,33 @@
                 <label for="{{ $prefix }}sekolah_asal"
                     class="block text-sm font-medium text-gray-700 dark:text-gray-300">Sekolah Nama Asal</label>
                 <input id="{{ $prefix }}sekolah_asal" name="sekolah_asal" type="text" value="{{ $nilai('sekolah_asal') }}"
-                    class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+                    class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 max-md:min-h-11 max-md:text-base">
             </div>
             <div>
                 <label for="{{ $prefix }}tanggal_diterima"
                     class="block text-sm font-medium text-gray-700 dark:text-gray-300">Tanggal Diterima</label>
                 <input id="{{ $prefix }}tanggal_diterima" name="tanggal_diterima" type="date" value="{{ $nilai('tanggal_diterima') }}"
-                    class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+                    class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 max-md:min-h-11 max-md:text-base">
             </div>
         </div>
         <div>
             <label for="{{ $prefix }}kelas_diterima"
                 class="block text-sm font-medium text-gray-700 dark:text-gray-300">Terima di kelas</label>
             <input id="{{ $prefix }}kelas_diterima" name="kelas_diterima" type="text" value="{{ $nilai('kelas_diterima') }}"
-                class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+                class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 max-md:min-h-11 max-md:text-base">
         </div>
         <div class="grid grid-cols-2 gap-3">
             <div>
                 <label for="{{ $prefix }}nama_ayah"
                     class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nama Ayah</label>
                 <input id="{{ $prefix }}nama_ayah" name="nama_ayah" type="text" value="{{ $nilai('nama_ayah') }}"
-                    class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+                    class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 max-md:min-h-11 max-md:text-base">
             </div>
             <div>
                 <label for="{{ $prefix }}nama_ibu"
                     class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nama Ibu</label>
                 <input id="{{ $prefix }}nama_ibu" name="nama_ibu" type="text" value="{{ $nilai('nama_ibu') }}"
-                    class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+                    class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 max-md:min-h-11 max-md:text-base">
             </div>
         </div>
         <div class="grid grid-cols-2 gap-3">
@@ -128,58 +128,59 @@
                 <label for="{{ $prefix }}pekerjaan_ayah"
                     class="block text-sm font-medium text-gray-700 dark:text-gray-300">Pekerjaan Ayah</label>
                 <input id="{{ $prefix }}pekerjaan_ayah" name="pekerjaan_ayah" type="text" value="{{ $nilai('pekerjaan_ayah') }}"
-                    class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+                    class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 max-md:min-h-11 max-md:text-base">
             </div>
             <div>
                 <label for="{{ $prefix }}pekerjaan_ibu"
                     class="block text-sm font-medium text-gray-700 dark:text-gray-300">Pekerjaan Ibu</label>
                 <input id="{{ $prefix }}pekerjaan_ibu" name="pekerjaan_ibu" type="text" value="{{ $nilai('pekerjaan_ibu') }}"
-                    class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+                    class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 max-md:min-h-11 max-md:text-base">
             </div>
         </div>
         <div>
             <label for="{{ $prefix }}alamat_orang_tua"
                 class="block text-sm font-medium text-gray-700 dark:text-gray-300">Alamat Orang Tua</label>
             <textarea id="{{ $prefix }}alamat_orang_tua" name="alamat_orang_tua" rows="2"
-                class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">{{ $nilai('alamat_orang_tua') }}</textarea>
+                class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 max-md:min-h-11 max-md:text-base">{{ $nilai('alamat_orang_tua') }}</textarea>
         </div>
         <div class="grid grid-cols-2 gap-3">
             <div>
                 <label for="{{ $prefix }}nama_wali"
                     class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nama Wali</label>
                 <input id="{{ $prefix }}nama_wali" name="nama_wali" type="text" value="{{ $nilai('nama_wali') }}"
-                    class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+                    class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 max-md:min-h-11 max-md:text-base">
             </div>
             <div>
                 <label for="{{ $prefix }}pekerjaan_wali"
                     class="block text-sm font-medium text-gray-700 dark:text-gray-300">Pekerjaan Wali</label>
                 <input id="{{ $prefix }}pekerjaan_wali" name="pekerjaan_wali" type="text" value="{{ $nilai('pekerjaan_wali') }}"
-                    class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+                    class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 max-md:min-h-11 max-md:text-base">
             </div>
         </div>
         <div>
             <label for="{{ $prefix }}alamat_wali"
                 class="block text-sm font-medium text-gray-700 dark:text-gray-300">Alamat Wali</label>
             <textarea id="{{ $prefix }}alamat_wali" name="alamat_wali" rows="2"
-                class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">{{ $nilai('alamat_wali') }}</textarea>
+                class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 max-md:min-h-11 max-md:text-base">{{ $nilai('alamat_wali') }}</textarea>
         </div>
         <div>
             <label for="{{ $prefix }}photo"
                 class="block text-sm font-medium text-gray-700 dark:text-gray-300">Foto</label>
             <input id="{{ $prefix }}photo" name="photo" type="file" accept="image/*"
-                class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+                class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 max-md:min-h-11 max-md:text-base">
             @if ($mode === 'edit')
                 <p class="mt-1 text-xs text-gray-500">Kosongkan jika tidak mengubah foto.</p>
             @endif
         </div>
     </div>
 </div>
-<div class="mt-4 flex items-center justify-end gap-3 border-t border-gray-100 pt-4 dark:border-gray-700">
+{{-- HP: bilah tombol menempel di bawah lembar modal agar selalu terjangkau --}}
+<div class="mt-4 flex items-center justify-end gap-3 border-t border-gray-100 bg-white pt-4 dark:border-gray-700 dark:bg-gray-900 max-md:sticky max-md:bottom-0 max-md:z-10 max-md:-mx-4 max-md:-mb-4 max-md:grid max-md:grid-cols-2 max-md:px-4 max-md:pb-[max(1rem,env(safe-area-inset-bottom))]">
     <button type="button"
-        class="rounded-lg border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-600 transition hover:border-gray-300 hover:text-gray-800 dark:border-gray-700 dark:text-gray-300"
+        class="rounded-lg border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-600 transition hover:border-gray-300 hover:text-gray-800 dark:border-gray-700 dark:text-gray-300 max-md:min-h-11"
         data-close-modal>{{ __('Batal') }}</button>
     <button type="submit"
-        class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-500/30">
+        class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-500/30 max-md:min-h-11 max-md:justify-center">
         {{ $mode === 'create' ? __('Simpan Data') : __('Perbarui Data') }}
     </button>
 </div>

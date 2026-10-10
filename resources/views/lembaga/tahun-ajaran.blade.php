@@ -1,20 +1,20 @@
 <x-layouts.app>
-    <div class="mb-8 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+    <div class="mb-8 flex flex-col gap-3 max-md:mb-5 md:flex-row md:items-center md:justify-between">
         <div>
-            <h1 class="text-3xl font-semibold text-gray-900 dark:text-gray-100">{{ __('Tahun Ajaran') }}</h1>
+            <h1 class="text-3xl font-semibold text-gray-900 max-md:text-2xl dark:text-gray-100">{{ __('Tahun Ajaran') }}</h1>
             <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
                 {{ __('Kelola tahun ajaran aktif, termasuk pengaturan semester dan status aktif yang digunakan sistem.') }}
             </p>
         </div>
-        <div class="flex flex-wrap items-center gap-3">
+        <div class="flex flex-wrap items-center gap-3 max-md:grid max-md:grid-cols-1 max-md:gap-2">
             <a href="{{ route('tahun-ajaran-baru.create') }}"
                 title="{{ __('Pindahkan kelas, siswa, dan jadwal mengajar ke semester/tahun ajaran berikutnya sekaligus') }}"
-                class="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700 shadow-sm transition hover:bg-emerald-100 focus:outline-none focus:ring-4 focus:ring-emerald-500/30 dark:border-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200 dark:hover:bg-emerald-900/60">
+                class="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700 shadow-sm transition hover:bg-emerald-100 focus:outline-none focus:ring-4 focus:ring-emerald-500/30 max-md:min-h-11 max-md:justify-center dark:border-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200 dark:hover:bg-emerald-900/60">
                 <i class="fas fa-forward"></i>
                 {{ __('Wizard Tahun Ajaran Baru') }}
             </a>
             <button type="button" id="openCreateModal"
-                class="inline-flex items-center gap-2 rounded-full bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-500/40">
+                class="inline-flex items-center gap-2 rounded-full bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-500/40 max-md:min-h-11 max-md:justify-center">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
                     stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 4v16m8-8H4" />
@@ -25,16 +25,16 @@
     </div>
 
     <div class="grid gap-6 lg:grid-cols-[360px,1fr]">
-        <div class="space-y-6">
+        <div class="space-y-6 max-md:hidden">
 
 
 
         </div>
 
-        <div>
+        <div class="max-md:min-w-0">
             <div
                 class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
-                <div class="border-b border-gray-100 bg-gray-50 px-6 py-5 dark:border-gray-700 dark:bg-gray-900/40">
+                <div class="border-b border-gray-100 bg-gray-50 px-6 py-5 max-md:px-4 max-md:py-4 dark:border-gray-700 dark:bg-gray-900/40">
                     <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                         <div>
                             <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
@@ -45,7 +45,92 @@
                     </div>
                 </div>
 
-                <div class="px-6 pb-6">
+                {{-- HP: kartu per tahun ajaran (aksi sama dengan tabel, area sentuh minimal 44px) --}}
+                <ul class="divide-y divide-gray-200 md:hidden dark:divide-gray-700">
+                    @forelse ($tahunAjaran as $tahun)
+                        @php
+                            $dataTahunAjaran = $tahun->siswas_count
+                                + $tahun->kelas_count
+                                + $tahun->penilaians_count
+                                + $tahun->rapor_metadatas_count
+                                + $tahun->tahfidz_penilaians_count
+                                + $tahun->mengajars_count;
+                        @endphp
+                        <li class="space-y-3 px-4 py-4">
+                            <div class="flex items-start justify-between gap-3">
+                                <div class="min-w-0">
+                                    <p class="truncate text-base font-semibold text-gray-900 dark:text-gray-100">
+                                        {{ $tahun->nama }}
+                                        <span class="font-medium text-gray-500 dark:text-gray-400">• {{ $tahun->semester ?? '—' }}</span>
+                                    </p>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">
+                                        {{ __('Periode') }} {{ $tahun->tahun_mulai }} / {{ $tahun->tahun_selesai }}
+                                    </p>
+                                </div>
+                                <span class="shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold {{ $tahun->is_active ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-200' : 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-300' }}">
+                                    {{ $tahun->is_active ? __('Aktif') : __('Nonaktif') }}
+                                </span>
+                            </div>
+
+                            <form action="{{ route('tahun-ajaran.toggle-active', $tahun) }}" method="POST">
+                                @csrf
+                                @method('PATCH')
+                                <button type="submit"
+                                    class="flex min-h-11 w-full items-center justify-between gap-3 rounded-xl border border-gray-200 px-3 text-left text-sm font-medium text-gray-700 transition active:bg-gray-50 dark:border-gray-700 dark:text-gray-200 dark:active:bg-gray-700/50">
+                                    <span>{{ $tahun->is_active ? __('Nonaktifkan tahun ajaran') : __('Aktifkan tahun ajaran') }}</span>
+                                    <span aria-hidden="true"
+                                        class="relative inline-flex h-6 w-11 shrink-0 items-center rounded-full {{ $tahun->is_active ? 'bg-emerald-500' : 'bg-gray-300 dark:bg-gray-600' }}">
+                                        <span class="inline-block h-4 w-4 transform rounded-full bg-white shadow {{ $tahun->is_active ? 'translate-x-6' : 'translate-x-1' }}"></span>
+                                    </span>
+                                </button>
+                            </form>
+
+                            <div class="grid grid-cols-2 gap-2">
+                                <button type="button"
+                                    class="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-indigo-50 px-3 text-sm font-semibold text-indigo-600 transition active:bg-indigo-100 dark:bg-indigo-900/40 dark:text-indigo-200 dark:active:bg-indigo-900/60"
+                                    data-action="edit"
+                                    data-update-url="{{ route('tahun-ajaran.update', $tahun) }}"
+                                    data-nama="{{ $tahun->nama }}"
+                                    data-mulai="{{ $tahun->tahun_mulai }}"
+                                    data-selesai="{{ $tahun->tahun_selesai }}"
+                                    data-semester="{{ $tahun->semester }}"
+                                    data-keterangan="{{ $tahun->keterangan }}"
+                                    data-active="{{ $tahun->is_active ? '1' : '0' }}">
+                                    <i class="fas fa-pen text-xs" aria-hidden="true"></i>
+                                    {{ __('Edit') }}
+                                </button>
+                                @if ($dataTahunAjaran > 0)
+                                    <x-hapus-nilai-terkunci :jumlah="$dataTahunAjaran"
+                                        class="inline-flex min-h-11 cursor-not-allowed items-center justify-center gap-2 rounded-xl bg-gray-100 px-3 text-sm font-semibold text-gray-400 dark:bg-gray-800 dark:text-gray-500" />
+                                @else
+                                    <form action="{{ route('tahun-ajaran.destroy', $tahun) }}" method="POST"
+                                        onsubmit="return confirm('{{ __('Hapus tahun ajaran ini?') }}');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit"
+                                            class="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-red-50 px-3 text-sm font-semibold text-red-600 transition active:bg-red-100 dark:bg-red-900/40 dark:text-red-300 dark:active:bg-red-900/60">
+                                            <i class="fas fa-trash text-xs" aria-hidden="true"></i>
+                                            {{ __('Hapus') }}
+                                        </button>
+                                    </form>
+                                @endif
+                            </div>
+                            @if ($dataTahunAjaran > 0)
+                                {{-- Pengganti tooltip tombol Hapus terkunci (tidak ada hover di HP) --}}
+                                <p class="text-xs text-gray-500 dark:text-gray-400">
+                                    <i class="fas fa-lock mr-1 text-[10px]" aria-hidden="true"></i>
+                                    {{ __('Tidak bisa dihapus: masih terhubung ke :jumlah nilai. Hapus nilai tersebut lebih dulu.', ['jumlah' => number_format($dataTahunAjaran, 0, ',', '.')]) }}
+                                </p>
+                            @endif
+                        </li>
+                    @empty
+                        <li class="px-4 py-6 text-center text-sm text-gray-500 dark:text-gray-400">
+                            {{ __('Belum ada data tahun ajaran. Tambahkan data baru untuk memulai.') }}
+                        </li>
+                    @endforelse
+                </ul>
+
+                <div class="px-6 pb-6 max-md:hidden">
                     <div class="overflow-x-auto">
                         <table
                             class="min-w-full divide-y divide-gray-200 text-left text-sm text-gray-700 dark:divide-gray-700 dark:text-gray-200">
@@ -151,34 +236,35 @@
         </div>
     </div>
 
-    <div id="modalOverlay" class="fixed inset-0 z-40 hidden items-center justify-center bg-gray-900/60 px-4">
+    {{-- Di HP modal tampil sebagai lembar bawah selebar layar (di atas menu bawah aplikasi). --}}
+    <div id="modalOverlay" class="fixed inset-0 z-40 hidden items-center justify-center bg-gray-900/60 px-4 max-md:items-end max-md:px-0">
         <div id="createModal"
-            class="modal-card hidden w-full max-w-2xl overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-900">
-            <div class="border-b border-gray-100 bg-gray-50 px-6 py-4 dark:border-gray-700 dark:bg-gray-900/40">
+            class="modal-card hidden w-full max-w-2xl overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl max-md:max-h-[92dvh] max-md:max-w-none max-md:overflow-y-auto max-md:overscroll-contain max-md:rounded-b-none max-md:border-x-0 max-md:border-b-0 dark:border-gray-700 dark:bg-gray-900">
+            <div class="border-b border-gray-100 bg-gray-50 px-6 py-4 max-md:px-4 dark:border-gray-700 dark:bg-gray-900/40">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ __('Tambah Tahun Ajaran') }}
                 </h3>
             </div>
-            <form action="{{ route('tahun-ajaran.store') }}" method="POST" class="space-y-4 px-6 py-6">
+            <form action="{{ route('tahun-ajaran.store') }}" method="POST" class="space-y-4 px-6 py-6 max-md:px-4 max-md:pb-[calc(1rem+env(safe-area-inset-bottom))] max-md:pt-4">
                 @csrf
                 <div class="grid gap-4 sm:grid-cols-2">
                     <div>
                         <label for="create_nama"
                             class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Nama (contoh: 2024/2025)') }}</label>
                         <input id="create_nama" name="nama" type="text" required
-                            class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+                            class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 max-md:h-11 max-md:py-0 max-md:text-base dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
                     </div>
                     <div class="grid grid-cols-2 gap-3">
                         <div>
                             <label for="create_mulai"
                                 class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Tahun Mulai') }}</label>
                             <input id="create_mulai" name="tahun_mulai" type="number" required
-                                class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+                                class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 max-md:h-11 max-md:py-0 max-md:text-base dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
                         </div>
                         <div>
                             <label for="create_selesai"
                                 class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Tahun Selesai') }}</label>
                             <input id="create_selesai" name="tahun_selesai" type="number" required
-                                class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+                                class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 max-md:h-11 max-md:py-0 max-md:text-base dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
                         </div>
                     </div>
                 </div>
@@ -187,32 +273,32 @@
                         <label for="create_semester"
                             class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Semester') }} <span class="text-red-500">*</span></label>
                         <select id="create_semester" name="semester" required
-                            class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+                            class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 max-md:h-11 max-md:py-0 max-md:text-base dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
                             <option value="">{{ __('-- Pilih Semester --') }}</option>
                             <option value="Ganjil">{{ __('Ganjil') }}</option>
                             <option value="Genap">{{ __('Genap') }}</option>
                         </select>
                     </div>
-                    <div class="flex items-center gap-3 pt-6">
+                    <div class="flex items-center gap-3 pt-6 max-md:min-h-11 max-md:pt-0">
                         <input type="hidden" name="is_active" value="0">
                         <input id="create_active" name="is_active" type="checkbox" value="1"
-                            class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                            class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 max-md:h-6 max-md:w-6">
                         <label for="create_active"
-                            class="text-sm font-semibold text-gray-800 dark:text-gray-200">{{ __('Tandai sebagai aktif') }}</label>
+                            class="text-sm font-semibold text-gray-800 max-md:flex max-md:min-h-11 max-md:flex-1 max-md:items-center dark:text-gray-200">{{ __('Tandai sebagai aktif') }}</label>
                     </div>
                 </div>
                 <div>
                     <label for="create_keterangan"
                         class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Keterangan') }}</label>
                     <textarea id="create_keterangan" name="keterangan" rows="3"
-                        class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"></textarea>
+                        class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 max-md:text-base dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"></textarea>
                 </div>
-                <div class="flex items-center justify-end gap-3 border-t border-gray-100 pt-4 dark:border-gray-700">
+                <div class="flex items-center justify-end gap-3 border-t border-gray-100 pt-4 max-md:grid max-md:grid-cols-2 dark:border-gray-700">
                     <button type="button"
-                        class="rounded-lg border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-600 transition hover:border-gray-300 hover:text-gray-800 dark:border-gray-700 dark:text-gray-300"
+                        class="rounded-lg border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-600 transition hover:border-gray-300 hover:text-gray-800 max-md:min-h-11 dark:border-gray-700 dark:text-gray-300"
                         data-close-modal>{{ __('Batal') }}</button>
                     <button type="submit"
-                        class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-500/30">
+                        class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-500/30 max-md:min-h-11 max-md:justify-center max-md:px-3">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
@@ -225,11 +311,11 @@
         </div>
 
         <div id="editModal"
-            class="modal-card hidden w-full max-w-2xl overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-900">
-            <div class="border-b border-gray-100 bg-gray-50 px-6 py-4 dark:border-gray-700 dark:bg-gray-900/40">
+            class="modal-card hidden w-full max-w-2xl overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl max-md:max-h-[92dvh] max-md:max-w-none max-md:overflow-y-auto max-md:overscroll-contain max-md:rounded-b-none max-md:border-x-0 max-md:border-b-0 dark:border-gray-700 dark:bg-gray-900">
+            <div class="border-b border-gray-100 bg-gray-50 px-6 py-4 max-md:px-4 dark:border-gray-700 dark:bg-gray-900/40">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ __('Edit Tahun Ajaran') }}</h3>
             </div>
-            <form id="editForm" method="POST" class="space-y-4 px-6 py-6">
+            <form id="editForm" method="POST" class="space-y-4 px-6 py-6 max-md:px-4 max-md:pb-[calc(1rem+env(safe-area-inset-bottom))] max-md:pt-4">
                 @csrf
                 @method('PUT')
                 <div class="grid gap-4 sm:grid-cols-2">
@@ -237,20 +323,20 @@
                         <label for="edit_nama"
                             class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Nama') }}</label>
                         <input id="edit_nama" name="nama" type="text" required
-                            class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+                            class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 max-md:h-11 max-md:py-0 max-md:text-base dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
                     </div>
                     <div class="grid grid-cols-2 gap-3">
                         <div>
                             <label for="edit_mulai"
                                 class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Tahun Mulai') }}</label>
                             <input id="edit_mulai" name="tahun_mulai" type="number" required
-                                class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+                                class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 max-md:h-11 max-md:py-0 max-md:text-base dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
                         </div>
                         <div>
                             <label for="edit_selesai"
                                 class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Tahun Selesai') }}</label>
                             <input id="edit_selesai" name="tahun_selesai" type="number" required
-                                class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+                                class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 max-md:h-11 max-md:py-0 max-md:text-base dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
                         </div>
                     </div>
                 </div>
@@ -259,32 +345,32 @@
                         <label for="edit_semester"
                             class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Semester') }} <span class="text-red-500">*</span></label>
                         <select id="edit_semester" name="semester" required
-                            class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+                            class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 max-md:h-11 max-md:py-0 max-md:text-base dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
                             <option value="">{{ __('-- Pilih Semester --') }}</option>
                             <option value="Ganjil">{{ __('Ganjil') }}</option>
                             <option value="Genap">{{ __('Genap') }}</option>
                         </select>
                     </div>
-                    <div class="flex items-center gap-3 pt-6">
+                    <div class="flex items-center gap-3 pt-6 max-md:min-h-11 max-md:pt-0">
                         <input type="hidden" name="is_active" value="0">
                         <input id="edit_active" name="is_active" type="checkbox" value="1"
-                            class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                            class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 max-md:h-6 max-md:w-6">
                         <label for="edit_active"
-                            class="text-sm font-semibold text-gray-800 dark:text-gray-200">{{ __('Tandai sebagai aktif') }}</label>
+                            class="text-sm font-semibold text-gray-800 max-md:flex max-md:min-h-11 max-md:flex-1 max-md:items-center dark:text-gray-200">{{ __('Tandai sebagai aktif') }}</label>
                     </div>
                 </div>
                 <div>
                     <label for="edit_keterangan"
                         class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Keterangan') }}</label>
                     <textarea id="edit_keterangan" name="keterangan" rows="3"
-                        class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"></textarea>
+                        class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 max-md:text-base dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"></textarea>
                 </div>
-                <div class="flex items-center justify-between border-t border-gray-100 pt-4 dark:border-gray-700">
+                <div class="flex items-center justify-between border-t border-gray-100 pt-4 max-md:grid max-md:grid-cols-2 max-md:gap-3 dark:border-gray-700">
                     <button type="button"
-                        class="rounded-lg border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-600 transition hover:border-gray-300 hover:text-gray-800 dark:border-gray-700 dark:text-gray-300"
+                        class="rounded-lg border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-600 transition hover:border-gray-300 hover:text-gray-800 max-md:min-h-11 dark:border-gray-700 dark:text-gray-300"
                         data-close-modal>{{ __('Batal') }}</button>
                     <button type="submit"
-                        class="inline-flex items-center gap-2 rounded-lg bg-purple-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-purple-700 focus:outline-none focus:ring-4 focus:ring-purple-500/30">
+                        class="inline-flex items-center gap-2 rounded-lg bg-purple-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-purple-700 focus:outline-none focus:ring-4 focus:ring-purple-500/30 max-md:min-h-11 max-md:justify-center max-md:px-3">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"

@@ -35,11 +35,11 @@
                     </div>
                     <ul class="divide-y divide-gray-200 dark:divide-gray-700">
                         @foreach ($items as $assignment)
-                            <li class="flex items-center justify-between px-4 py-3">
-                                <div class="text-sm text-gray-800 dark:text-gray-100">{{ $assignment->kelas->nama }}
+                            <li class="flex items-center justify-between gap-3 px-4 py-3 max-md:py-2">
+                                <div class="min-w-0 text-sm text-gray-800 dark:text-gray-100">{{ $assignment->kelas->nama }}
                                 </div>
                                 <a href="{{ route('guru.penilaian.show', ['mengajar' => $assignment, 'jenis' => 'sumatif']) }}"
-                                    class="inline-flex items-center gap-2 rounded-lg border border-blue-500 px-3 py-1 text-xs font-semibold text-blue-600 hover:bg-blue-50 dark:border-blue-400 dark:text-blue-100 dark:hover:bg-blue-900/40">
+                                    class="inline-flex items-center gap-2 rounded-lg border border-blue-500 px-3 py-1 text-xs font-semibold text-blue-600 hover:bg-blue-50 max-md:min-h-11 max-md:px-4 max-md:text-sm dark:border-blue-400 dark:text-blue-100 dark:hover:bg-blue-900/40">
                                     {{ __('Isi Nilai') }}
                                 </a>
                             </li>

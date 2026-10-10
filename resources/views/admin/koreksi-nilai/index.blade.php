@@ -53,8 +53,9 @@
                         $daftarMengajar = $mengajarPerKelas->get($kelas->id, collect());
                         $totalSiswa = (int) $kelas->siswas_count;
                     @endphp
+                    {{-- min-w-0: nama mapel panjang (truncate) tidak boleh melebarkan kolom grid melewati layar HP --}}
                     <section
-                        class="rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                        class="min-w-0 rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
                         <header
                             class="flex items-center justify-between gap-3 border-b border-gray-200 px-4 py-3 dark:border-gray-700">
                             <h2 class="text-base font-semibold text-gray-800 dark:text-gray-100">{{ $kelas->nama }}</h2>

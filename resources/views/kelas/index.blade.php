@@ -9,14 +9,14 @@
             <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100">{{ __('Data Kelas') }}</h1>
             <p class="text-gray-600 dark:text-gray-400 mt-1">{{ __('Kelola daftar kelas dan wali kelas.') }}</p>
         </div>
-        <div class="flex flex-wrap gap-2">
+        <div class="grid grid-cols-2 gap-2 md:flex md:flex-wrap">
             <button type="button" onclick="document.getElementById('copyKelasModal').classList.remove('hidden')"
-                class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700">
+                class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-emerald-700 max-md:min-h-11 max-md:justify-center max-md:px-2">
                 <i class="fas fa-copy"></i>
                 {{ __('Salin dari TA Lain') }}
             </button>
             <button type="button" id="openCreateKelas"
-                class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-500/30">
+                class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-500/30 max-md:order-first max-md:min-h-11 max-md:justify-center">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
                     stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 4v16m8-8H4" />
@@ -26,8 +26,62 @@
         </div>
     </div>
 
+    {{-- HP: daftar kartu; tabel (DataTables) hanya untuk layar md ke atas --}}
+    <div class="space-y-3 md:hidden">
+        @forelse ($kelasList as $kelas)
+            <article
+                class="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                <div class="flex items-start justify-between gap-3">
+                    <div class="min-w-0">
+                        <p class="break-words font-semibold text-gray-900 dark:text-gray-100">{{ $kelas->nama }}</p>
+                        <p class="mt-0.5 break-words text-sm text-gray-600 dark:text-gray-300">
+                            <i class="fas fa-user-tie mr-1 text-xs text-gray-400"></i>{{ optional($kelas->guru)->nama ?? __('Wali kelas belum diatur') }}
+                        </p>
+                        <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
+                            {{ __('Tingkat') }} {{ $kelas->tingkat }}@if ($kelas->jurusan) · {{ $kelas->jurusan }}@endif @if ($kelas->jenis) · {{ $kelas->jenis }}@endif
+                        </p>
+                    </div>
+                    <span
+                        class="inline-flex shrink-0 items-center gap-1 rounded-full bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700 dark:bg-blue-900/40 dark:text-blue-200">
+                        <i class="fas fa-users text-[10px]"></i> {{ $kelas->siswas_count }}
+                    </span>
+                </div>
+                <div class="mt-3 grid grid-cols-2 gap-2 border-t border-gray-100 pt-3 dark:border-gray-700">
+                    <button type="button"
+                        class="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl bg-indigo-50 px-2 text-sm font-semibold text-indigo-700 transition active:scale-[0.98] dark:bg-indigo-900/40 dark:text-indigo-200"
+                        data-action="edit-kelas" data-update-url="{{ route('kelas.update', $kelas) }}"
+                        data-modal="edit-{{ $kelas->id }}"
+                        data-nama="{{ $kelas->nama }}" data-tingkat="{{ $kelas->tingkat }}"
+                        data-jurusan="{{ $kelas->jurusan }}" data-jenis="{{ $kelas->jenis }}"
+                        data-guru-id="{{ $kelas->guru_id }}">
+                        <i class="fas fa-pen text-xs"></i> {{ __('Edit') }}
+                    </button>
+                    @if ($kelas->penilaians_count > 0)
+                        <x-hapus-nilai-terkunci :jumlah="$kelas->penilaians_count"
+                            class="inline-flex min-h-11 w-full cursor-not-allowed items-center justify-center gap-1.5 rounded-xl bg-gray-100 px-2 text-sm font-semibold text-gray-400 dark:bg-gray-700 dark:text-gray-400" />
+                    @else
+                        <form action="{{ route('kelas.destroy', $kelas) }}" method="POST"
+                            onsubmit="return confirm('{{ __('Hapus kelas ini?') }}');">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit"
+                                class="inline-flex min-h-11 w-full items-center justify-center gap-1.5 rounded-xl bg-red-50 px-2 text-sm font-semibold text-red-600 transition active:scale-[0.98] dark:bg-red-900/40 dark:text-red-300">
+                                <i class="fas fa-trash text-xs"></i> {{ __('Hapus') }}
+                            </button>
+                        </form>
+                    @endif
+                </div>
+            </article>
+        @empty
+            <div
+                class="rounded-2xl border border-gray-200 bg-white px-4 py-8 text-center text-sm text-gray-500 shadow-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400">
+                {{ __('Belum ada data kelas.') }}
+            </div>
+        @endforelse
+    </div>
+
     <div
-        class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+        class="hidden overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm md:block dark:border-gray-700 dark:bg-gray-800">
         <div class="px-6 pb-6 overflow-x-auto">
             <table id="kelas-table"
                 class="min-w-full divide-y divide-gray-200 text-left text-sm text-gray-700 dark:divide-gray-700 dark:text-gray-200">
@@ -94,25 +148,25 @@
         @endif
     </div>
 
-    <div id="kelasModalOverlay" class="fixed inset-0 z-40 hidden items-center justify-center bg-gray-900/60 px-4"
+    <div id="kelasModalOverlay" class="fixed inset-0 z-40 hidden items-center justify-center bg-gray-900/60 px-4 max-md:items-end max-md:px-0"
         data-open-modal="{{ $errors->any() ? old('_modal') : '' }}">
         <div id="createKelasModal"
-            class="modal-card hidden w-full max-w-3xl overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-900">
-            <div class="border-b border-gray-100 bg-gray-50 px-6 py-4 dark:border-gray-700 dark:bg-gray-900/40">
+            class="modal-card hidden w-full max-w-3xl overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-900 max-md:max-h-[92dvh] max-md:overflow-y-auto max-md:overscroll-contain max-md:rounded-b-none">
+            <div class="border-b border-gray-100 bg-gray-50 px-6 py-4 dark:border-gray-700 dark:bg-gray-900 max-md:sticky max-md:top-0 max-md:z-10 max-md:px-4">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ __('Tambah Kelas') }}</h3>
             </div>
-            <form action="{{ route('kelas.store') }}" method="POST" class="space-y-4 px-6 py-6">
+            <form action="{{ route('kelas.store') }}" method="POST" class="space-y-4 px-6 py-6 max-md:px-4 max-md:py-4">
                 @csrf
                 @include('kelas.partials.form', ['mode' => 'create'])
             </form>
         </div>
 
         <div id="editKelasModal"
-            class="modal-card hidden w-full max-w-3xl overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-900">
-            <div class="border-b border-gray-100 bg-gray-50 px-6 py-4 dark:border-gray-700 dark:bg-gray-900/40">
+            class="modal-card hidden w-full max-w-3xl overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-900 max-md:max-h-[92dvh] max-md:overflow-y-auto max-md:overscroll-contain max-md:rounded-b-none">
+            <div class="border-b border-gray-100 bg-gray-50 px-6 py-4 dark:border-gray-700 dark:bg-gray-900 max-md:sticky max-md:top-0 max-md:z-10 max-md:px-4">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ __('Edit Kelas') }}</h3>
             </div>
-            <form id="editKelasForm" method="POST" class="space-y-4 px-6 py-6">
+            <form id="editKelasForm" method="POST" class="space-y-4 px-6 py-6 max-md:px-4 max-md:py-4">
                 @csrf
                 @method('PUT')
                 @include('kelas.partials.form', ['mode' => 'edit'])
@@ -194,14 +248,15 @@
         <div class="flex min-h-screen items-center justify-center p-4">
             <div class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm" onclick="document.getElementById('copyKelasModal').classList.add('hidden')"></div>
             
-            <div class="relative w-full max-w-md rounded-2xl bg-white p-6 shadow-xl dark:bg-gray-800">
-                <div class="mb-4 flex items-center justify-between">
+            <div class="relative w-full max-w-md rounded-2xl bg-white p-6 shadow-xl dark:bg-gray-800 max-md:p-5">
+                <div class="mb-4 flex items-center justify-between gap-3">
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
                         <i class="fas fa-copy mr-2 text-emerald-600"></i>
                         {{ __('Salin Kelas') }}
                     </h3>
                     <button type="button" onclick="document.getElementById('copyKelasModal').classList.add('hidden')"
-                        class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                        aria-label="{{ __('Tutup') }}"
+                        class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 max-md:-mr-2 max-md:inline-flex max-md:h-11 max-md:w-11 max-md:shrink-0 max-md:items-center max-md:justify-center">
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
@@ -213,7 +268,7 @@
                             {{ __('Salin dari Tahun Ajaran:') }}
                         </label>
                         <select name="source_tahun_ajaran_id" required
-                            class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100">
+                            class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 max-md:min-h-11 max-md:text-base">
                             <option value="">-- {{ __('Pilih Tahun Ajaran Sumber') }} --</option>
                             @foreach ($tahunAjarans as $tahun)
                                 @if ($tahun->id != $currentTahunId)
@@ -231,13 +286,13 @@
                         {{ __('Kelas yang sudah ada tidak akan di-overwrite. Wali kelas harus di-assign manual.') }}
                     </div>
 
-                    <div class="flex justify-end gap-3">
+                    <div class="flex justify-end gap-3 max-md:grid max-md:grid-cols-2">
                         <button type="button" onclick="document.getElementById('copyKelasModal').classList.add('hidden')"
-                            class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
+                            class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700 max-md:min-h-11">
                             {{ __('Batal') }}
                         </button>
                         <button type="submit"
-                            class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700">
+                            class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 max-md:min-h-11">
                             <i class="fas fa-copy mr-1"></i> {{ __('Salin Kelas') }}
                         </button>
                     </div>

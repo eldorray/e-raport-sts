@@ -1,6 +1,6 @@
 <x-layouts.app>
-    <!-- Breadcrumbs -->
-    <div class="mb-6 flex items-center text-sm">
+    <!-- Breadcrumbs (di HP diganti tombol kembali / menu) -->
+    <div class="mb-6 flex items-center text-sm max-md:hidden">
         <a href="{{ route('dashboard') }}"
             class="text-blue-600 dark:text-blue-400 hover:underline">{{ __('Dashboard') }}</a>
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mx-2 text-gray-400" fill="none" viewBox="0 0 24 24"
@@ -24,8 +24,8 @@
         </p>
     </div>
 
-    <div class="p-6">
-        <div class="flex flex-col md:flex-row gap-6">
+    <div class="p-6 max-md:p-0">
+        <div class="flex flex-col md:flex-row gap-6 max-md:gap-4">
             <!-- Sidebar Navigation -->
             @include('settings.partials.navigation')
 
@@ -34,21 +34,21 @@
                 <!-- Theme Section -->
                 <div
                     class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-                    <div class="p-6">
+                    <div class="p-6 max-md:p-4">
                         <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">{{ __('Theme') }}</h3>
                         <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
                             {{ __('Pilih tema tampilan yang nyaman untuk mata Anda') }}</p>
-                        <div class="inline-flex rounded-md shadow-sm" role="group">
+                        <div class="inline-flex rounded-md shadow-sm max-md:flex max-md:w-full" role="group">
                             <button onclick="setAppearance('light')" id="theme-light"
-                                class="theme-btn px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-l-lg hover:bg-gray-100 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:bg-gray-600">
+                                class="theme-btn px-4 py-2 text-sm font-medium max-md:min-h-11 max-md:flex-1 max-md:px-2 text-gray-900 bg-white border border-gray-200 rounded-l-lg hover:bg-gray-100 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:bg-gray-600">
                                 <i class="fas fa-sun mr-2"></i>{{ __('Light') }}
                             </button>
                             <button onclick="setAppearance('dark')" id="theme-dark"
-                                class="theme-btn px-4 py-2 text-sm font-medium text-gray-900 bg-white border-t border-b border-gray-200 hover:bg-gray-100 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:bg-gray-600">
+                                class="theme-btn px-4 py-2 text-sm font-medium max-md:min-h-11 max-md:flex-1 max-md:px-2 text-gray-900 bg-white border-t border-b border-gray-200 hover:bg-gray-100 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:bg-gray-600">
                                 <i class="fas fa-moon mr-2"></i>{{ __('Dark') }}
                             </button>
                             <button onclick="setAppearance('system')" id="theme-system"
-                                class="theme-btn px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-r-md hover:bg-gray-100 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:bg-gray-600">
+                                class="theme-btn px-4 py-2 text-sm font-medium max-md:min-h-11 max-md:flex-1 max-md:px-2 text-gray-900 bg-white border border-gray-200 rounded-r-md hover:bg-gray-100 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:bg-gray-600">
                                 <i class="fas fa-desktop mr-2"></i>{{ __('System') }}
                             </button>
                         </div>
@@ -58,22 +58,22 @@
                 <!-- Font Size Section -->
                 <div
                     class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-                    <div class="p-6">
+                    <div class="p-6 max-md:p-4">
                         <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">{{ __('Ukuran Font') }}
                         </h3>
                         <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
                             {{ __('Sesuaikan ukuran teks sesuai kenyamanan Anda') }}</p>
-                        <div class="inline-flex rounded-md shadow-sm" role="group">
+                        <div class="inline-flex rounded-md shadow-sm max-md:flex max-md:w-full" role="group">
                             <button onclick="setFontSize('small')" id="font-small"
-                                class="font-btn px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-l-lg hover:bg-gray-100 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:bg-gray-600">
+                                class="font-btn px-4 py-2 text-sm font-medium max-md:min-h-11 max-md:flex-1 max-md:px-2 text-gray-900 bg-white border border-gray-200 rounded-l-lg hover:bg-gray-100 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:bg-gray-600">
                                 <span class="text-xs">A</span> {{ __('Kecil') }}
                             </button>
                             <button onclick="setFontSize('normal')" id="font-normal"
-                                class="font-btn px-4 py-2 text-sm font-medium text-gray-900 bg-white border-t border-b border-gray-200 hover:bg-gray-100 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:bg-gray-600">
+                                class="font-btn px-4 py-2 text-sm font-medium max-md:min-h-11 max-md:flex-1 max-md:px-2 text-gray-900 bg-white border-t border-b border-gray-200 hover:bg-gray-100 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:bg-gray-600">
                                 <span class="text-base">A</span> {{ __('Sedang') }}
                             </button>
                             <button onclick="setFontSize('large')" id="font-large"
-                                class="font-btn px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-r-md hover:bg-gray-100 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:bg-gray-600">
+                                class="font-btn px-4 py-2 text-sm font-medium max-md:min-h-11 max-md:flex-1 max-md:px-2 text-gray-900 bg-white border border-gray-200 rounded-r-md hover:bg-gray-100 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:bg-gray-600">
                                 <span class="text-lg">A</span> {{ __('Besar') }}
                             </button>
                         </div>
@@ -83,7 +83,7 @@
                 <!-- Font Style Section -->
                 <div
                     class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-                    <div class="p-6">
+                    <div class="p-6 max-md:p-4">
                         <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">
                             {{ __('Jenis Font') }}</h3>
                         <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
@@ -135,66 +135,66 @@
                 <!-- Font Color Section -->
                 <div
                     class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-                    <div class="p-6">
+                    <div class="p-6 max-md:p-4">
                         <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">
                             {{ __('Warna Font') }}</h3>
                         <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
                             {{ __('Pilih warna teks yang diinginkan') }}</p>
                         <div class="flex flex-wrap gap-3">
                             <button onclick="setFontColor('default')" data-color="default"
-                                class="font-color-btn w-10 h-10 rounded-full bg-gray-800 dark:bg-gray-200 hover:ring-4 hover:ring-gray-300 dark:hover:ring-gray-600 transition-all flex items-center justify-center border-2 border-gray-300 dark:border-gray-600"
+                                class="font-color-btn w-10 h-10 rounded-full max-md:h-11 max-md:w-11 bg-gray-800 dark:bg-gray-200 hover:ring-4 hover:ring-gray-300 dark:hover:ring-gray-600 transition-all flex items-center justify-center border-2 border-gray-300 dark:border-gray-600"
                                 title="Default">
-                                <i class="fas fa-check text-white dark:text-gray-800 hidden"></i>
+                                <span data-centang class="hidden"><i class="fas fa-check text-white dark:text-gray-800"></i></span>
                             </button>
                             <button onclick="setFontColor('slate')" data-color="slate"
-                                class="font-color-btn w-10 h-10 rounded-full bg-slate-700 hover:ring-4 hover:ring-slate-300 dark:hover:ring-slate-600 transition-all flex items-center justify-center"
+                                class="font-color-btn w-10 h-10 rounded-full max-md:h-11 max-md:w-11 bg-slate-700 hover:ring-4 hover:ring-slate-300 dark:hover:ring-slate-600 transition-all flex items-center justify-center"
                                 title="Slate">
-                                <i class="fas fa-check text-white hidden"></i>
+                                <span data-centang class="hidden"><i class="fas fa-check text-white"></i></span>
                             </button>
                             <button onclick="setFontColor('zinc')" data-color="zinc"
-                                class="font-color-btn w-10 h-10 rounded-full bg-zinc-700 hover:ring-4 hover:ring-zinc-300 dark:hover:ring-zinc-600 transition-all flex items-center justify-center"
+                                class="font-color-btn w-10 h-10 rounded-full max-md:h-11 max-md:w-11 bg-zinc-700 hover:ring-4 hover:ring-zinc-300 dark:hover:ring-zinc-600 transition-all flex items-center justify-center"
                                 title="Zinc">
-                                <i class="fas fa-check text-white hidden"></i>
+                                <span data-centang class="hidden"><i class="fas fa-check text-white"></i></span>
                             </button>
                             <button onclick="setFontColor('neutral')" data-color="neutral"
-                                class="font-color-btn w-10 h-10 rounded-full bg-neutral-700 hover:ring-4 hover:ring-neutral-300 dark:hover:ring-neutral-600 transition-all flex items-center justify-center"
+                                class="font-color-btn w-10 h-10 rounded-full max-md:h-11 max-md:w-11 bg-neutral-700 hover:ring-4 hover:ring-neutral-300 dark:hover:ring-neutral-600 transition-all flex items-center justify-center"
                                 title="Neutral">
-                                <i class="fas fa-check text-white hidden"></i>
+                                <span data-centang class="hidden"><i class="fas fa-check text-white"></i></span>
                             </button>
                             <button onclick="setFontColor('stone')" data-color="stone"
-                                class="font-color-btn w-10 h-10 rounded-full bg-stone-700 hover:ring-4 hover:ring-stone-300 dark:hover:ring-stone-600 transition-all flex items-center justify-center"
+                                class="font-color-btn w-10 h-10 rounded-full max-md:h-11 max-md:w-11 bg-stone-700 hover:ring-4 hover:ring-stone-300 dark:hover:ring-stone-600 transition-all flex items-center justify-center"
                                 title="Stone">
-                                <i class="fas fa-check text-white hidden"></i>
+                                <span data-centang class="hidden"><i class="fas fa-check text-white"></i></span>
                             </button>
                             <button onclick="setFontColor('warmgray')" data-color="warmgray"
-                                class="font-color-btn w-10 h-10 rounded-full bg-amber-900 hover:ring-4 hover:ring-amber-300 dark:hover:ring-amber-700 transition-all flex items-center justify-center"
+                                class="font-color-btn w-10 h-10 rounded-full max-md:h-11 max-md:w-11 bg-amber-900 hover:ring-4 hover:ring-amber-300 dark:hover:ring-amber-700 transition-all flex items-center justify-center"
                                 title="Warm Gray">
-                                <i class="fas fa-check text-white hidden"></i>
+                                <span data-centang class="hidden"><i class="fas fa-check text-white"></i></span>
                             </button>
                             <button onclick="setFontColor('coolgray')" data-color="coolgray"
-                                class="font-color-btn w-10 h-10 rounded-full bg-blue-900 hover:ring-4 hover:ring-blue-300 dark:hover:ring-blue-700 transition-all flex items-center justify-center"
+                                class="font-color-btn w-10 h-10 rounded-full max-md:h-11 max-md:w-11 bg-blue-900 hover:ring-4 hover:ring-blue-300 dark:hover:ring-blue-700 transition-all flex items-center justify-center"
                                 title="Cool Gray">
-                                <i class="fas fa-check text-white hidden"></i>
+                                <span data-centang class="hidden"><i class="fas fa-check text-white"></i></span>
                             </button>
                         </div>
                     </div>
                 </div>
 
-                <!-- Sidebar Mode Section -->
+                <!-- Sidebar Mode Section (tidak ada sidebar dalam mode aplikasi HP) -->
                 <div
-                    class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-                    <div class="p-6">
+                    class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden in-[.mode-aplikasi]:hidden">
+                    <div class="p-6 max-md:p-4">
                         <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">
                             {{ __('Mode Sidebar') }}</h3>
                         <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
                             {{ __('Pilih tampilan sidebar yang diinginkan') }}</p>
-                        <div class="inline-flex rounded-md shadow-sm" role="group">
+                        <div class="inline-flex rounded-md shadow-sm max-md:flex max-md:w-full" role="group">
                             <button onclick="setSidebarMode('expanded')" id="sidebar-expanded"
-                                class="sidebar-btn px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-l-lg hover:bg-gray-100 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:bg-gray-600">
+                                class="sidebar-btn px-4 py-2 text-sm font-medium max-md:min-h-11 max-md:flex-1 max-md:px-2 text-gray-900 bg-white border border-gray-200 rounded-l-lg hover:bg-gray-100 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:bg-gray-600">
                                 <i class="fas fa-arrows-alt-h mr-2"></i>{{ __('Expanded') }}
                             </button>
                             <button onclick="setSidebarMode('compact')" id="sidebar-compact"
-                                class="sidebar-btn px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-r-md hover:bg-gray-100 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:bg-gray-600">
+                                class="sidebar-btn px-4 py-2 text-sm font-medium max-md:min-h-11 max-md:flex-1 max-md:px-2 text-gray-900 bg-white border border-gray-200 rounded-r-md hover:bg-gray-100 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:bg-gray-600">
                                 <i class="fas fa-compress-alt mr-2"></i>{{ __('Compact') }}
                             </button>
                         </div>
@@ -204,13 +204,13 @@
                 <!-- Reset Settings -->
                 <div
                     class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-                    <div class="p-6">
+                    <div class="p-6 max-md:p-4">
                         <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-100 mb-4">
                             {{ __('Reset Pengaturan') }}</h3>
                         <p class="text-sm text-gray-600 dark:text-gray-400 mb-4">
                             {{ __('Kembalikan semua pengaturan tampilan ke default') }}</p>
                         <button onclick="resetAllSettings()"
-                            class="px-4 py-2 text-sm font-medium text-white bg-red-500 rounded-lg hover:bg-red-600 transition-colors">
+                            class="px-4 py-2 text-sm font-medium text-white bg-red-500 rounded-lg hover:bg-red-600 transition-colors max-md:min-h-11 max-md:w-full">
                             <i class="fas fa-undo mr-2"></i>{{ __('Reset ke Default') }}
                         </button>
                     </div>
@@ -223,6 +223,14 @@
         document.addEventListener('DOMContentLoaded', function() {
             // Initialize settings from localStorage
             initializeSettings();
+
+            // Warna font ditulis inline di body sesuai tema; samakan lagi setiap tema berganti
+            // (tombol tema di halaman ini, tombol tema header aplikasi HP, atau tema sistem).
+            new MutationObserver(() => applyFontColor(localStorage.getItem('fontColor') || 'default'))
+                .observe(document.documentElement, {
+                    attributes: true,
+                    attributeFilter: ['class']
+                });
         });
 
         function initializeSettings() {
@@ -263,7 +271,8 @@
         }
 
         // Extend the existing setAppearance function
-        const originalSetAppearance = window.setAppearance;
+        // Mode aplikasi HP memakai layout PWA yang hanya menyediakan pwaSetAppearance
+        const originalSetAppearance = window.setAppearance || window.pwaSetAppearance;
         window.setAppearance = function(appearance) {
             originalSetAppearance(appearance);
             updateThemeButtons(appearance);
@@ -374,15 +383,16 @@
         }
 
         function updateFontColorButtons(color) {
+            // Centang dibungkus span: kelas `hidden` pada ikon Font Awesome kalah oleh `.fas { display }`
             document.querySelectorAll('.font-color-btn').forEach(btn => {
-                const icon = btn.querySelector('i');
+                const icon = btn.querySelector('[data-centang]');
                 btn.classList.remove('ring-4', 'ring-offset-2');
                 if (icon) icon.classList.add('hidden');
             });
             const activeBtn = document.querySelector('.font-color-btn[data-color="' + color + '"]');
             if (activeBtn) {
                 activeBtn.classList.add('ring-4', 'ring-offset-2');
-                const icon = activeBtn.querySelector('i');
+                const icon = activeBtn.querySelector('[data-centang]');
                 if (icon) icon.classList.remove('hidden');
             }
         }

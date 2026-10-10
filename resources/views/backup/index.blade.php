@@ -1,15 +1,15 @@
 <x-layouts.app>
-    <div class="mb-6">
+    <div class="mb-6 max-md:mb-4">
         <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100">{{ __('Backup & Restore Database') }}</h1>
         <p class="text-gray-600 dark:text-gray-400 mt-1">{{ __('Kelola backup dan restore database aplikasi') }}</p>
     </div>
 
-    <div class="grid gap-6 lg:grid-cols-2">
+    <div class="grid gap-6 max-md:gap-4 lg:grid-cols-2">
         {{-- Backup Section --}}
-        <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+        <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm max-md:min-w-0 max-md:p-4 dark:border-gray-700 dark:bg-gray-800">
             <div class="flex items-center gap-3 mb-4">
                 <div
-                    class="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100 text-blue-600 dark:bg-blue-900/50 dark:text-blue-400">
+                    class="flex h-12 w-12 items-center justify-center rounded-xl max-md:shrink-0 bg-blue-100 text-blue-600 dark:bg-blue-900/50 dark:text-blue-400">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -26,7 +26,7 @@
             <div class="space-y-4">
                 <div class="rounded-lg bg-gray-50 p-4 text-sm text-gray-600 dark:bg-gray-700/50 dark:text-gray-300">
                     <p class="font-medium mb-2">{{ __('File backup akan berisi:') }}</p>
-                    <ul class="list-disc list-inside space-y-1 text-gray-500 dark:text-gray-400">
+                    <ul class="list-disc list-inside space-y-1 text-gray-500 max-md:list-outside max-md:pl-4 dark:text-gray-400">
                         <li>{{ __('Struktur tabel (CREATE TABLE)') }}</li>
                         <li>{{ __('Semua data (INSERT INTO)') }}</li>
                         <li>{{ __('Tidak termasuk tabel sesi, cache, dan antrean') }}</li>
@@ -46,10 +46,10 @@
         </div>
 
         {{-- Restore Section --}}
-        <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+        <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm max-md:min-w-0 max-md:p-4 dark:border-gray-700 dark:bg-gray-800">
             <div class="flex items-center gap-3 mb-4">
                 <div
-                    class="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-100 text-amber-600 dark:bg-amber-900/50 dark:text-amber-400">
+                    class="flex h-12 w-12 items-center justify-center rounded-xl max-md:shrink-0 bg-amber-100 text-amber-600 dark:bg-amber-900/50 dark:text-amber-400">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

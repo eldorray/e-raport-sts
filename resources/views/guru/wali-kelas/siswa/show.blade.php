@@ -4,7 +4,7 @@
             <ol class="inline-flex items-center space-x-1 md:space-x-2">
                 <li class="inline-flex items-center">
                     <a href="{{ route('wali-kelas.siswa.index') }}"
-                        class="inline-flex items-center text-sm font-medium text-gray-500 hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-500">
+                        class="inline-flex items-center text-sm font-medium text-gray-500 hover:text-blue-600 max-md:min-h-11 dark:text-gray-400 dark:hover:text-blue-500">
                         <svg class="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                         </svg>
@@ -17,13 +17,13 @@
 
     <div
         class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+        <div class="px-6 py-4 border-b border-gray-200 max-md:px-4 dark:border-gray-700">
             <h1 class="text-xl font-bold text-gray-800 dark:text-gray-100">{{ __('Detail Siswa') }}</h1>
             <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{{ $siswa->nama }} - {{ $kelas->nama }}</p>
         </div>
 
-        <div class="p-6">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="p-6 max-md:p-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 break-words">
                 {{-- Foto Siswa --}}
                 <div class="flex flex-col items-center">
                     <div class="w-48 h-48 rounded-xl overflow-hidden bg-gray-100 dark:bg-gray-700 shadow-md">
@@ -183,10 +183,10 @@
             </div>
 
             {{-- Aksi --}}
-            <div class="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700 flex flex-wrap gap-3">
+            <div class="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700 flex flex-wrap gap-3 max-md:mt-6 max-md:pt-4">
                 <a href="{{ route('rapor.print', ['siswa' => $siswa, 'tahun_ajaran_id' => session('selected_tahun_ajaran_id'), 'semester' => session('selected_semester')]) }}"
                     target="_blank"
-                    class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700">
+                    class="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-700 max-md:h-11 max-md:w-full max-md:justify-center">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

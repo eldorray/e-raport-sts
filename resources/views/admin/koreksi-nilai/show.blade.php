@@ -205,12 +205,13 @@
         @endif
 
         {{-- Di HP bilah simpan menempel di bawah layar (konten layout tidak punya area gulir sendiri),
-             disembunyikan saat menu samping dibuka; mulai md bilah ini kembali di akhir form. --}}
+             disembunyikan saat menu samping dibuka; mulai md bilah ini kembali di akhir form.
+             Dalam mode aplikasi bilah naik ke atas menu bawah aplikasi (yang juga menangani safe area). --}}
         <div @class([
             'flex items-center justify-between gap-3 rounded-b-2xl border-t border-gray-200 px-4 py-3 dark:border-gray-700',
-            'fixed inset-x-0 bottom-0 z-30 rounded-none bg-white/95 pb-[calc(0.75rem+env(safe-area-inset-bottom))] shadow-[0_-4px_12px_rgba(0,0,0,0.08)] backdrop-blur md:static md:z-auto md:rounded-b-2xl md:bg-transparent md:pb-3 md:shadow-none md:backdrop-blur-none dark:bg-gray-800/95 md:dark:bg-transparent' => $bisaSimpan,
+            'fixed inset-x-0 bottom-0 z-30 rounded-none bg-white/95 pb-[calc(0.75rem+env(safe-area-inset-bottom))] shadow-[0_-4px_12px_rgba(0,0,0,0.08)] backdrop-blur md:static md:z-auto md:rounded-b-2xl md:bg-transparent md:pb-3 md:shadow-none md:backdrop-blur-none dark:bg-gray-800/95 md:dark:bg-transparent in-[.mode-aplikasi]:max-md:bottom-[calc(4.75rem+env(safe-area-inset-bottom))] in-[.mode-aplikasi]:max-md:pb-3' => $bisaSimpan,
         ])
-            @if ($bisaSimpan) :class="{ 'max-md:hidden': sidebarOpen }" @endif>
+            @if ($bisaSimpan) :class="{ 'max-md:hidden': typeof sidebarOpen !== 'undefined' && sidebarOpen }" @endif>
             <p class="min-w-0 text-xs text-gray-600 dark:text-gray-300">
                 <span class="font-semibold tabular-nums"><span x-text="lengkap">{{ $jumlahLengkapAwal }}</span>/{{ $siswas->count() }}</span>
                 {{ __('lengkap') }}

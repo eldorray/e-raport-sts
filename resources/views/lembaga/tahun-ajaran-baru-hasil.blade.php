@@ -22,8 +22,8 @@
         ];
     @endphp
 
-    <div class="mb-8">
-        <h1 class="text-3xl font-semibold text-gray-900 dark:text-gray-100">{{ __('Tahun Ajaran Baru Selesai') }}</h1>
+    <div class="mb-8 max-md:mb-5">
+        <h1 class="text-3xl font-semibold text-gray-900 max-md:text-2xl dark:text-gray-100">{{ __('Tahun Ajaran Baru Selesai') }}</h1>
         <p class="mt-2 flex flex-wrap items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
             <span class="font-semibold text-gray-900 dark:text-gray-100">{{ $hasil['sumber'] }}</span>
             <i class="fas fa-arrow-right text-xs" aria-hidden="true"></i>
@@ -36,10 +36,10 @@
 
     @include('lembaga.tahun-ajaran-baru-langkah', ['langkah' => 3])
 
-    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div class="grid gap-4 max-md:grid-cols-2 max-md:gap-3 sm:grid-cols-2 lg:grid-cols-3">
         @foreach ($kartu as $item)
-            <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-                <p class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+            <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm max-md:min-w-0 max-md:p-4 dark:border-gray-700 dark:bg-gray-800">
+                <p class="text-xs font-semibold uppercase tracking-wide text-gray-500 max-md:normal-case max-md:tracking-normal dark:text-gray-400">
                     <i class="fas {{ $item['ikon'] }} mr-1"></i> {{ $item['label'] }}
                 </p>
                 <p class="mt-2 text-2xl font-bold text-gray-900 dark:text-gray-100">{{ $item['nilai'] }}</p>
@@ -82,13 +82,15 @@
         @endunless
     </div>
 
-    <div class="mt-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+    <div class="mt-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm max-md:p-4 dark:border-gray-700 dark:bg-gray-800">
         <h2 class="text-base font-semibold text-gray-900 dark:text-gray-100">{{ __('Langkah berikutnya') }}</h2>
-        <div class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div class="mt-4 grid gap-3 max-md:mt-3 max-md:gap-2 sm:grid-cols-2 lg:grid-cols-4">
             @foreach ($langkahBerikut as $tautan)
                 <a href="{{ route($tautan['route']) }}"
-                    class="flex items-center gap-3 rounded-xl border border-gray-200 px-4 py-3 text-sm font-semibold text-gray-700 transition hover:border-blue-300 hover:bg-blue-50 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-blue-900/20">
-                    <i class="fas {{ $tautan['ikon'] }} text-blue-600"></i> {{ $tautan['label'] }}
+                    class="flex items-center gap-3 rounded-xl border border-gray-200 px-4 py-3 text-sm font-semibold text-gray-700 transition hover:border-blue-300 hover:bg-blue-50 max-md:min-h-12 active:max-md:bg-blue-50 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-blue-900/20">
+                    <i class="fas {{ $tautan['ikon'] }} text-blue-600 max-md:w-5 max-md:text-center"></i> <span class="max-md:min-w-0 max-md:flex-1">{{ $tautan['label'] }}</span>
+                    {{-- Pembungkus span: kelas display Font Awesome (di luar layer Tailwind) mengalahkan md:hidden pada <i> --}}
+                    <span class="md:hidden" aria-hidden="true"><i class="fas fa-chevron-right text-xs text-gray-400"></i></span>
                 </a>
             @endforeach
         </div>

@@ -11,27 +11,27 @@
             'selesai' => $isi('tujuan_tahun_selesai', $saran['tahun_selesai'] ?? ''),
             'semester' => $isi('tujuan_semester', $saran['semester'] ?? ''),
         ];
-        $inputClass = 'mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:opacity-60 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100';
+        $inputClass = 'mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:opacity-60 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100 max-md:h-11 max-md:py-0 max-md:text-base';
     @endphp
 
-    <div class="mb-8 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+    <div class="mb-8 flex flex-col gap-3 max-md:mb-5 md:flex-row md:items-center md:justify-between">
         <div>
-            <h1 class="text-3xl font-semibold text-gray-900 dark:text-gray-100">{{ __('Tahun Ajaran Baru') }}</h1>
+            <h1 class="text-3xl font-semibold text-gray-900 max-md:text-2xl dark:text-gray-100">{{ __('Tahun Ajaran Baru') }}</h1>
             <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
                 {{ __('Pindahkan seluruh sekolah ke semester atau tahun ajaran berikutnya sekaligus: kelas, rombel siswa, dan jadwal mengajar.') }}
             </p>
         </div>
         <a href="{{ route('tahun-ajaran.index') }}"
-            class="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-600 transition hover:border-gray-300 hover:text-gray-800 dark:border-gray-700 dark:text-gray-300">
+            class="inline-flex items-center gap-2 rounded-lg border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-600 transition hover:border-gray-300 hover:text-gray-800 max-md:min-h-11 max-md:self-start dark:border-gray-700 dark:text-gray-300">
             <i class="fas fa-arrow-left"></i> {{ __('Kembali ke Tahun Ajaran') }}
         </a>
     </div>
 
     @include('lembaga.tahun-ajaran-baru-langkah', ['langkah' => 1])
 
-    <div class="grid gap-6 lg:grid-cols-[1fr,380px]">
+    <div class="grid gap-6 max-md:gap-4 lg:grid-cols-[1fr,380px]">
         <form method="GET" action="{{ route('tahun-ajaran-baru.preview') }}"
-            class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800"
+            class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm max-md:min-w-0 dark:border-gray-700 dark:bg-gray-800"
             x-data="{
                 ...@js($awal),
                 usulan: @js((object) $usulan),
@@ -46,14 +46,14 @@
                     this.tujuanId = saran.tujuan_id ? String(saran.tujuan_id) : '';
                 },
             }">
-            <div class="border-b border-gray-100 bg-gray-50 px-6 py-5 dark:border-gray-700 dark:bg-gray-900/40">
+            <div class="border-b border-gray-100 bg-gray-50 px-6 py-5 max-md:px-4 max-md:py-4 dark:border-gray-700 dark:bg-gray-900/40">
                 <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ __('Pilih Tahun Ajaran') }}</h2>
                 <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
                     {{ __('Tahun ajaran sumber hanya dibaca dan tidak berubah. Tahun ajaran tujuan harus masih kosong.') }}
                 </p>
             </div>
 
-            <div class="space-y-6 px-6 py-6">
+            <div class="space-y-6 px-6 py-6 max-md:space-y-5 max-md:px-4 max-md:py-5">
                 <div>
                     <label for="sumber_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                         {{ __('Tahun ajaran sumber') }}
@@ -171,16 +171,16 @@
                 @enderror
             </div>
 
-            <div class="flex items-center justify-end gap-3 border-t border-gray-100 px-6 py-4 dark:border-gray-700">
+            <div class="flex items-center justify-end gap-3 border-t border-gray-100 px-6 py-4 max-md:px-4 dark:border-gray-700">
                 <button type="submit" @disabled($tahunAjarans->isEmpty())
-                    class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-500/30 disabled:cursor-not-allowed disabled:bg-blue-300">
+                    class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-500/30 disabled:cursor-not-allowed disabled:bg-blue-300 max-md:min-h-11 max-md:w-full max-md:justify-center max-md:text-base">
                     {{ __('Lanjut ke Pratinjau') }} <i class="fas fa-arrow-right"></i>
                 </button>
             </div>
         </form>
 
         <aside class="space-y-4">
-            <div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+            <div class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm max-md:p-4 dark:border-gray-700 dark:bg-gray-800">
                 <h2 class="text-base font-semibold text-gray-900 dark:text-gray-100">{{ __('Dua cara yang didukung') }}</h2>
                 <dl class="mt-4 space-y-4 text-sm">
                     <div>
@@ -201,7 +201,7 @@
                     </div>
                 </dl>
             </div>
-            <div class="rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-900/30 dark:text-amber-100">
+            <div class="rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-800 max-md:p-4 dark:border-amber-800 dark:bg-amber-900/30 dark:text-amber-100">
                 <i class="fas fa-info-circle mr-1"></i>
                 {{ __('Wizard tidak mengubah apa pun sebelum Anda menekan Jalankan di halaman pratinjau. Siswa nonaktif tidak ikut disalin.') }}
             </div>

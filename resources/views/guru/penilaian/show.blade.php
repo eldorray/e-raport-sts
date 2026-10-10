@@ -3,7 +3,7 @@
         <div>
             <p class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">
                 {{ __('Penilaian Mapel') }}</p>
-            <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100">
+            <h1 class="text-xl font-bold text-gray-800 md:text-2xl dark:text-gray-100">
                 {{ $mengajar->mataPelajaran->nama_mapel ?? '—' }} — {{ $mengajar->kelas->nama ?? '—' }}
             </h1>
             <p class="text-sm text-gray-600 dark:text-gray-400">
@@ -42,8 +42,9 @@
         </div>
     @endif
 
+    {{-- Di HP: overflow-clip (bukan hidden) agar bilah simpan bisa menempel di bawah layar --}}
     <div
-        class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+        class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm max-md:overflow-clip dark:border-gray-700 dark:bg-gray-800">
         <form method="POST" action="{{ route('guru.penilaian.store', $mengajar) }}"
             x-data="{ menyimpan: false }" @submit="menyimpan = true" @pageshow.window="menyimpan = false">
             @csrf
@@ -70,7 +71,7 @@
                     <div class="flex flex-1 flex-col gap-1 md:max-w-xl">
                         <input id="materi_tp" name="materi_tp" type="text" value="{{ $currentMateriTp }}"
                             maxlength="255" @disabled(!$canEdit)
-                            class="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm font-medium shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 disabled:opacity-60 disabled:cursor-not-allowed"
+                            class="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm font-medium shadow-sm focus:border-blue-500 focus:ring-blue-500 max-md:h-11 max-md:text-base dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 disabled:opacity-60 disabled:cursor-not-allowed"
                             placeholder="{{ __('Contoh: Persamaan linear satu variabel') }}">
                         <p class="text-xs text-gray-500 dark:text-gray-400">
                             {{ __('Materi/TP ini digunakan dalam pola deskripsi capaian.') }}</p>
@@ -104,11 +105,12 @@
                 </div>
             </div>
 
+            {{-- Satu markup: tabel di layar lebar, satu kartu per siswa di HP (input tetap sama) --}}
             <div class="overflow-x-auto">
                 <table
-                    class="min-w-full divide-y divide-gray-200 text-sm text-gray-800 dark:divide-gray-700 dark:text-gray-100">
+                    class="min-w-full divide-y divide-gray-200 text-sm text-gray-800 max-md:block dark:divide-gray-700 dark:text-gray-100">
                     <thead
-                        class="bg-gray-100 text-xs font-semibold uppercase tracking-wide text-gray-600 dark:bg-gray-900/40 dark:text-gray-400">
+                        class="bg-gray-100 text-xs font-semibold uppercase tracking-wide text-gray-600 max-md:hidden dark:bg-gray-900/40 dark:text-gray-400">
                         <tr>
                             <th class="px-4 py-3 text-left">#</th>
                             <th class="px-4 py-3 text-left">NISN</th>
@@ -119,7 +121,7 @@
                             <th class="px-4 py-3 text-left">{{ __('Capaian Kompetensi') }}</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                    <tbody class="divide-y divide-gray-200 max-md:block dark:divide-gray-700">
                         @forelse ($siswas as $index => $siswa)
                             @php
                                 $nilai = $nilaiBySiswa[$siswa->id] ?? null;
@@ -136,11 +138,17 @@
                                 $rapor = $hasil['rapor'];
                                 $descriptor = $hasil['descriptor'];
                             @endphp
-                            <tr>
-                                <td class="px-4 py-3">{{ $index + 1 }}</td>
-                                <td class="px-4 py-3">{{ $siswa->nisn ?? '—' }}</td>
-                                <td class="px-4 py-3">
-                                    {{ $siswa->nama }}
+                            <tr class="max-md:grid max-md:grid-cols-3 max-md:gap-x-3 max-md:gap-y-3 max-md:px-4 max-md:py-4">
+                                <td class="px-4 py-3 max-md:hidden">{{ $index + 1 }}</td>
+                                <td class="px-4 py-3 max-md:hidden">{{ $siswa->nisn ?? '—' }}</td>
+                                <td class="px-4 py-3 max-md:col-span-3 max-md:p-0">
+                                    <div class="flex items-baseline gap-2">
+                                        <span
+                                            class="text-xs font-semibold tabular-nums text-gray-400 md:hidden dark:text-gray-500">{{ $index + 1 }}.</span>
+                                        <span class="max-md:font-semibold">{{ $siswa->nama }}</span>
+                                    </div>
+                                    <p class="text-xs text-gray-500 md:hidden dark:text-gray-400">NISN
+                                        {{ $siswa->nisn ?? '—' }}</p>
                                     @if ($nilai?->dikoreksi_pada)
                                         <p class="mt-0.5 text-xs text-amber-700 dark:text-amber-300">
                                             {{ __('Dikoreksi :nama, :waktu', [
@@ -150,24 +158,34 @@
                                         </p>
                                     @endif
                                 </td>
-                                <td class="px-4 py-3">
+                                <td class="px-4 py-3 max-md:p-0">
+                                    <label for="nilai_sumatif_{{ $siswa->id }}"
+                                        class="mb-1 block text-xs font-medium text-gray-500 md:hidden dark:text-gray-400">{{ __('Rerata Sumatif') }}</label>
                                     <input type="number" step="0.01" min="0" max="100"
-                                        name="nilai_sumatif[{{ $siswa->id }}]"
+                                        id="nilai_sumatif_{{ $siswa->id }}" name="nilai_sumatif[{{ $siswa->id }}]"
                                         value="{{ old('nilai_sumatif.' . $siswa->id, $sumatif) }}"
                                         aria-label="{{ __('Nilai sumatif :nama', ['nama' => $siswa->nama]) }}"
                                         @disabled(!$canEdit)
-                                        class="w-28 rounded-lg border border-gray-300 px-3 py-2 text-center text-sm font-medium shadow-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 dark:focus:border-blue-400 disabled:opacity-60 disabled:cursor-not-allowed">
+                                        class="w-28 rounded-lg border border-gray-300 px-3 py-2 text-center text-sm font-medium shadow-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 max-md:h-11 max-md:w-full max-md:text-base dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 dark:focus:border-blue-400 disabled:opacity-60 disabled:cursor-not-allowed">
                                 </td>
-                                <td class="px-4 py-3">
+                                <td class="px-4 py-3 max-md:p-0">
+                                    <label for="nilai_sts_{{ $siswa->id }}"
+                                        class="mb-1 block text-xs font-medium text-gray-500 md:hidden dark:text-gray-400">{{ __('SAS / STS') }}</label>
                                     <input type="number" step="0.01" min="0" max="100"
-                                        name="nilai_sts[{{ $siswa->id }}]"
+                                        id="nilai_sts_{{ $siswa->id }}" name="nilai_sts[{{ $siswa->id }}]"
                                         value="{{ old('nilai_sts.' . $siswa->id, $sts) }}"
                                         aria-label="{{ __('Nilai SAS / STS :nama', ['nama' => $siswa->nama]) }}"
                                         @disabled(!$canEdit)
-                                        class="w-28 rounded-lg border border-gray-300 px-3 py-2 text-center text-sm font-medium shadow-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 dark:focus:border-blue-400 disabled:opacity-60 disabled:cursor-not-allowed">
+                                        class="w-28 rounded-lg border border-gray-300 px-3 py-2 text-center text-sm font-medium shadow-sm transition-colors focus:border-blue-500 focus:ring-2 focus:ring-blue-500 max-md:h-11 max-md:w-full max-md:text-base dark:border-gray-600 dark:bg-gray-900 dark:text-gray-100 dark:focus:border-blue-400 disabled:opacity-60 disabled:cursor-not-allowed">
                                 </td>
-                                <td class="px-4 py-3 text-gray-600 dark:text-gray-300">{{ $rapor ?? '—' }}</td>
-                                <td class="px-4 py-3 text-gray-500 dark:text-gray-400">
+                                <td class="px-4 py-3 text-gray-600 max-md:p-0 dark:text-gray-300">
+                                    <span
+                                        class="mb-1 block text-xs font-medium text-gray-500 md:hidden dark:text-gray-400">{{ __('Nilai Rapor') }}</span>
+                                    <span
+                                        class="max-md:flex max-md:h-11 max-md:items-center max-md:justify-center max-md:rounded-lg max-md:bg-gray-50 max-md:text-base max-md:font-semibold max-md:text-gray-800 max-md:dark:bg-gray-900/60 max-md:dark:text-gray-100">{{ $rapor ?? '—' }}</span>
+                                </td>
+                                <td
+                                    class="px-4 py-3 text-gray-500 max-md:col-span-3 max-md:p-0 dark:text-gray-400 {{ $descriptor ? '' : 'max-md:hidden' }}">
                                     @if ($descriptor)
                                         <div class="text-xs font-semibold text-gray-800 dark:text-gray-100">
                                             {{ $descriptor['predikat'] }} • {{ $descriptor['keterangan'] }}
@@ -180,9 +198,9 @@
                                 </td>
                             </tr>
                         @empty
-                            <tr>
+                            <tr class="max-md:block">
                                 <td colspan="7"
-                                    class="px-4 py-6 text-center text-sm text-gray-500 dark:text-gray-400">
+                                    class="px-4 py-6 text-center text-sm text-gray-500 max-md:block dark:text-gray-400">
                                     {{ __('Tidak ada siswa pada kelas ini.') }}
                                 </td>
                             </tr>
@@ -191,15 +209,18 @@
                 </table>
             </div>
 
-            <div class="flex items-center justify-between px-4 py-4">
-                <p class="text-xs text-gray-500 dark:text-gray-400">
+            {{-- Di HP pembungkus ini "contents": keterangan tetap di bawah daftar, tombol menjadi
+                 bilah yang menempel di atas menu bawah aplikasi --}}
+            <div class="max-md:contents md:flex md:items-center md:justify-between md:px-4 md:py-4">
+                <p class="text-xs text-gray-500 max-md:border-t max-md:border-gray-200 max-md:px-4 max-md:py-3 dark:text-gray-400 max-md:dark:border-gray-700">
                     {{ __('Nilai 0-100. Kolom Sumatif dan STS dapat langsung diubah. Nilai Rapor dihitung dengan bobot yang Anda tentukan di atas.') }}
                 </p>
-                <div class="flex items-center gap-3">
-                    @if ($canEdit)
+                @if ($canEdit)
+                    <div
+                        class="flex items-center gap-3 max-md:z-20 max-md:border-t max-md:border-gray-200 max-md:bg-white/95 max-md:px-4 max-md:py-3 max-md:backdrop-blur max-md:in-[.mode-aplikasi]:sticky max-md:in-[.mode-aplikasi]:bottom-[calc(4.75rem+env(safe-area-inset-bottom))] max-md:dark:border-gray-700 max-md:dark:bg-gray-800/95">
                         {{-- Reset button placeholder - actual form is outside --}}
                         <button type="button" id="reset-trigger"
-                            class="inline-flex items-center gap-2 rounded-lg border border-red-300 bg-white px-4 py-2 text-sm font-semibold text-red-600 shadow hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:border-red-600 dark:bg-gray-800 dark:text-red-400 dark:hover:bg-red-900/30">
+                            class="inline-flex items-center gap-2 rounded-lg border border-red-300 bg-white px-4 py-2 text-sm font-semibold text-red-600 shadow hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 max-md:h-11 max-md:shrink-0 dark:border-red-600 dark:bg-gray-800 dark:text-red-400 dark:hover:bg-red-900/30">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
                                 stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -208,11 +229,11 @@
                             {{ __('Reset Nilai') }}
                         </button>
                         <button type="submit" :disabled="menyimpan"
-                            class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus:ring-offset-gray-900">
+                            class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60 max-md:h-11 max-md:flex-1 max-md:justify-center dark:bg-blue-500 dark:hover:bg-blue-600 dark:focus:ring-offset-gray-900">
                             {{ __('Simpan Nilai') }}
                         </button>
-                    @endif
-                </div>
+                    </div>
+                @endif
             </div>
         </form>
     </div>

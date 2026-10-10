@@ -1,6 +1,6 @@
 <x-layouts.app>
-    <!-- Breadcrumbs -->
-    <div class="mb-6 flex items-center text-sm">
+    <!-- Breadcrumbs (di HP diganti tombol kembali / menu) -->
+    <div class="mb-6 flex items-center text-sm max-md:hidden">
         <a href="{{ route('dashboard') }}"
             class="text-blue-600 dark:text-blue-400 hover:underline">{{ __('Dashboard') }}</a>
         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mx-2 text-gray-400" fill="none" viewBox="0 0 24 24"
@@ -24,8 +24,8 @@
         </p>
     </div>
 
-    <div class="p-6">
-        <div class="flex flex-col md:flex-row gap-6">
+    <div class="p-6 max-md:p-0">
+        <div class="flex flex-col md:flex-row gap-6 max-md:gap-4">
             <!-- Sidebar Navigation -->
             @include('settings.partials.navigation')
 
@@ -33,9 +33,11 @@
             <div class="flex-1">
                 <div
                     class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden mb-6">
-                    <div class="p-6">
+                    <div class="p-6 max-md:p-4">
                         <!-- Profile Form -->
-                        <form class="max-w-md mb-10" action="{{ route('settings.password.update') }}" method="POST">
+                        <form
+                            class="max-w-md mb-10 max-md:mb-0 max-md:[&_button]:min-h-11 max-md:[&_button]:w-full max-md:[&_input]:min-h-11 max-md:[&_input]:text-base"
+                            action="{{ route('settings.password.update') }}" method="POST">
                             @csrf
                             @method('PUT')
                             <div class="mb-4">
