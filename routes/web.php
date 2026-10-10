@@ -6,12 +6,14 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EkskulController;
 use App\Http\Controllers\EkskulPenilaianController;
 use App\Http\Controllers\GuruController;
+use App\Http\Controllers\KoreksiNilaiController;
 use App\Http\Controllers\KelasController;
 use App\Http\Controllers\MataPelajaranController;
 use App\Http\Controllers\MengajarController;
 use App\Http\Controllers\MengajarTahfidzController;
 use App\Http\Controllers\PenilaianController;
 use App\Http\Controllers\PrintSettingController;
+use App\Http\Controllers\PwaAdminController;
 use App\Http\Controllers\PwaGuruController;
 use App\Http\Controllers\RaporAdminController;
 use App\Http\Controllers\RaporDataController;
@@ -22,6 +24,7 @@ use App\Http\Controllers\Settings;
 use App\Http\Controllers\SiswaController;
 use App\Http\Controllers\TahfidzController;
 use App\Http\Controllers\TahfidzPrintController;
+use App\Http\Controllers\TahunAjaranBaruController;
 use App\Http\Controllers\TahunAjaranController;
 use App\Http\Controllers\WaliKelasSiswaController;
 use Illuminate\Support\Facades\Route;
@@ -45,6 +48,9 @@ Route::middleware(['auth'])->group(function () {
     // All authenticated users can switch context (tahun ajaran & semester)
     Route::patch('tahun-ajaran/switch-session', [TahunAjaranController::class, 'switchSession'])
         ->name('tahun-ajaran.switch-session');
+
+    // [fitur:pwa-start] Pintu masuk aplikasi HP (arahkan sesuai peran)
+    // [/fitur:pwa-start]
 
     // Admin-only
     Route::middleware('role:admin')->group(function () {
@@ -95,6 +101,23 @@ Route::middleware(['auth'])->group(function () {
         // Backup (restore dilakukan dari panel hosting, bukan dari aplikasi)
         Route::get('backup', [BackupController::class, 'index'])->name('backup.index');
         Route::get('backup/download', [BackupController::class, 'download'])->name('backup.download');
+
+        // [fitur:wizard-tahun-ajaran] Wizard tahun ajaran baru
+        Route::get('tahun-ajaran-baru', [TahunAjaranBaruController::class, 'create'])->name('tahun-ajaran-baru.create');
+        Route::post('tahun-ajaran-baru', [TahunAjaranBaruController::class, 'store'])->name('tahun-ajaran-baru.store');
+        // [/fitur:wizard-tahun-ajaran]
+
+        // [fitur:koreksi-nilai] Admin melihat dan mengoreksi nilai per kelas
+        Route::get('koreksi-nilai', [KoreksiNilaiController::class, 'index'])->name('koreksi-nilai.index');
+        Route::get('koreksi-nilai/{mengajar}', [KoreksiNilaiController::class, 'show'])->name('koreksi-nilai.show');
+        Route::post('koreksi-nilai/{mengajar}', [KoreksiNilaiController::class, 'store'])->name('koreksi-nilai.store');
+        // [/fitur:koreksi-nilai]
+
+        // [fitur:pwa-admin] Aplikasi admin (PWA, mobile-first)
+        Route::prefix('admin-app')->name('admin.pwa.')->group(function () {
+            Route::get('/', [PwaAdminController::class, 'beranda'])->name('beranda');
+        });
+        // [/fitur:pwa-admin]
     });
 
     // Admin & Guru: pengaturan bobot dan cetak rapor
@@ -116,6 +139,10 @@ Route::middleware(['auth'])->group(function () {
         Route::post('tahfidz/{siswa}', [TahfidzController::class, 'store'])->whereNumber('siswa')->name('tahfidz.store');
         Route::delete('tahfidz/{siswa}/reset', [TahfidzController::class, 'reset'])->whereNumber('siswa')->name('tahfidz.reset');
         Route::get('tahfidz/{siswa}/print', [TahfidzPrintController::class, 'show'])->whereNumber('siswa')->name('tahfidz.print');
+
+        // [fitur:cetak-kelas] Cetak rapor satu kelas sekaligus
+        Route::get('rapor/kelas/{kelas}/cetak', [RaportPrintController::class, 'kelas'])->name('rapor.print-kelas');
+        // [/fitur:cetak-kelas]
 
         // Route dengan parameter dinamis harus di akhir
         Route::get('rapor/{siswa}', [RaportPrintController::class, 'show'])->whereNumber('siswa')->name('rapor.print');

@@ -11,6 +11,19 @@
                     :active="request()->routeIs('dashboard*')">Dashboard</x-layouts.sidebar-link>
 
                 @if ($role === 'admin')
+                    <li class="px-1 pt-1 pb-2">
+                        <a href="{{ route('admin.pwa.beranda') }}" @click="closeSidebarOnMobile()"
+                            class="flex items-center rounded-md border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-800 transition-colors duration-200 hover:bg-emerald-100 dark:border-emerald-900/70 dark:bg-emerald-950/40 dark:text-emerald-200">
+                            @svg('fas-mobile-screen-button', 'w-5 h-5 text-emerald-600 dark:text-emerald-300')
+                            <span x-show="sidebarOpen" x-transition:enter="transition-all duration-300"
+                                x-transition:enter-start="opacity-0 transform -translate-x-2"
+                                x-transition:enter-end="opacity-100 transform translate-x-0"
+                                x-transition:leave="transition-all duration-300"
+                                x-transition:leave-start="opacity-100 transform translate-x-0"
+                                x-transition:leave-end="opacity-0 transform -translate-x-2"
+                                class="ml-3 whitespace-nowrap">{{ __('Aplikasi Admin (HP)') }}</span>
+                        </a>
+                    </li>
                     <x-layouts.sidebar-link href="{{ route('school-profile.index') }}" icon='fas-school'
                         :active="request()->routeIs('school-profile*')">Profil Sekolah</x-layouts.sidebar-link>
                     <li class="px-2 pt-4 pb-2">
@@ -30,7 +43,9 @@
                     @endphp
                     <x-layouts.sidebar-two-level-link-parent title="Lembaga" icon="fas-house" :active="$lembagaOpen">
                         <x-layouts.sidebar-two-level-link href="{{ route('tahun-ajaran.index') }}" icon='fas-calendar'
-                            :active="request()->routeIs('tahun-ajaran*')">Tahun Ajaran</x-layouts.sidebar-two-level-link>
+                            :active="request()->routeIs('tahun-ajaran.*')">Tahun Ajaran</x-layouts.sidebar-two-level-link>
+                        <x-layouts.sidebar-two-level-link href="{{ route('tahun-ajaran-baru.create') }}" icon='fas-forward'
+                            :active="request()->routeIs('tahun-ajaran-baru.*')">Tahun Ajaran Baru</x-layouts.sidebar-two-level-link>
                         <x-layouts.sidebar-two-level-link href="{{ route('mata-pelajaran.index') }}" icon='fas-book'
                             :active="request()->routeIs('mata-pelajaran*')">Mata Pelajaran</x-layouts.sidebar-two-level-link>
                         <x-layouts.sidebar-two-level-link href="{{ route('kelas.index') }}" icon='fas-layer-group'
@@ -67,6 +82,8 @@
                         :active="request()->routeIs('rapor.print-settings.*')">Pengaturan Cetak</x-layouts.sidebar-link>
                     <x-layouts.sidebar-link href="{{ route('rapor.index') }}" icon='fas-file-lines'
                         :active="request()->routeIs('rapor.index')">Cetak Rapor</x-layouts.sidebar-link>
+                    <x-layouts.sidebar-link href="{{ route('koreksi-nilai.index') }}" icon='fas-pen-to-square'
+                        :active="request()->routeIs('koreksi-nilai.*')">Koreksi Nilai</x-layouts.sidebar-link>
                     <x-layouts.sidebar-link href="{{ route('tahfidz.index') }}" icon='fas-book-quran'
                         :active="request()->routeIs('tahfidz.*')">Raport Tahfidz</x-layouts.sidebar-link>
 
@@ -76,7 +93,7 @@
                         </h2>
                     </li>
                     <x-layouts.sidebar-link href="{{ route('backup.index') }}" icon='fas-database'
-                        :active="request()->routeIs('backup.*')">Backup & Restore</x-layouts.sidebar-link>
+                        :active="request()->routeIs('backup.*')">Backup</x-layouts.sidebar-link>
                     <x-layouts.sidebar-link href="{{ route('settings.appearance.edit') }}" icon='fas-palette'
                         :active="request()->routeIs('settings.appearance.*')">Setting Tampilan</x-layouts.sidebar-link>
                 @else
