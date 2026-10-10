@@ -92,3 +92,13 @@ it('menampilkan pesan warning dan success di bingkai aplikasi', function () {
         ->assertSee('Ada kelas yang dilewati.')
         ->assertSee('Data tersimpan.');
 });
+
+it('menerapkan pengaturan font halaman Tampilan di bingkai aplikasi', function () {
+    $this->actingAs($this->admin)->withSession($this->sesi + ['mode_aplikasi' => true])
+        ->get(route('siswa.index'))
+        ->assertOk()
+        ->assertSee(PENANDA_BINGKAI_APLIKASI, false)
+        ->assertSee("localStorage.getItem('fontSize')", false)
+        ->assertSee("localStorage.getItem('fontFamily')", false)
+        ->assertSee("localStorage.getItem('fontColor')", false);
+});

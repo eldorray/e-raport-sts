@@ -11,7 +11,7 @@
         <p class="text-sm text-gray-600 dark:text-gray-400">Kelola akun dan tambahkan admin baru.</p>
     </div>
 
-    <div class="grid gap-6 lg:grid-cols-[380px,1fr]">
+    <div class="grid gap-6 lg:grid-cols-[380px_minmax(0,1fr)]">
         {{-- HP: form tambah dilipat; ketuk tombol + untuk membuka --}}
         <div x-data="{ buka: @js($gagalTambah) }"
             class="flex flex-col gap-4 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800 max-md:p-4">

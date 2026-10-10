@@ -24,13 +24,7 @@
         </div>
     </div>
 
-    <div class="grid gap-6 lg:grid-cols-[360px,1fr]">
-        <div class="space-y-6 max-md:hidden">
-
-
-
-        </div>
-
+    <div class="grid gap-6">
         <div class="max-md:min-w-0">
             <div
                 class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">

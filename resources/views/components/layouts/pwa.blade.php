@@ -36,9 +36,7 @@
     <link rel="icon" type="image/png" href="{{ asset('images/eraport-icon.png') }}">
     <link rel="apple-touch-icon" href="{{ asset('images/eraport-icon.png') }}">
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    @include('components.layouts.app.pengaturan-font')
 
     <script>
         (function() {
@@ -138,7 +136,7 @@
     </style>
 </head>
 
-<body class="min-h-dvh bg-slate-100 font-sans text-slate-800 antialiased dark:bg-slate-950 dark:text-slate-100">
+<body class="min-h-dvh bg-slate-100 text-slate-800 antialiased dark:bg-slate-950 dark:text-slate-100">
     <div x-data="{
         offline: !navigator.onLine,
         tema: window.pwaAppearance(),

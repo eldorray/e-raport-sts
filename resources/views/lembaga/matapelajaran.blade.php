@@ -30,20 +30,7 @@
         </div>
     </div>
 
-    <div class="grid gap-6 lg:grid-cols-[360px,1fr]">
-        <div class="space-y-6 max-md:hidden">
-            <div
-                class="relative overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
-                <div aria-hidden="true" class="pointer-events-none absolute inset-0">
-                    <div
-                        class="absolute -top-14 -right-16 h-36 w-36 rounded-full bg-violet-100/70 dark:bg-violet-900/30">
-                    </div>
-                    <div class="absolute -bottom-16 -left-10 h-40 w-40 rounded-full bg-blue-100/70 dark:bg-blue-900/30">
-                    </div>
-                </div>
-            </div>
-        </div>
-
+    <div class="grid gap-6">
         <div class="min-w-0">
             {{-- HP: daftar kartu + pencarian cepat; tabel (DataTables) hanya untuk layar md ke atas --}}
             <div class="space-y-3 md:hidden"

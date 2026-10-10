@@ -8,8 +8,9 @@
     Tombol hapus yang dinonaktifkan karena data induk masih menyimpan nilai.
     Dipakai di halaman guru, kelas, mata pelajaran, ekskul, dan tahun ajaran.
     Proteksi sebenarnya tetap ada di PenghapusanDataService (server-side).
+    Alasan tampil sebagai tooltip saat disorot, dan sebagai pesan saat diketuk (HP tidak punya hover).
 --}}
-<span class="{{ $class }}"
+<button type="button" aria-disabled="true" class="{{ $class }}" onclick="alert(this.title)"
     title="{{ __('Tidak bisa dihapus: masih terhubung ke :jumlah nilai. Hapus nilai tersebut lebih dulu.', ['jumlah' => number_format($jumlah, 0, ',', '.')]) }}">
     <i class="fas fa-lock text-[11px]"></i> {{ $label ?? __('Hapus') }}
-</span>
+</button>

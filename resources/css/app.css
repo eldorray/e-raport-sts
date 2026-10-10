@@ -157,3 +157,12 @@
 .mode-aplikasi table.dataTable td {
     white-space: nowrap;
 }
+
+/* Warna font pilihan (halaman Tampilan) menimpa warna teks bawaan body di layout */
+html[data-warna-font] body {
+    color: var(--font-color-light);
+}
+
+html.dark[data-warna-font] body {
+    color: var(--font-color-dark);
+}

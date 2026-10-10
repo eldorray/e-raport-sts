@@ -37,7 +37,7 @@
         </div>
     </div>
 
-    <div class="grid gap-6 max-md:gap-4 lg:grid-cols-[360px,1fr]">
+    <div class="grid gap-6 max-md:gap-4 lg:grid-cols-[360px_minmax(0,1fr)]">
         <div class="space-y-6 max-md:min-w-0 max-md:space-y-4">
             <div
                 class="relative overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">

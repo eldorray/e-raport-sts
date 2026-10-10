@@ -29,7 +29,7 @@
 
     @include('lembaga.tahun-ajaran-baru-langkah', ['langkah' => 1])
 
-    <div class="grid gap-6 max-md:gap-4 lg:grid-cols-[1fr,380px]">
+    <div class="grid gap-6 max-md:gap-4 lg:grid-cols-[minmax(0,1fr)_380px]">
         <form method="GET" action="{{ route('tahun-ajaran-baru.preview') }}"
             class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm max-md:min-w-0 dark:border-gray-700 dark:bg-gray-800"
             x-data="{
