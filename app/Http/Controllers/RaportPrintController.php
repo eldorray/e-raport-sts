@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\EkskulPenilaian;
 use App\Models\Guru;
+use App\Models\Kelas;
 use App\Models\Mengajar;
 use App\Models\Penilaian;
 use App\Models\PrintSetting;
@@ -85,6 +86,145 @@ class RaportPrintController extends Controller
             'watermarkDataUrl',
             'namaYayasan',
         ));
+    }
+
+    /**
+     * Menampilkan halaman cetak rapor seluruh siswa aktif dalam satu kelas.
+     *
+     * Konteks tahun ajaran & semester diambil dari kelas itu sendiri (bukan dari
+     * query string). Metadata rapor hanya dibaca, tidak dibuat, agar pratinjau
+     * tidak meninggalkan baris RaporMetadata.
+     *
+     * @param  Request  $request  HTTP request
+     * @param  Kelas  $kelas  Instance kelas dari route model binding
+     * @return View Halaman cetak rapor satu kelas
+     */
+    public function kelas(Request $request, Kelas $kelas): View
+    {
+        $this->authorizeKelasAccess($request->user(), $kelas);
+
+        $tahun = $kelas->tahun_ajaran_id ? TahunAjaran::find($kelas->tahun_ajaran_id) : null;
+        // Satu baris TahunAjaran = satu semester; sesi hanya cadangan bila kolomnya kosong
+        $semester = $tahun?->semester ?: session('selected_semester');
+
+        if (! $tahun || ! $semester) {
+            abort(422, __('Kelas ini belum terhubung dengan tahun ajaran dan semester.'));
+        }
+
+        $tahunId = $tahun->id;
+        $semester = (string) $semester;
+
+        $siswas = $kelas->siswas()
+            ->where('is_active', true)
+            ->orderBy('nama')
+            ->get();
+        $siswaIds = $siswas->pluck('id');
+
+        $wali = $kelas->guru;
+        $school = SchoolProfile::first();
+        $printSetting = PrintSetting::first();
+
+        $metaPerSiswa = RaporMetadata::query()
+            ->where('tahun_ajaran_id', $tahunId)
+            ->where('semester', $semester)
+            ->whereIn('siswa_id', $siswaIds)
+            ->get()
+            ->keyBy('siswa_id');
+
+        $ekskulPerSiswa = EkskulPenilaian::with('ekskul')
+            ->where('tahun_ajaran_id', $tahunId)
+            ->where('semester', $semester)
+            ->whereIn('siswa_id', $siswaIds)
+            ->get()
+            ->groupBy('siswa_id');
+
+        $gradeService = new GradeDescriptorService;
+
+        $lembars = $siswas->map(fn (Siswa $siswa): array => $this->buildLembar(
+            $siswa,
+            $tahunId,
+            $semester,
+            $metaPerSiswa->get($siswa->id) ?? $this->makeDefaultMetadata($tahunId, $semester, $siswa->id, $kelas->id, $wali?->id),
+            $ekskulPerSiswa->get($siswa->id, collect()),
+            $printSetting,
+            $gradeService,
+        ));
+
+        return view('rapor.print-kelas', [
+            'school' => $school,
+            'kelas' => $kelas,
+            'wali' => $wali,
+            'tahun' => $tahun,
+            'semester' => $semester,
+            'lembars' => $lembars,
+            'printPlace' => $this->resolvePrintPlace($printSetting, $school),
+            'watermarkDataUrl' => $this->buildWatermarkDataUrl($printSetting, $school),
+            'namaYayasan' => $printSetting?->nama_yayasan,
+        ]);
+    }
+
+    /**
+     * Data satu siswa untuk partial rapor.partials.lembar (sama seperti yang disiapkan show()).
+     *
+     * @param  \Illuminate\Support\Collection<int, EkskulPenilaian>  $ekskul
+     * @return array<string, mixed>
+     */
+    private function buildLembar(
+        Siswa $siswa,
+        int $tahunId,
+        string $semester,
+        RaporMetadata $meta,
+        \Illuminate\Support\Collection $ekskul,
+        ?PrintSetting $printSetting,
+        GradeDescriptorService $gradeService
+    ): array {
+        return [
+            'siswa' => $siswa,
+            'nilai' => $this->buildNilaiCollection($siswa->id, $tahunId, $semester, $gradeService),
+            'ekskul' => $ekskul,
+            'meta' => $meta,
+            'prestasi' => collect($meta->prestasi ?? [])->values()->take(3),
+            'raporDate' => $this->resolveRaporDate($printSetting, $meta),
+        ];
+    }
+
+    /**
+     * Otorisasi cetak rapor satu kelas: admin semua kelas, guru hanya kelas yang ia walikan.
+     */
+    private function authorizeKelasAccess(User $user, Kelas $kelas): void
+    {
+        $roleSlug = strtolower((string) ($user->role ?? ''));
+
+        if ($roleSlug === 'admin') {
+            return;
+        }
+
+        if ($roleSlug !== 'guru') {
+            abort(403, __('Anda tidak memiliki akses ke kelas ini.'));
+        }
+
+        $guru = Guru::where('user_id', $user->id)->first();
+
+        // Guru mapel yang bukan wali kelas tidak boleh mencetak rapor satu kelas
+        if (! $guru || ! $kelas->guru_id || (int) $kelas->guru_id !== (int) $guru->id) {
+            abort(403, __('Anda tidak memiliki akses ke kelas ini.'));
+        }
+    }
+
+    /**
+     * Metadata default di memori (tidak disimpan) untuk siswa yang belum punya metadata rapor.
+     */
+    private function makeDefaultMetadata(int $tahunId, string $semester, int $siswaId, ?int $kelasId, ?int $waliId): RaporMetadata
+    {
+        return new RaporMetadata([
+            'tahun_ajaran_id' => $tahunId,
+            'semester' => $semester,
+            'siswa_id' => $siswaId,
+            'kelas_id' => $kelasId,
+            'wali_guru_id' => $waliId,
+            'tanggal_rapor' => now(),
+            'prestasi' => [],
+        ]);
     }
 
     /**

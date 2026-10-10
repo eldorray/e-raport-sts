@@ -1,9 +1,21 @@
 <x-layouts.app>
+    @php
+        // Kelas yang boleh dicetak sekaligus: kelas terpilih (admin) atau kelas wali (guru); $kelasList sudah dibatasi sesuai peran
+        $kelasCetak = $kelasId ? $kelasList->firstWhere('id', $kelasId) : null;
+    @endphp
     <div class="mb-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div>
             <p class="text-xs uppercase tracking-wide text-gray-500 dark:text-gray-400">Master Data</p>
             <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Cetak Rapor Siswa</h1>
         </div>
+        @if ($kelasCetak)
+            <a href="{{ route('rapor.print-kelas', $kelasCetak) }}" target="_blank" rel="noopener"
+                class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-500/30">
+                <i class="fas fa-print text-xs"></i> {{ __('Cetak rapor satu kelas') }} ({{ $kelasCetak->nama }})
+            </a>
+        @elseif (! ($isGuru ?? false) && $kelasList->isNotEmpty())
+            <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('Pilih kelas untuk mencetak rapor seluruh siswanya sekaligus.') }}</p>
+        @endif
     </div>
 
     <div class="mb-4 grid gap-3 md:grid-cols-2 lg:grid-cols-4">
