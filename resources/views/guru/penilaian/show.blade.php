@@ -13,6 +13,26 @@
         </div>
     </div>
 
+    @php
+        $barisDikoreksi = $nilaiBySiswa->filter(fn ($nilai) => $nilai->dikoreksi_pada !== null);
+        $koreksiTerakhir = $barisDikoreksi->sortByDesc(fn ($nilai) => $nilai->dikoreksi_pada->getTimestamp())->first();
+    @endphp
+
+    @if ($koreksiTerakhir)
+        <div class="mb-4 rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-800 dark:bg-blue-900/30">
+            <div class="flex items-start gap-2 text-sm text-blue-800 dark:text-blue-200">
+                <i class="fas fa-pen-to-square mt-0.5" aria-hidden="true"></i>
+                <span>
+                    {{ __(':jumlah nilai siswa dikoreksi admin, terakhir oleh :nama pada :waktu. Baris yang dikoreksi diberi catatan di bawah nama siswa.', [
+                        'jumlah' => $barisDikoreksi->count(),
+                        'nama' => $koreksiTerakhir->pengoreksi?->name ?? __('Admin'),
+                        'waktu' => $koreksiTerakhir->dikoreksi_pada->translatedFormat('d M Y H:i'),
+                    ]) }}
+                </span>
+            </div>
+        </div>
+    @endif
+
     @if (!$canEdit)
         <div class="mb-4 rounded-lg border border-amber-300 bg-amber-50 p-4 dark:border-amber-700 dark:bg-amber-900/30">
             <div class="flex items-center gap-2 text-sm font-semibold text-amber-700 dark:text-amber-300">
@@ -119,7 +139,17 @@
                             <tr>
                                 <td class="px-4 py-3">{{ $index + 1 }}</td>
                                 <td class="px-4 py-3">{{ $siswa->nisn ?? '—' }}</td>
-                                <td class="px-4 py-3">{{ $siswa->nama }}</td>
+                                <td class="px-4 py-3">
+                                    {{ $siswa->nama }}
+                                    @if ($nilai?->dikoreksi_pada)
+                                        <p class="mt-0.5 text-xs text-amber-700 dark:text-amber-300">
+                                            {{ __('Dikoreksi :nama, :waktu', [
+                                                'nama' => $nilai->pengoreksi?->name ?? __('Admin'),
+                                                'waktu' => $nilai->dikoreksi_pada->translatedFormat('d M Y H:i'),
+                                            ]) }}
+                                        </p>
+                                    @endif
+                                </td>
                                 <td class="px-4 py-3">
                                     <input type="number" step="0.01" min="0" max="100"
                                         name="nilai_sumatif[{{ $siswa->id }}]"

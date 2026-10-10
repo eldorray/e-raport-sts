@@ -8,9 +8,9 @@ use App\Models\Penilaian;
 use App\Models\Siswa;
 use App\Models\TahunAjaran;
 use App\Services\GradeDescriptorService;
+use App\Services\PenyimpananNilaiService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 /**
@@ -86,7 +86,8 @@ class PenilaianController extends Controller
             ->orderBy('nama')
             ->get();
 
-        $nilaiBySiswa = Penilaian::where('mengajar_id', $mengajar->id)
+        $nilaiBySiswa = Penilaian::with('pengoreksi:id,name')
+            ->where('mengajar_id', $mengajar->id)
             ->where('tahun_ajaran_id', $tahunId)
             ->when($semester, fn ($q) => $q->where('semester', $semester))
             ->whereIn('siswa_id', $siswas->pluck('id'))
@@ -117,11 +118,16 @@ class PenilaianController extends Controller
     /**
      * Menyimpan nilai siswa.
      *
+     * Penulisan baris nilai diserahkan ke PenyimpananNilaiService (jalur yang
+     * sama dengan koreksi admin); baris yang diubah guru kehilangan jejak
+     * koreksi admin karena perubahan terakhirnya milik guru.
+     *
      * @param  Request  $request  HTTP request dengan data nilai
      * @param  Mengajar  $mengajar  Instance mengajar dari route model binding
+     * @param  PenyimpananNilaiService  $penyimpanan  Service penyimpanan nilai
      * @return RedirectResponse Redirect ke halaman sebelumnya
      */
-    public function store(Request $request, Mengajar $mengajar): RedirectResponse
+    public function store(Request $request, Mengajar $mengajar, PenyimpananNilaiService $penyimpanan): RedirectResponse
     {
         $tahunId = session('selected_tahun_ajaran_id');
         $semester = session('selected_semester');
@@ -151,13 +157,7 @@ class PenilaianController extends Controller
                 ->withInput();
         }
 
-        $validated = $request->validate([
-            'nilai_sumatif' => ['sometimes', 'array'],
-            'nilai_sumatif.*' => ['nullable', 'numeric', 'min:'.self::MIN_NILAI, 'max:'.self::MAX_NILAI],
-            'nilai_sts' => ['sometimes', 'array'],
-            'nilai_sts.*' => ['nullable', 'numeric', 'min:'.self::MIN_NILAI, 'max:'.self::MAX_NILAI],
-            'materi_tp' => ['nullable', 'string', 'max:255'],
-        ]);
+        $validated = $request->validate($penyimpanan->aturanValidasi());
 
         $user = $request->user();
         $bobotSumatif = $user->bobot_sumatif ?? $this->getDefaultBobotSumatif();
@@ -169,15 +169,9 @@ class PenilaianController extends Controller
                 ->withInput();
         }
 
-        $siswas = Siswa::where('kelas_id', $mengajar->kelas_id)->pluck('id');
-
-        DB::transaction(function () use ($validated, $mengajar, $guru, $tahunId, $semester, $siswas, $bobotSumatif, $bobotSts) {
-            $mengajar->bobot_sumatif = $bobotSumatif;
-            $mengajar->bobot_sts = $bobotSts;
-            $mengajar->save();
-
-            $this->saveNilaiSiswa($validated, $mengajar, $guru, $tahunId, $semester, $siswas);
-        });
+        // authorizeGuruAccess() menjamin $mengajar->guru_id milik guru ini,
+        // jadi baris ditulis dengan guru_id yang sama seperti sebelumnya.
+        $penyimpanan->simpan($mengajar, (int) $tahunId, (string) $semester, $validated, $bobotSumatif, $bobotSts);
 
         return back()->with('status', __('Nilai disimpan.'));
     }
@@ -324,59 +318,6 @@ class PenilaianController extends Controller
     private function isSemesterSama(string $a, string $b): bool
     {
         return strcasecmp(trim($a), trim($b)) === 0;
-    }
-
-    /**
-     * Menyimpan nilai semua siswa.
-     *
-     * @param  array<string, mixed>  $validated  Data nilai yang sudah divalidasi
-     * @param  Mengajar  $mengajar  Instance mengajar
-     * @param  Guru  $guru  Instance guru
-     * @param  int  $tahunId  ID tahun ajaran
-     * @param  string  $semester  Semester
-     * @param  \Illuminate\Support\Collection<int, int>  $siswas  Koleksi ID siswa
-     */
-    private function saveNilaiSiswa(
-        array $validated,
-        Mengajar $mengajar,
-        Guru $guru,
-        int $tahunId,
-        string $semester,
-        $siswas
-    ): void {
-        $sumatifPayload = $validated['nilai_sumatif'] ?? [];
-        $stsPayload = $validated['nilai_sts'] ?? [];
-        $materiTp = isset($validated['materi_tp']) ? trim($validated['materi_tp']) : null;
-
-        $allKeys = array_unique(array_merge(array_keys($sumatifPayload), array_keys($stsPayload)));
-
-        foreach ($allKeys as $siswaId) {
-            if (! $siswas->contains((int) $siswaId)) {
-                continue;
-            }
-
-            $record = Penilaian::firstOrNew([
-                'tahun_ajaran_id' => $tahunId,
-                'semester' => $semester,
-                'kelas_id' => $mengajar->kelas_id,
-                'siswa_id' => $siswaId,
-                'mata_pelajaran_id' => $mengajar->mata_pelajaran_id,
-                'guru_id' => $guru->id,
-                'mengajar_id' => $mengajar->id,
-            ]);
-
-            $record->materi_tp = $materiTp !== '' ? $materiTp : null;
-
-            if (array_key_exists($siswaId, $sumatifPayload)) {
-                $record->nilai_sumatif = $sumatifPayload[$siswaId] !== null ? (float) $sumatifPayload[$siswaId] : null;
-            }
-
-            if (array_key_exists($siswaId, $stsPayload)) {
-                $record->nilai_sts = $stsPayload[$siswaId] !== null ? (float) $stsPayload[$siswaId] : null;
-            }
-
-            $record->save();
-        }
     }
 
     /**

@@ -23,6 +23,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string|null $materi_tp
  * @property float|null $nilai_sumatif
  * @property float|null $nilai_sts
+ * @property int|null $dikoreksi_oleh
+ * @property \Carbon\Carbon|null $dikoreksi_pada
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
  * @property-read TahunAjaran $tahunAjaran
@@ -31,6 +33,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property-read MataPelajaran|null $mataPelajaran
  * @property-read Guru|null $guru
  * @property-read Mengajar|null $mengajar
+ * @property-read User|null $pengoreksi
  */
 class Penilaian extends Model
 {
@@ -53,6 +56,8 @@ class Penilaian extends Model
         'materi_tp',
         'nilai_sumatif',
         'nilai_sts',
+        'dikoreksi_oleh',
+        'dikoreksi_pada',
     ];
 
     /**
@@ -63,6 +68,8 @@ class Penilaian extends Model
     protected $casts = [
         'nilai_sumatif' => 'float',
         'nilai_sts' => 'float',
+        'dikoreksi_oleh' => 'integer',
+        'dikoreksi_pada' => 'datetime',
     ];
 
     /**
@@ -123,5 +130,16 @@ class Penilaian extends Model
     public function mengajar(): BelongsTo
     {
         return $this->belongsTo(Mengajar::class);
+    }
+
+    /**
+     * Admin yang terakhir mengoreksi baris nilai ini (null bila belum pernah
+     * dikoreksi atau perubahan terakhir dilakukan oleh guru).
+     *
+     * @return BelongsTo<User, $this>
+     */
+    public function pengoreksi(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'dikoreksi_oleh');
     }
 }
