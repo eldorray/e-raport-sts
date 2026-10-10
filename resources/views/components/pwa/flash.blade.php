@@ -1,5 +1,6 @@
 @php
-    $pesanStatus = session('status');
+    $pesanStatus = session('status') ?? session('success');
+    $pesanPeringatan = session('warning');
     $pesanError = session('error');
 @endphp
 
@@ -10,6 +11,18 @@
         <p class="flex-1 leading-relaxed">{{ $pesanStatus }}</p>
         <button type="button" @click="tampil = false" aria-label="{{ __('Tutup') }}"
             class="text-emerald-600 transition hover:text-emerald-800 dark:text-emerald-300">
+            <i class="fas fa-xmark"></i>
+        </button>
+    </div>
+@endif
+
+@if ($pesanPeringatan)
+    <div x-data="{ tampil: true }" x-show="tampil" x-transition
+        class="mb-4 flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950/60 dark:text-amber-200">
+        <i class="fas fa-circle-exclamation mt-0.5 text-base"></i>
+        <p class="flex-1 leading-relaxed">{{ $pesanPeringatan }}</p>
+        <button type="button" @click="tampil = false" aria-label="{{ __('Tutup') }}"
+            class="text-amber-600 transition hover:text-amber-800 dark:text-amber-300">
             <i class="fas fa-xmark"></i>
         </button>
     </div>

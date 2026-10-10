@@ -72,7 +72,7 @@
                 <i class="fas fa-download"></i>{{ __('Pasang') }}
             </button>
 
-            <a href="{{ route('dashboard') }}"
+            <a href="{{ route('app.versi-web') }}"
                 class="flex items-center justify-center gap-2 rounded-2xl border border-slate-200 px-3 py-3 text-sm font-semibold text-slate-600 transition active:scale-[0.98] dark:border-slate-700 dark:text-slate-300">
                 <i class="fas fa-desktop"></i>{{ __('Versi Web') }}
             </a>

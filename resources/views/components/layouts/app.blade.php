@@ -1,3 +1,26 @@
+@php
+    $modeAplikasi = auth()->check() && session(\App\Http\Middleware\TandaiModeAplikasi::KUNCI_SESI);
+@endphp
+@if ($modeAplikasi)
+    {{-- Mode aplikasi HP: halaman web tampil dalam bingkai aplikasi (header, tombol kembali, menu bawah) --}}
+    @php
+        $guruAplikasi = auth()->user()->role === 'guru'
+            ? \App\Models\Guru::where('user_id', auth()->id())->first()
+            : null;
+        $waliAplikasi = $guruAplikasi
+            && \App\Models\Kelas::where('guru_id', $guruAplikasi->id)
+                ->where('tahun_ajaran_id', session('selected_tahun_ajaran_id'))
+                ->exists();
+    @endphp
+    <x-layouts.pwa :title="$title ?? \App\Support\MenuAplikasi::judul(request()->route()?->getName())"
+        :back="\App\Support\MenuAplikasi::kembali(request())" :wali="$waliAplikasi">
+        <link rel="stylesheet" href="https://cdn.datatables.net/2.3.5/css/dataTables.dataTables.min.css">
+        <div class="mode-aplikasi min-w-0">
+            {{ $slot }}
+        </div>
+        @include('components.layouts.app.datatables')
+    </x-layouts.pwa>
+@else
 <!DOCTYPE html>
 <html lang="en">
 
@@ -296,22 +319,7 @@
         </div>
     </div>
 </body>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"
-    integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g=="
-    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script src="https://cdn.datatables.net/2.3.5/js/dataTables.min.js"></script>
-<script>
-    $(document).ready(function() {
-        const tableIds = ['#subjects-table', '#guru-table', '#siswa-table', '#kelas-table', '#rombel-table',
-            '#guru-subjects-table', '#rapor-table', '#tahfidz-table'
-        ];
-        tableIds.forEach((id) => {
-            const tableEl = document.querySelector(id);
-            if (tableEl) {
-                new DataTable(tableEl);
-            }
-        });
-    });
-</script>
+@include('components.layouts.app.datatables')
 
 </html>
+@endif

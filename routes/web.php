@@ -27,6 +27,7 @@ use App\Http\Controllers\TahfidzPrintController;
 use App\Http\Controllers\TahunAjaranBaruController;
 use App\Http\Controllers\TahunAjaranController;
 use App\Http\Controllers\WaliKelasSiswaController;
+use App\Http\Middleware\TandaiModeAplikasi;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -57,7 +58,7 @@ Route::middleware(['auth'])->group(function () {
             'guru' => 'guru.pwa.beranda',
             default => 'dashboard',
         });
-    })->name('app.start');
+    })->middleware(TandaiModeAplikasi::class)->name('app.start');
     // Pintasan "Nilai" di ikon aplikasi: guru ke input nilai, admin ke koreksi nilai
     Route::get('app/nilai', function () {
         return redirect()->route(match (auth()->user()?->role) {
@@ -65,7 +66,13 @@ Route::middleware(['auth'])->group(function () {
             'guru' => 'guru.pwa.nilai',
             default => 'dashboard',
         });
-    })->name('app.nilai');
+    })->middleware(TandaiModeAplikasi::class)->name('app.nilai');
+    // Keluar dari mode aplikasi: halaman kembali memakai tampilan web
+    Route::get('aplikasi/versi-web', function () {
+        session()->forget(TandaiModeAplikasi::KUNCI_SESI);
+
+        return redirect()->route('dashboard');
+    })->name('app.versi-web');
     // [/fitur:pwa-start]
 
     // Admin-only
@@ -132,7 +139,7 @@ Route::middleware(['auth'])->group(function () {
         // [/fitur:koreksi-nilai]
 
         // [fitur:pwa-admin] Aplikasi admin (PWA, mobile-first)
-        Route::prefix('admin-app')->name('admin.pwa.')->group(function () {
+        Route::prefix('admin-app')->name('admin.pwa.')->middleware(TandaiModeAplikasi::class)->group(function () {
             Route::get('/', [PwaAdminController::class, 'beranda'])->name('beranda');
             Route::get('menu', [PwaAdminController::class, 'menu'])->name('menu');
             Route::get('akun', [PwaAdminController::class, 'akun'])->name('akun');
@@ -192,7 +199,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('wali-kelas/claim-siswa', [WaliKelasSiswaController::class, 'claim'])->name('wali-kelas.siswa.claim');
 
         // Aplikasi guru (PWA, mobile-first) — only role guru
-        Route::prefix('guru-app')->name('guru.pwa.')->group(function () {
+        Route::prefix('guru-app')->name('guru.pwa.')->middleware(TandaiModeAplikasi::class)->group(function () {
             Route::get('/', [PwaGuruController::class, 'beranda'])->name('beranda');
             Route::get('nilai', [PwaGuruController::class, 'nilai'])->name('nilai');
             Route::get('nilai/{mengajar}', [PwaGuruController::class, 'formNilai'])->name('nilai.form');

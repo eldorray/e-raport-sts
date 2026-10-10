@@ -219,11 +219,11 @@
         ['url' => route('rapor.prestasi', ['kelas_id' => $kelas->id]), 'ikon' => 'fa-trophy', 'label' => __('Prestasi Siswa')],
         ['url' => route('rapor.catatan', ['kelas_id' => $kelas->id]), 'ikon' => 'fa-note-sticky', 'label' => __('Catatan Wali')],
     ] as $tautan)
-                        <a href="{{ $tautan['url'] }}" target="_blank" rel="noopener"
+                        <a href="{{ $tautan['url'] }}"
                             class="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-3 text-sm font-semibold shadow-sm transition active:scale-[0.99] dark:border-slate-800 dark:bg-slate-900">
                             <i class="fas {{ $tautan['ikon'] }} w-5 text-center text-slate-400"></i>
                             {{ $tautan['label'] }}
-                            <i class="fas fa-arrow-up-right-from-square ml-auto text-xs text-slate-300 dark:text-slate-600"></i>
+                            <i class="fas fa-chevron-right ml-auto text-xs text-slate-300 dark:text-slate-600"></i>
                         </a>
                     @endforeach
                 </div>

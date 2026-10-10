@@ -10,6 +10,7 @@ use App\Models\Mengajar;
 use App\Models\Penilaian;
 use App\Models\Siswa;
 use App\Models\TahunAjaran;
+use App\Support\MenuAplikasi;
 use Illuminate\Database\Query\JoinClause;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -47,7 +48,7 @@ class PwaAdminController extends Controller
     public function menu(): View
     {
         return view('admin.pwa.menu', $this->konteks() + [
-            'grupMenu' => $this->grupMenu(),
+            'grupMenu' => MenuAplikasi::admin(),
         ]);
     }
 
@@ -280,85 +281,5 @@ class PwaAdminController extends Controller
     private function persen(int $bagian, int $total): int
     {
         return $total > 0 ? intdiv($bagian * 100, $total) : 0;
-    }
-
-    /**
-     * Semua menu admin versi web, dikelompokkan seperti sidebar.
-     *
-     * @return list<array{judul: string, item: list<array{label: string, keterangan: string, ikon: string, url: string}>}>
-     */
-    private function grupMenu(): array
-    {
-        return [
-            [
-                'judul' => __('Umum'),
-                'item' => [
-                    $this->itemMenu(__('Dashboard Web'), __('Ringkasan lengkap versi desktop'), 'fa-gauge', 'dashboard'),
-                    $this->itemMenu(__('Profil Sekolah'), __('Identitas madrasah dan kepala madrasah'), 'fa-school', 'school-profile.index'),
-                ],
-            ],
-            [
-                'judul' => __('Lembaga'),
-                'item' => [
-                    $this->itemMenu(__('Tahun Ajaran'), __('Daftar tahun ajaran dan semester'), 'fa-calendar', 'tahun-ajaran.index'),
-                    $this->itemMenu(__('Tahun Ajaran Baru'), __('Lanjutkan kelas dan siswa ke tahun berikutnya'), 'fa-forward', 'tahun-ajaran-baru.create'),
-                    $this->itemMenu(__('Mata Pelajaran'), __('Daftar mapel dan kodenya'), 'fa-book', 'mata-pelajaran.index'),
-                    $this->itemMenu(__('Kelas'), __('Kelas dan wali kelas'), 'fa-layer-group', 'kelas.index'),
-                    $this->itemMenu(__('Ekskul'), __('Ekstrakurikuler dan pembinanya'), 'fa-star', 'ekskul.index'),
-                ],
-            ],
-            [
-                'judul' => __('Guru'),
-                'item' => [
-                    $this->itemMenu(__('Guru'), __('Data guru dan akunnya'), 'fa-user', 'guru.index'),
-                    $this->itemMenu(__('Mengajar'), __('Penugasan mapel per kelas'), 'fa-person-chalkboard', 'mengajar.index'),
-                    $this->itemMenu(__('Mengajar Tahfidz'), __('Pembimbing tahfidz per kelas'), 'fa-book-quran', 'mengajar-tahfidz.index'),
-                ],
-            ],
-            [
-                'judul' => __('Siswa'),
-                'item' => [
-                    $this->itemMenu(__('Siswa'), __('Data induk siswa'), 'fa-user-graduate', 'siswa.index'),
-                    $this->itemMenu(__('Rombel Kelas'), __('Pembagian siswa ke kelas'), 'fa-people-roof', 'rombel.index'),
-                ],
-            ],
-            [
-                'judul' => __('Pengguna'),
-                'item' => [
-                    $this->itemMenu(__('Manajemen User'), __('Akun admin dan guru'), 'fa-user-gear', 'users.index'),
-                ],
-            ],
-            [
-                'judul' => __('Rapor'),
-                'item' => [
-                    $this->itemMenu(__('Pengaturan Cetak'), __('Tanggal rapor, tanda tangan, dan kertas'), 'fa-gear', 'rapor.print-settings.edit'),
-                    $this->itemMenu(__('Cetak Rapor'), __('Rapor dan leger per kelas'), 'fa-file-lines', 'rapor.index'),
-                    $this->itemMenu(__('Koreksi Nilai'), __('Periksa dan perbaiki nilai per kelas'), 'fa-pen-to-square', 'koreksi-nilai.index'),
-                    $this->itemMenu(__('Raport Tahfidz'), __('Penilaian dan cetak rapor tahfidz'), 'fa-book-quran', 'tahfidz.index'),
-                ],
-            ],
-            [
-                'judul' => __('Sistem'),
-                'item' => [
-                    $this->itemMenu(__('Backup'), __('Unduh cadangan database'), 'fa-database', 'backup.index'),
-                    $this->itemMenu(__('Setting Tampilan'), __('Tema tampilan versi web'), 'fa-palette', 'settings.appearance.edit'),
-                ],
-            ],
-        ];
-    }
-
-    /**
-     * Satu butir menu yang menautkan ke halaman web.
-     *
-     * @return array{label: string, keterangan: string, ikon: string, url: string}
-     */
-    private function itemMenu(string $label, string $keterangan, string $ikon, string $rute): array
-    {
-        return [
-            'label' => $label,
-            'keterangan' => $keterangan,
-            'ikon' => $ikon,
-            'url' => route($rute),
-        ];
     }
 }

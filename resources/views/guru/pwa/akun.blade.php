@@ -186,6 +186,12 @@
             </dl>
         </section>
 
+        {{-- Kembali ke tampilan web (mematikan mode aplikasi) --}}
+        <a href="{{ route('app.versi-web') }}"
+            class="mt-3 flex h-12 w-full items-center justify-center gap-2 rounded-2xl border border-slate-200 text-sm font-semibold text-slate-600 transition active:scale-[0.99] dark:border-slate-700 dark:text-slate-300">
+            <i class="fas fa-desktop"></i>{{ __('Buka Versi Web') }}
+        </a>
+
         {{-- Keluar --}}
         <form method="POST" action="{{ route('logout') }}" class="mt-3"
             onsubmit="return confirm('{{ __('Keluar dari aplikasi sekarang?') }}');">

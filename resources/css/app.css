@@ -140,3 +140,20 @@
 .dark .custom-file-input:active::before {
     background: #4b5563;
 }
+
+/* Mode aplikasi HP (layouts/app dalam bingkai PWA): tabel lebar digeser ke samping,
+   baris tetap satu baris supaya tidak menjulang tinggi di layar sempit. */
+.mode-aplikasi .dt-container {
+    font-size: 0.875rem;
+}
+
+.mode-aplikasi .dt-layout-table,
+.mode-aplikasi .tabel-geser {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.mode-aplikasi table.dataTable th,
+.mode-aplikasi table.dataTable td {
+    white-space: nowrap;
+}
