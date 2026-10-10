@@ -1,4 +1,4 @@
-<x-layouts.pwa :title="__('Wali Kelas')" :subtitle="$kelas?->nama ?? __('Cetak dokumen kelas')" :back="route('guru.pwa.beranda')">
+<x-layouts.pwa :title="__('Wali Kelas')" :back="route('guru.pwa.beranda')" :daftar-tahun="$daftarTahun" :wali="$adaKelasWali">
     <div x-data="waliKelas({{ Illuminate\Support\Js::from(['total' => $siswas->count()]) }})" x-init="siap()">
         @if (! $guru)
             <div
@@ -90,6 +90,22 @@
                     </span>
 
                     <i class="fas fa-arrow-up-right-from-square shrink-0 text-emerald-100"></i>
+                </a>
+
+                <a href="{{ route('rapor.print-kelas', $kelas) }}" target="_blank" rel="noopener"
+                    class="mt-2 flex items-center gap-3 rounded-2xl border border-emerald-200 bg-white p-4 shadow-sm transition active:scale-[0.99] dark:border-emerald-900/60 dark:bg-slate-900">
+                    <span
+                        class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-300">
+                        <i class="fas fa-print text-lg"></i>
+                    </span>
+
+                    <span class="min-w-0 flex-1">
+                        <span class="block text-sm font-semibold">{{ __('Cetak Rapor Satu Kelas') }}</span>
+                        <span class="mt-0.5 block text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">
+                            {{ __('Semua rapor siswa dalam satu halaman, siap dicetak atau disimpan PDF.') }}</span>
+                    </span>
+
+                    <i class="fas fa-arrow-up-right-from-square shrink-0 text-slate-400"></i>
                 </a>
 
                 <p class="mt-2 flex items-start gap-2 px-1 text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">

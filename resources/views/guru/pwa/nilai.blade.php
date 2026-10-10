@@ -1,4 +1,4 @@
-<x-layouts.pwa :title="__('Input Nilai')" :subtitle="$tahunAjaran ? $tahunAjaran->nama.' • '.($semester ?: '-') : null" :back="route('guru.pwa.beranda')">
+<x-layouts.pwa :title="__('Input Nilai')" :back="route('guru.pwa.beranda')" :daftar-tahun="$daftarTahun" :wali="$adaKelasWali">
     @if (! $guru)
         <div class="rounded-3xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950/50 dark:text-amber-200">
             <p class="font-semibold">{{ __('Akun ini belum tertaut ke data guru.') }}</p>
@@ -7,13 +7,7 @@
             </p>
         </div>
     @elseif (! $tahunAjaran)
-        <div class="rounded-3xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-800 dark:border-blue-900 dark:bg-blue-950/50 dark:text-blue-200">
-            <p class="font-semibold">{{ __('Tahun ajaran belum dipilih.') }}</p>
-            <a href="{{ route('dashboard') }}"
-                class="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white">
-                <i class="fas fa-arrow-right"></i>{{ __('Buka Dashboard') }}
-            </a>
-        </div>
+        <x-pwa.tahun-kosong :pesan="__('Pilih tahun ajaran dan semester untuk melihat penugasan mengajar Anda.')" />
     @elseif ($perKelas->isEmpty())
         <div class="rounded-3xl border border-slate-200 bg-white p-5 text-center text-sm shadow-sm dark:border-slate-800 dark:bg-slate-900">
             <i class="fas fa-inbox mb-2 text-2xl text-slate-300 dark:text-slate-600"></i>
@@ -24,9 +18,17 @@
         </div>
     @else
         <div class="mb-4 rounded-3xl border border-slate-200 bg-white p-4 text-sm shadow-sm dark:border-slate-800 dark:bg-slate-900">
-            <p class="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
-                {{ __('Tahun ajaran aktif') }}</p>
-            <p class="mt-1 font-semibold">{{ $tahunAjaran->nama }} • {{ $semester ?: '-' }}</p>
+            <div class="flex items-center gap-3">
+                <div class="min-w-0 flex-1">
+                    <p class="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                        {{ __('Tahun ajaran terpilih') }}</p>
+                    <p class="mt-1 truncate font-semibold">{{ $tahunAjaran->nama }} • {{ $semester ?: '-' }}</p>
+                </div>
+                <button type="button" @click="bukaTahun()" aria-haspopup="dialog"
+                    class="h-11 shrink-0 rounded-2xl border border-slate-200 px-4 text-xs font-semibold text-emerald-700 transition active:scale-95 dark:border-slate-700 dark:text-emerald-400">
+                    {{ __('Ganti') }}
+                </button>
+            </div>
             @if (! $tahunAjaran->is_active)
                 <p class="mt-2 flex items-center gap-2 rounded-2xl bg-amber-50 px-3 py-2 text-xs font-semibold text-amber-800 dark:bg-amber-950/50 dark:text-amber-200">
                     <i class="fas fa-lock"></i>
@@ -49,8 +51,8 @@
                     <div class="space-y-2">
                         @foreach ($daftar as $item)
                             @php
-                                $lengkap = (int) ($progres[$item->id]->lengkap ?? 0);
-                                $terisi = (int) ($progres[$item->id]->terisi ?? 0);
+                                $lengkap = (int) ($progres[$item->id]['lengkap'] ?? 0);
+                                $terisi = (int) ($progres[$item->id]['terisi'] ?? 0);
                                 $persenItem = $jumlahSiswa > 0 ? (int) round(($lengkap / $jumlahSiswa) * 100) : 0;
                                 $keadaan = $lengkap >= $jumlahSiswa && $jumlahSiswa > 0
                                     ? 'lengkap'

@@ -1,17 +1,24 @@
 {
-    "name": "e-Raport — Aplikasi Guru",
+    "id": "/guru-app",
+    "name": "e-Raport",
     "short_name": "e-Raport",
-    "description": "Input nilai sumatif dan STS siswa langsung dari ponsel.",
+    "description": "Input nilai, pantau kelengkapan, dan kelola rapor madrasah langsung dari ponsel.",
     "lang": "id",
     "dir": "ltr",
-    "start_url": "/guru-app",
+    "start_url": "/app",
     "scope": "/",
     "display": "standalone",
-    "display_override": ["standalone", "minimal-ui"],
+    "display_override": [
+        "standalone",
+        "minimal-ui"
+    ],
     "orientation": "portrait",
     "background_color": "#0f172a",
     "theme_color": "#047857",
-    "categories": ["education", "productivity"],
+    "categories": [
+        "education",
+        "productivity"
+    ],
     "icons": [
         {
             "src": "/images/pwa-192.png",
@@ -34,14 +41,9 @@
     ],
     "shortcuts": [
         {
-            "name": "Input Nilai",
+            "name": "Nilai",
             "short_name": "Nilai",
-            "url": "/guru-app/nilai"
-        },
-        {
-            "name": "Pelaporan Ekskul",
-            "short_name": "Ekskul",
-            "url": "/ekskul-saya"
+            "url": "/app/nilai"
         }
     ]
 }

@@ -1,8 +1,21 @@
+{{--
+    Layout aplikasi HP (PWA) untuk guru dan admin.
+    - nav: false menyembunyikan navigasi bawah (mis. form nilai yang punya bilah simpan sendiri).
+    - wali: khusus guru, tampilkan menu Wali bila guru menjadi wali kelas pada tahun ajaran terpilih.
+    - daftarTahun: daftar tahun ajaran; bila diisi, subjudul header menjadi tombol pemilih tahun ajaran.
+--}}
 @props([
     'title' => null,
     'subtitle' => null,
     'back' => null,
-])<!DOCTYPE html>
+    'nav' => true,
+    'wali' => false,
+    'daftarTahun' => null,
+])
+@php
+    $judulAplikasi = auth()->user()?->role === 'admin' ? __('Aplikasi Admin') : __('Aplikasi Guru');
+    $tahunTerpilih = $daftarTahun?->firstWhere('id', (int) session('selected_tahun_ajaran_id'));
+@endphp<!DOCTYPE html>
 <html lang="id">
 
 <head>
@@ -83,7 +96,10 @@
             "prefetch": [
                 {
                     "where": {
-                        "href_matches": "/guru-app*"
+                        "or": [
+                            { "href_matches": "/guru-app*" },
+                            { "href_matches": "/admin-app*" }
+                        ]
                     },
                     "eagerness": "moderate"
                 }
@@ -130,6 +146,8 @@
         terinstal: window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true,
         panduan: false,
         bannerTampil: false,
+        sheetTahun: false,
+        menggantiTahun: false,
         platform: /iPad|iPhone|iPod/.test(navigator.userAgent) ? 'ios' : (/Android/.test(navigator.userAgent) ? 'android' : 'desktop'),
         init() {
             const ditutupPada = Number(window.localStorage.getItem('pwa-banner-ditutup') || 0);
@@ -146,6 +164,13 @@
             const sedangGelap = document.documentElement.classList.contains('dark');
             this.tema = sedangGelap ? 'light' : 'dark';
             window.pwaSetAppearance(this.tema);
+        },
+        pilihTema(mode) {
+            this.tema = mode;
+            window.pwaSetAppearance(mode);
+        },
+        bukaTahun() {
+            this.sheetTahun = true;
         },
         tutupBanner() {
             this.bannerTampil = false;
@@ -165,7 +190,9 @@
         }
     }"
         @beforeinstallprompt.window.prevent="promptEvent = $event; bannerTampil = !terinstal" @online.window="offline = false"
-        @offline.window="offline = true" class="flex min-h-dvh flex-col">
+        @offline.window="offline = true"
+        @pageshow.window="if ($event.persisted) { sheetTahun = false; menggantiTahun = false; }"
+        class="flex min-h-dvh flex-col">
         {{-- Indikator offline --}}
         <div x-cloak x-show="offline" x-transition
             class="safe-atas fixed inset-x-0 top-0 z-40 bg-amber-500 px-4 py-2 text-center text-xs font-semibold text-white shadow">
@@ -186,12 +213,24 @@
                         class="h-10 w-10 shrink-0 rounded-xl">
                 @endif
 
-                <div class="min-w-0 flex-1">
-                    <p class="truncate text-base font-semibold leading-tight">{{ $title ?? __('Aplikasi Guru') }}</p>
-                    @if ($subtitle)
-                        <p class="truncate text-xs text-slate-500 dark:text-slate-400">{{ $subtitle }}</p>
-                    @endif
-                </div>
+                @if ($daftarTahun !== null)
+                    {{-- Judul + tahun ajaran terpilih; ketuk untuk mengganti tahun ajaran --}}
+                    <button type="button" @click="bukaTahun()" aria-haspopup="dialog"
+                        class="flex min-h-11 min-w-0 flex-1 flex-col justify-center rounded-2xl px-1 text-left transition active:bg-slate-100 dark:active:bg-slate-800">
+                        <span class="block w-full truncate text-base font-semibold leading-tight">{{ $title ?? $judulAplikasi }}</span>
+                        <span class="flex w-full min-w-0 items-center gap-1 text-xs font-medium text-emerald-700 dark:text-emerald-400">
+                            <span class="truncate">{{ $tahunTerpilih ? $tahunTerpilih->nama.' • '.$tahunTerpilih->semester : __('Pilih tahun ajaran') }}</span>
+                            <i class="fas fa-chevron-down shrink-0 text-[9px]"></i>
+                        </span>
+                    </button>
+                @else
+                    <div class="min-w-0 flex-1">
+                        <p class="truncate text-base font-semibold leading-tight">{{ $title ?? $judulAplikasi }}</p>
+                        @if ($subtitle)
+                            <p class="truncate text-xs text-slate-500 dark:text-slate-400">{{ $subtitle }}</p>
+                        @endif
+                    </div>
+                @endif
 
                 <button type="button" @click="putarTema()" x-cloak
                     :aria-label="tema === 'dark' ? '{{ __('Ganti ke tema terang') }}' : '{{ __('Ganti ke tema gelap') }}'"
@@ -208,64 +247,20 @@
             </div>
         </header>
 
-        <main class="flex-1 px-4 pb-32 pt-4">
+        <main class="flex-1 px-4 pt-4 {{ $nav ? 'pb-32' : 'pb-6' }}">
             <x-pwa.flash />
             <x-pwa.install-banner />
 
             {{ $slot }}
         </main>
 
-        {{-- Navigasi bawah --}}
-        <nav
-            class="safe-bawah fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white/95 backdrop-blur dark:border-slate-800 dark:bg-slate-900/95">
-            <div class="mx-auto grid max-w-lg grid-cols-5">
-                @php
-                    $menu = [
-                        [
-                            'label' => __('Beranda'),
-                            'ikon' => 'fa-house',
-                            'url' => route('guru.pwa.beranda'),
-                            'aktif' => request()->routeIs('guru.pwa.beranda'),
-                        ],
-                        [
-                            'label' => __('Nilai'),
-                            'ikon' => 'fa-pen-to-square',
-                            'url' => route('guru.pwa.nilai'),
-                            'aktif' => request()->routeIs('guru.pwa.nilai*'),
-                        ],
-                        [
-                            'label' => __('Wali'),
-                            'ikon' => 'fa-user-graduate',
-                            'url' => route('guru.pwa.wali'),
-                            'aktif' => request()->routeIs('guru.pwa.wali'),
-                        ],
-                        [
-                            'label' => __('Ekskul'),
-                            'ikon' => 'fa-medal',
-                            'url' => route('guru.pwa.ekskul'),
-                            'aktif' => request()->routeIs('guru.pwa.ekskul*'),
-                        ],
-                        [
-                            'label' => __('Akun'),
-                            'ikon' => 'fa-user-gear',
-                            'url' => route('guru.pwa.akun'),
-                            'aktif' => request()->routeIs('guru.pwa.akun') || request()->routeIs('settings.*'),
-                        ],
-                    ];
-                @endphp
+        @if ($nav)
+            <x-pwa.navigasi-bawah :wali="$wali" />
+        @endif
 
-                @foreach ($menu as $item)
-                    <a href="{{ $item['url'] }}"
-                        class="flex flex-col items-center gap-1 px-1 pb-2 pt-2.5 text-[11px] font-medium transition {{ $item['aktif'] ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-400' }}">
-                        <span
-                            class="flex h-9 w-14 items-center justify-center rounded-2xl transition {{ $item['aktif'] ? 'bg-emerald-50 dark:bg-emerald-950/60' : '' }}">
-                            <i class="fas {{ $item['ikon'] }} text-lg"></i>
-                        </span>
-                        {{ $item['label'] }}
-                    </a>
-                @endforeach
-            </div>
-        </nav>
+        @if ($daftarTahun !== null)
+            <x-pwa.pilih-tahun :daftar="$daftarTahun" :terpilih="$tahunTerpilih?->id" />
+        @endif
 
         {{-- Panduan pasang aplikasi manual (iOS / peramban tanpa prompt) --}}
         <div x-cloak x-show="panduan" x-transition.opacity

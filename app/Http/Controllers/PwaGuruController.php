@@ -35,7 +35,7 @@ class PwaGuruController extends Controller
         $konteks = $this->konteks($request);
 
         if (! $konteks['guru'] || ! $konteks['tahunId']) {
-            return view('guru.pwa.beranda', $konteks + [
+            return view('guru.pwa.beranda', $konteks + $this->dataTampilan($konteks, false) + [
                 'penugasan' => collect(),
                 'ringkasan' => $this->ringkasanKosong(),
                 'lanjutkan' => collect(),
@@ -46,12 +46,13 @@ class PwaGuruController extends Controller
         $penugasan = $this->penugasan($konteks);
         $ringkasan = $this->ringkasan($penugasan, $konteks);
         $lanjutkan = $this->butuhPerhatian($penugasan, $konteks)->take(3)->values();
+        $kelasWali = $this->kelasWali($konteks);
 
-        return view('guru.pwa.beranda', $konteks + [
+        return view('guru.pwa.beranda', $konteks + $this->dataTampilan($konteks, $kelasWali !== null) + [
             'penugasan' => $penugasan,
             'ringkasan' => $ringkasan,
             'lanjutkan' => $lanjutkan,
-            'kelasWali' => $this->kelasWali($konteks),
+            'kelasWali' => $kelasWali,
         ]);
     }
 
@@ -66,10 +67,10 @@ class PwaGuruController extends Controller
         $konteks = $this->konteks($request);
 
         if (! $konteks['guru'] || ! $konteks['tahunId']) {
-            return view('guru.pwa.nilai', $konteks + [
+            return view('guru.pwa.nilai', $konteks + $this->dataTampilan($konteks, false) + [
                 'perKelas' => collect(),
-                'progres' => collect(),
-                'jumlahSiswaPerKelas' => collect(),
+                'progres' => [],
+                'jumlahSiswaPerKelas' => [],
             ]);
         }
 
@@ -79,7 +80,7 @@ class PwaGuruController extends Controller
             'perKelas' => $penugasan->groupBy('kelas_id'),
             'progres' => $this->progres($penugasan, $konteks),
             'jumlahSiswaPerKelas' => $this->jumlahSiswaPerKelas($penugasan),
-        ] + $konteks);
+        ] + $konteks + $this->dataTampilan($konteks));
     }
 
     /**
@@ -105,7 +106,8 @@ class PwaGuruController extends Controller
             ->orderBy('nama')
             ->get();
 
-        $nilaiBySiswa = Penilaian::where('mengajar_id', $mengajar->id)
+        $nilaiBySiswa = Penilaian::with('pengoreksi:id,name')
+            ->where('mengajar_id', $mengajar->id)
             ->where('tahun_ajaran_id', $konteks['tahunId'])
             ->when($konteks['semester'], fn ($query) => $query->where('semester', $konteks['semester']))
             ->whereIn('siswa_id', $siswas->pluck('id'))
@@ -145,7 +147,7 @@ class PwaGuruController extends Controller
             $progres = $this->progresEkskul($daftar, $konteks);
         }
 
-        return view('guru.pwa.ekskul', $konteks + [
+        return view('guru.pwa.ekskul', $konteks + $this->dataTampilan($konteks) + [
             'daftar' => $daftar,
             'progres' => $progres,
         ]);
@@ -197,7 +199,7 @@ class PwaGuruController extends Controller
     }
 
     /**
-     * Halaman akun guru: identitas, bobot nilai, tema, sandi, dan keluar.
+     * Halaman akun guru: identitas, tahun ajaran, bobot nilai, tema, sandi, dan keluar.
      *
      * @param  Request  $request  HTTP request
      * @return View Halaman akun
@@ -207,7 +209,7 @@ class PwaGuruController extends Controller
         $konteks = $this->konteks($request);
         $user = $request->user();
 
-        return view('guru.pwa.akun', $konteks + [
+        return view('guru.pwa.akun', $konteks + $this->dataTampilan($konteks) + [
             'user' => $user,
             'bobotSumatif' => (float) ($user->bobot_sumatif ?? config('rapor.bobot_sumatif', 50)),
             'bobotSts' => (float) ($user->bobot_sts ?? config('rapor.bobot_sts', 50)),
@@ -261,7 +263,7 @@ class PwaGuruController extends Controller
             }
         }
 
-        return view('guru.pwa.wali', $konteks + [
+        return view('guru.pwa.wali', $konteks + $this->dataTampilan($konteks, $kelas !== null) + [
             'kelas' => $kelas,
             'siswas' => $siswas,
             'progresSiswa' => $progresSiswa,
@@ -356,6 +358,51 @@ class PwaGuruController extends Controller
                 ];
             })
             ->all();
+    }
+
+    /**
+     * Data bingkai aplikasi (layout): pilihan tahun ajaran dan status wali kelas untuk navigasi bawah.
+     *
+     * @param  array{guru: Guru|null, tahunId: int|null, semester: string|null, tahunAjaran: TahunAjaran|null}  $konteks
+     * @param  bool|null  $adaKelasWali  Status wali yang sudah diketahui pemanggil (menghemat satu kueri)
+     * @return array{daftarTahun: Collection<int, TahunAjaran>, adaKelasWali: bool}
+     */
+    private function dataTampilan(array $konteks, ?bool $adaKelasWali = null): array
+    {
+        return [
+            'daftarTahun' => $this->daftarTahun(),
+            'adaKelasWali' => $adaKelasWali ?? $this->adaKelasWali($konteks),
+        ];
+    }
+
+    /**
+     * Semua tahun ajaran untuk pemilih (satu baris = satu semester), terbaru lebih dulu.
+     *
+     * @return Collection<int, TahunAjaran>
+     */
+    private function daftarTahun(): Collection
+    {
+        return TahunAjaran::query()
+            ->orderByDesc('tahun_mulai')
+            ->orderByDesc('nama')
+            ->orderBy('semester')
+            ->get(['id', 'nama', 'semester', 'is_active']);
+    }
+
+    /**
+     * Apakah guru menjadi wali kelas pada tahun ajaran terpilih.
+     *
+     * @param  array{guru: Guru|null, tahunId: int|null, semester: string|null, tahunAjaran: TahunAjaran|null}  $konteks
+     */
+    private function adaKelasWali(array $konteks): bool
+    {
+        if (! $konteks['guru'] || ! $konteks['tahunId']) {
+            return false;
+        }
+
+        return Kelas::where('guru_id', $konteks['guru']->id)
+            ->where('tahun_ajaran_id', $konteks['tahunId'])
+            ->exists();
     }
 
     /**

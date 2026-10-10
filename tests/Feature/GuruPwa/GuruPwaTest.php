@@ -242,7 +242,7 @@ it('menyediakan berkas manifest, service worker, dan halaman offline', function 
 
     $manifest = json_decode((string) file_get_contents(public_path('manifest.webmanifest')), true);
 
-    expect($manifest['start_url'])->toBe('/guru-app')
+    expect($manifest['start_url'])->toBe('/app')
         ->and($manifest['display'])->toBe('standalone')
         ->and($manifest['name'])->toContain('e-Raport')
         ->and(collect($manifest['icons'])->pluck('purpose')->all())->toContain('maskable');

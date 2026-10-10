@@ -3,7 +3,7 @@
     $persen = $ringkasan['siswa'] > 0 ? (int) round(($ringkasan['lengkap'] / $ringkasan['siswa']) * 100) : 0;
 @endphp
 
-<x-layouts.pwa :title="__('Aplikasi Guru')" :subtitle="$tahunAjaran ? $tahunAjaran->nama.' • '.($semester ?: '-') : null">
+<x-layouts.pwa :title="__('Aplikasi Guru')" :daftar-tahun="$daftarTahun" :wali="$adaKelasWali">
     {{-- Kartu pembuka --}}
     <section
         class="rounded-3xl bg-gradient-to-br from-emerald-600 via-emerald-600 to-teal-700 p-5 text-white shadow-lg shadow-emerald-900/20">
@@ -14,19 +14,22 @@
         </p>
 
         @if ($tahunAjaran)
-            <div class="mt-4 flex flex-wrap items-center gap-2">
+            <button type="button" @click="bukaTahun()" aria-haspopup="dialog"
+                aria-label="{{ __('Ganti tahun ajaran') }}"
+                class="mt-4 flex flex-wrap items-center gap-2 text-left transition active:scale-[0.99]">
                 <span class="rounded-full bg-white/15 px-3 py-1 text-xs font-semibold">
                     <i class="fas fa-calendar-day mr-1"></i>{{ $tahunAjaran->nama }}
                 </span>
                 <span class="rounded-full bg-white/15 px-3 py-1 text-xs font-semibold">
                     <i class="fas fa-clock mr-1"></i>{{ $semester ?: '-' }}
+                    <i class="fas fa-chevron-down ml-1 text-[9px]"></i>
                 </span>
                 @if (! $tahunAjaran->is_active)
                     <span class="rounded-full bg-amber-400/90 px-3 py-1 text-xs font-semibold text-amber-950">
                         <i class="fas fa-lock mr-1"></i>{{ __('Tahun ajaran tidak aktif — hanya baca') }}
                     </span>
                 @endif
-            </div>
+            </button>
         @endif
 
         @if ($kontekSiap = $tahunAjaran && $guru)
@@ -46,16 +49,7 @@
             </p>
         </div>
     @elseif (! $tahunAjaran)
-        <div class="mt-4 rounded-3xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-800 dark:border-blue-900 dark:bg-blue-950/50 dark:text-blue-200">
-            <p class="font-semibold">{{ __('Tahun ajaran belum dipilih.') }}</p>
-            <p class="mt-1 leading-relaxed">
-                {{ __('Pilih tahun ajaran dan semester di dashboard, lalu kembali ke aplikasi ini.') }}
-            </p>
-            <a href="{{ route('dashboard') }}"
-                class="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white">
-                <i class="fas fa-arrow-right"></i>{{ __('Buka Dashboard') }}
-            </a>
-        </div>
+        <x-pwa.tahun-kosong class="mt-4" :pesan="__('Pilih tahun ajaran dan semester untuk mulai mengisi nilai.')" />
     @endif
 
     @if ($guru && $tahunAjaran)

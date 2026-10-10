@@ -3,7 +3,7 @@
     $namaKelas = $mengajar->kelas?->nama ?? '—';
 @endphp
 
-<x-layouts.pwa :title="$namaMapel" :subtitle="$namaKelas.' • '.($tahunAjaran?->nama ?? '').' • '.($semester ?: '-')" :back="route('guru.pwa.nilai')">
+<x-layouts.pwa :title="$namaMapel" :subtitle="$namaKelas.' • '.($tahunAjaran?->nama ?? '').' • '.($semester ?: '-')" :back="route('guru.pwa.nilai')" :nav="false">
     <div x-data="inputNilai({{ Illuminate\Support\Js::from([
         'total' => $siswas->count(),
         'bobotSumatif' => $bobotSumatif,
@@ -14,39 +14,37 @@
         'belumTersimpan' => $errors->any() && session()->hasOldInput(),
     ]) }})"
         x-init="siap()">
-        {{-- Ringkasan progres --}}
+        {{-- Ringkasan progres (dibuat ringkas agar daftar siswa langsung terlihat) --}}
         <section
-            class="mb-3 rounded-3xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-            <div class="flex items-end justify-between gap-3">
-                <div>
-                    <p class="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
-                        {{ __('Nilai lengkap') }}</p>
-                    <p class="mt-0.5 text-2xl font-bold tabular-nums">
-                        <span x-text="lengkap">0</span><span
-                            class="text-base font-medium text-slate-400">/{{ $siswas->count() }}</span>
-                    </p>
-                </div>
-                <p class="text-xs text-slate-500 dark:text-slate-400">
+            class="mb-3 rounded-2xl border border-slate-200 bg-white px-3.5 py-3 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+            <div class="flex items-baseline justify-between gap-3">
+                <p class="text-xs font-medium text-slate-500 dark:text-slate-400">
+                    {{ __('Nilai lengkap') }}
+                    <span class="ml-1 text-lg font-bold tabular-nums text-slate-800 dark:text-slate-100"><span
+                            x-text="lengkap">0</span><span
+                            class="text-xs font-medium text-slate-400">/{{ $siswas->count() }}</span></span>
+                </p>
+                <p class="text-[11px] text-slate-500 dark:text-slate-400">
                     <span x-text="terisiTotal"></span> {{ __('berisi nilai') }}
                 </p>
             </div>
 
-            <div class="mt-3 h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+            <div class="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
                 <div class="h-full rounded-full bg-emerald-500 transition-all duration-300"
                     :style="`width: ${persen}%`"></div>
             </div>
 
-            <div class="mt-3 flex flex-wrap items-center gap-2 text-[11px]">
+            <div class="mt-2 flex items-center gap-1.5 text-[11px]">
                 <span
-                    class="rounded-full bg-slate-100 px-2.5 py-1 font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                    class="rounded-full bg-slate-100 px-2 py-0.5 font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
                     {{ __('Sumatif :bobot%', ['bobot' => $bobotSumatif]) }}
                 </span>
                 <span
-                    class="rounded-full bg-slate-100 px-2.5 py-1 font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                    class="rounded-full bg-slate-100 px-2 py-0.5 font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
                     {{ __('STS :bobot%', ['bobot' => $bobotSts]) }}
                 </span>
                 <a href="{{ route('guru.pwa.akun') }}#bobot"
-                    class="ml-auto font-semibold text-emerald-600 dark:text-emerald-400">{{ __('Ubah bobot') }}</a>
+                    class="-my-1 ml-auto px-1 py-1 font-semibold text-emerald-600 dark:text-emerald-400">{{ __('Ubah bobot') }}</a>
             </div>
         </section>
 
@@ -80,48 +78,63 @@
         @endif
 
         <form method="POST" action="{{ route('guru.penilaian.store', $mengajar) }}" x-ref="form"
-            @submit="kirim($event)" class="pb-28">
+            @submit="kirim($event)"
+            class="{{ $canEdit && $siswas->isNotEmpty() ? 'pb-[calc(4.5rem+env(safe-area-inset-bottom))]' : '' }}">
             @csrf
             <input type="hidden" name="tahun_ajaran_id" value="{{ $tahunId }}">
             <input type="hidden" name="semester" value="{{ $semester }}">
 
             {{-- Materi / tujuan pembelajaran --}}
             <details class="mb-3 rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                <summary class="flex cursor-pointer items-center gap-2 px-4 py-3 text-sm font-semibold">
+                <summary class="flex min-h-11 cursor-pointer items-center gap-2 px-3.5 py-2.5 text-sm font-semibold">
                     <i class="fas fa-book-open text-slate-400"></i>
                     {{ __('Materi / Tujuan Pembelajaran') }}
                 </summary>
-                <div class="px-4 pb-4">
+                <div class="px-3.5 pb-3.5">
                     <input type="text" name="materi_tp" maxlength="255" @disabled(! $canEdit)
                         value="{{ old('materi_tp', $materiTp) }}" @input="simpanDraft()"
                         placeholder="{{ __('mis. Bab 3 — Operasi Pecahan') }}"
-                        class="h-12 w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 text-sm outline-none transition focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/30 dark:border-slate-700 dark:bg-slate-950 dark:focus:bg-slate-900" />
+                        class="h-12 w-full rounded-2xl border border-slate-200 bg-slate-50 px-3 text-base outline-none transition focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/30 dark:border-slate-700 dark:bg-slate-950 dark:focus:bg-slate-900" />
                 </div>
             </details>
 
-            {{-- Pencarian siswa (menempel di bawah header) --}}
+            {{-- Pencarian siswa + judul kolom (menempel di bawah header) --}}
             <div
-                class="sticky top-[calc(4rem+env(safe-area-inset-top))] z-20 -mx-4 mb-3 border-b border-slate-200 bg-slate-100/95 px-4 py-2 backdrop-blur dark:border-slate-800 dark:bg-slate-950/95">
+                class="sticky top-[calc(4rem+env(safe-area-inset-top))] z-20 -mx-4 mb-2 border-b border-slate-200 bg-slate-100/95 px-4 pb-1.5 pt-2 backdrop-blur dark:border-slate-800 dark:bg-slate-950/95">
                 <div class="flex items-center gap-2">
                     <div class="relative flex-1">
                         <i class="fas fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-slate-400"></i>
-                        <input type="search" x-model="cari" autocomplete="off"
+                        <input type="search" x-model="cari" autocomplete="off" aria-label="{{ __('Cari siswa') }}"
                             placeholder="{{ __('Cari nama atau NIS…') }}"
-                            class="h-12 w-full rounded-2xl border border-slate-200 bg-white pl-10 pr-3 text-sm outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/30 dark:border-slate-700 dark:bg-slate-900" />
+                            class="h-11 w-full rounded-2xl border border-slate-200 bg-white pl-10 pr-3 text-base outline-none transition focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/30 dark:border-slate-700 dark:bg-slate-900" />
                     </div>
 
                     @if ($canEdit)
                         <button type="button" @click="bukaIsiCepat()"
-                            class="flex h-12 shrink-0 items-center gap-2 rounded-2xl bg-emerald-600 px-4 text-sm font-semibold text-white transition active:scale-95">
+                            class="flex h-11 shrink-0 items-center gap-2 rounded-2xl bg-emerald-600 px-4 text-sm font-semibold text-white transition active:scale-95">
                             <i class="fas fa-bolt"></i>
                             <span class="hidden min-[380px]:inline">{{ __('Isi Cepat') }}</span>
                         </button>
                     @endif
                 </div>
 
-                <p class="mt-1.5 px-1 text-[11px] text-slate-500 dark:text-slate-400">
-                    <span x-text="tampil"></span> {{ __('dari') }} {{ $siswas->count() }} {{ __('siswa ditampilkan') }}
-                </p>
+                @if ($siswas->isNotEmpty())
+                    {{-- Judul kolom; border transparan menyamakan posisi dengan bingkai daftar siswa --}}
+                    <div class="mt-1.5 border-x border-transparent" aria-hidden="true">
+                        <div
+                            class="flex items-center gap-1.5 pl-2 pr-1.5 text-[10px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                            <span class="w-5 shrink-0 text-center">#</span>
+                            <span class="min-w-0 flex-1 truncate">
+                                {{ __('Siswa') }}
+                                <span x-cloak x-show="cari.trim() !== ''" class="normal-case tracking-normal"
+                                    x-text="`· ${tampil} {{ __('dari') }} ${total}`"></span>
+                            </span>
+                            <span class="w-14 shrink-0 text-center">{{ __('Sumatif') }}</span>
+                            <span class="w-14 shrink-0 text-center">{{ __('STS') }}</span>
+                            <span class="w-9 shrink-0 text-center">{{ __('Akhir') }}</span>
+                        </div>
+                    </div>
+                @endif
             </div>
 
             @if ($siswas->isEmpty())
@@ -133,7 +146,26 @@
                         {{ __('Tambahkan siswa melalui menu Siswa atau Wali Kelas terlebih dahulu.') }}</p>
                 </div>
             @else
-                <ul class="space-y-2" @input="hitung(); simpanDraft()" @change="hitung()">
+                {{-- Satu baris per siswa: nomor, nama + NIS, Sumatif, STS, nilai akhir --}}
+                @php
+                    $terkoreksi = $nilaiBySiswa->filter(fn ($nilai) => $nilai->dikoreksi_pada !== null);
+                    $koreksiTerakhir = $terkoreksi->sortByDesc('dikoreksi_pada')->first();
+                @endphp
+                @if ($koreksiTerakhir)
+                    <p data-ringkasan-koreksi
+                        class="mb-2 flex items-start gap-2 rounded-2xl bg-amber-50 px-3 py-2 text-xs text-amber-800 dark:bg-amber-950/50 dark:text-amber-200">
+                        <i class="fas fa-user-pen mt-0.5"></i>
+                        <span>{{ __(':jumlah nilai siswa dikoreksi admin, terakhir oleh :nama pada :waktu.', [
+                            'jumlah' => $terkoreksi->count(),
+                            'nama' => $koreksiTerakhir->pengoreksi?->name ?? __('Admin'),
+                            'waktu' => $koreksiTerakhir->dikoreksi_pada->translatedFormat('d M Y H:i'),
+                        ]) }}</span>
+                    </p>
+                @endif
+
+                <ul data-baris-ringkas
+                    class="divide-y divide-slate-100 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:divide-slate-800 dark:border-slate-800 dark:bg-slate-900"
+                    @input="hitung(); simpanDraft()" @change="hitung()">
                     @foreach ($siswas as $index => $siswa)
                         @php
                             $baris = $nilaiBySiswa->get($siswa->id);
@@ -143,59 +175,54 @@
                         @endphp
                         <li data-siswa="{{ $siswa->id }}" data-nama="{{ $siswa->nama }}"
                             data-nis="{{ $siswa->nis }}" x-show="cocok(@js($siswa->nama), @js($siswa->nis))"
-                            class="rounded-2xl border border-slate-200 bg-white p-3 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                            <div class="flex items-start gap-3">
-                                <span
-                                    class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-xs font-bold text-slate-600 dark:bg-slate-800 dark:text-slate-300">{{ $index + 1 }}</span>
+                            class="flex items-center gap-1.5 py-1 pl-2 pr-1.5">
+                            <span
+                                class="w-5 shrink-0 text-center text-[11px] font-semibold tabular-nums text-slate-400 dark:text-slate-500">{{ $index + 1 }}</span>
 
-                                <div class="min-w-0 flex-1">
-                                    <p class="truncate text-sm font-semibold">{{ $siswa->nama }}</p>
-                                    <p class="text-[11px] text-slate-500 dark:text-slate-400">
-                                        NIS {{ $siswa->nis ?: '—' }}</p>
-                                </div>
-
-                                <span
-                                    class="shrink-0 rounded-full bg-slate-100 px-2.5 py-1 text-[11px] font-bold tabular-nums text-slate-600 dark:bg-slate-800 dark:text-slate-300">
-                                    {{ __('Akhir') }}: <span data-nilai-akhir>—</span>
-                                </span>
+                            <div class="min-w-0 flex-1">
+                                <p class="truncate text-sm font-semibold leading-tight">{{ $siswa->nama }}</p>
+                                <p class="truncate text-[11px] leading-tight text-slate-500 dark:text-slate-400">
+                                    NIS {{ $siswa->nis ?: '—' }}
+                                    @if ($baris?->dikoreksi_pada)
+                                        <span class="font-semibold text-amber-700 dark:text-amber-300"
+                                            title="{{ __('Dikoreksi :nama, :waktu', ['nama' => $baris->pengoreksi?->name ?? __('Admin'), 'waktu' => $baris->dikoreksi_pada->translatedFormat('d M Y H:i')]) }}">
+                                            · {{ __('dikoreksi') }}</span>
+                                    @endif
+                                </p>
                             </div>
 
-                            <div class="mt-3 grid grid-cols-2 gap-2">
-                                <label class="block">
-                                    <span
-                                        class="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{{ __('Sumatif') }}</span>
-                                    <input type="text" inputmode="decimal" enterkeyhint="next" autocomplete="off"
-                                        data-nilai="sumatif" name="nilai_sumatif[{{ $siswa->id }}]"
-                                        value="{{ old('nilai_sumatif.'.$siswa->id, $nilaiAwal($baris?->nilai_sumatif)) }}"
-                                        @blur="normalisasi($event)" @keydown.enter.prevent="kolomBerikut($event)"
-                                        @disabled(! $canEdit) placeholder="—"
-                                        class="h-12 w-full rounded-2xl border border-slate-200 bg-slate-50 text-center text-lg font-bold tabular-nums outline-none transition focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/30 disabled:opacity-60 dark:border-slate-700 dark:bg-slate-950 dark:focus:bg-slate-900" />
-                                </label>
+                            <input type="text" inputmode="decimal" enterkeyhint="next" autocomplete="off"
+                                data-nilai="sumatif" name="nilai_sumatif[{{ $siswa->id }}]"
+                                aria-label="{{ __('Sumatif :nama', ['nama' => $siswa->nama]) }}"
+                                value="{{ old('nilai_sumatif.'.$siswa->id, $nilaiAwal($baris?->nilai_sumatif)) }}"
+                                @blur="normalisasi($event)" @keydown.enter.prevent="kolomBerikut($event)"
+                                @disabled(! $canEdit) placeholder="—"
+                                class="h-11 w-14 shrink-0 rounded-xl border border-slate-200 bg-slate-50 px-1 text-center text-base font-bold tabular-nums outline-none transition focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/30 disabled:opacity-60 dark:border-slate-700 dark:bg-slate-950 dark:focus:bg-slate-900" />
 
-                                <label class="block">
-                                    <span
-                                        class="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{{ __('STS') }}</span>
-                                    <input type="text" inputmode="decimal" enterkeyhint="next" autocomplete="off"
-                                        data-nilai="sts" name="nilai_sts[{{ $siswa->id }}]"
-                                        value="{{ old('nilai_sts.'.$siswa->id, $nilaiAwal($baris?->nilai_sts)) }}"
-                                        @blur="normalisasi($event)" @keydown.enter.prevent="kolomBerikut($event)"
-                                        @disabled(! $canEdit) placeholder="—"
-                                        class="h-12 w-full rounded-2xl border border-slate-200 bg-slate-50 text-center text-lg font-bold tabular-nums outline-none transition focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/30 disabled:opacity-60 dark:border-slate-700 dark:bg-slate-950 dark:focus:bg-slate-900" />
-                                </label>
-                            </div>
+                            <input type="text" inputmode="decimal" enterkeyhint="next" autocomplete="off"
+                                data-nilai="sts" name="nilai_sts[{{ $siswa->id }}]"
+                                aria-label="{{ __('STS :nama', ['nama' => $siswa->nama]) }}"
+                                value="{{ old('nilai_sts.'.$siswa->id, $nilaiAwal($baris?->nilai_sts)) }}"
+                                @blur="normalisasi($event)" @keydown.enter.prevent="kolomBerikut($event)"
+                                @disabled(! $canEdit) placeholder="—"
+                                class="h-11 w-14 shrink-0 rounded-xl border border-slate-200 bg-slate-50 px-1 text-center text-base font-bold tabular-nums outline-none transition focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/30 disabled:opacity-60 dark:border-slate-700 dark:bg-slate-950 dark:focus:bg-slate-900" />
+
+                            <span data-nilai-akhir
+                                class="w-9 shrink-0 text-center text-sm font-bold tabular-nums text-slate-700 dark:text-slate-200">—</span>
                         </li>
                     @endforeach
                 </ul>
             @endif
 
             @if ($canEdit && $siswas->isNotEmpty())
-                {{-- Bilah simpan menempel di atas navigasi bawah --}}
+                {{-- Bilah simpan menggantikan navigasi bawah di halaman ini --}}
                 <div
-                    class="fixed inset-x-0 bottom-[calc(4.5rem+env(safe-area-inset-bottom))] z-20 px-4">
-                    <div
-                        class="mx-auto flex max-w-lg items-center gap-3 rounded-2xl border border-slate-200 bg-white/95 p-2.5 shadow-lg backdrop-blur dark:border-slate-700 dark:bg-slate-900/95">
-                        <div class="min-w-0 flex-1 px-1">
-                            <p class="text-xs font-semibold">
+                    class="safe-bawah fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white/95 px-4 backdrop-blur dark:border-slate-800 dark:bg-slate-900/95">
+                    <div class="mx-auto flex max-w-lg items-center gap-3 py-2">
+                        <div class="min-w-0 flex-1">
+                            <p class="flex items-center gap-1.5 text-xs font-semibold">
+                                <span class="h-2 w-2 shrink-0 rounded-full"
+                                    :class="dirty ? 'bg-amber-500' : 'bg-emerald-500'"></span>
                                 <span x-text="dirty ? '{{ __('Belum disimpan') }}' : '{{ __('Tersimpan') }}'"></span>
                             </p>
                             <p class="text-[11px] text-slate-500 dark:text-slate-400">
@@ -205,7 +232,7 @@
 
                         {{-- `offline` berasal dari komponen Alpine pada layout PWA (scope induk) --}}
                         <button type="submit" :disabled="menyimpan || offline"
-                            class="flex h-12 items-center gap-2 rounded-2xl bg-emerald-600 px-5 text-sm font-bold text-white transition hover:bg-emerald-700 active:scale-[0.98] disabled:opacity-60">
+                            class="flex h-12 items-center gap-2 rounded-2xl bg-emerald-600 px-6 text-sm font-bold text-white transition hover:bg-emerald-700 active:scale-[0.98] disabled:opacity-60">
                             <i class="fas"
                                 :class="menyimpan ? 'fa-spinner fa-spin' : (offline ? 'fa-wifi' : 'fa-floppy-disk')"></i>
                             <span

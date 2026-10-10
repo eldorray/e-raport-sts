@@ -1,4 +1,4 @@
-<x-layouts.pwa :title="__('Ekskul Saya')" :subtitle="$tahunAjaran ? $tahunAjaran->nama.' • '.($semester ?: '-') : null" :back="route('guru.pwa.beranda')">
+<x-layouts.pwa :title="__('Ekskul Saya')" :back="route('guru.pwa.beranda')" :daftar-tahun="$daftarTahun" :wali="$adaKelasWali">
     @if (! $guru)
         <div class="rounded-3xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950/50 dark:text-amber-200">
             <p class="font-semibold">{{ __('Akun ini belum tertaut ke data guru.') }}</p>

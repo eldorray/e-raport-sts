@@ -2,7 +2,7 @@
     $jumlahPeserta = $peserta->count();
 @endphp
 
-<x-layouts.pwa :title="$ekskul->nama" :subtitle="__('Ekskul').' • '.($tahunAjaran?->nama ?? '').' • '.($semester ?: '-')" :back="route('guru.pwa.ekskul')">
+<x-layouts.pwa :title="$ekskul->nama" :subtitle="__('Ekskul').' • '.($tahunAjaran?->nama ?? '').' • '.($semester ?: '-')" :back="route('guru.pwa.ekskul')" :nav="false">
     <div x-data="ekskulNilai({{ Illuminate\Support\Js::from([
         'total' => $jumlahPeserta,
         'belumTersimpan' => $errors->any() && session()->hasOldInput('nilai'),
@@ -72,7 +72,7 @@
             </div>
         @else
             <form method="POST" action="{{ route('guru.ekskul.store', $ekskul) }}" x-ref="form"
-                @submit="kirim()" class="pb-28">
+                @submit="kirim()" class="pb-[calc(4rem+env(safe-area-inset-bottom))]">
                 @csrf
                 <input type="hidden" name="tahun_ajaran_id" value="{{ $tahunId }}">
                 <input type="hidden" name="semester" value="{{ $semester }}">
@@ -130,9 +130,10 @@
                 </ul>
 
                 @if ($canEdit)
-                    <div class="fixed inset-x-0 bottom-[calc(4.5rem+env(safe-area-inset-bottom))] z-20 px-4">
-                        <div
-                            class="mx-auto flex max-w-lg items-center gap-3 rounded-2xl border border-slate-200 bg-white/95 p-2.5 shadow-lg backdrop-blur dark:border-slate-700 dark:bg-slate-900/95">
+                    {{-- Bilah simpan menggantikan navigasi bawah di halaman ini --}}
+                    <div
+                        class="safe-bawah fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white/95 px-4 backdrop-blur dark:border-slate-800 dark:bg-slate-900/95">
+                        <div class="mx-auto flex max-w-lg items-center gap-3 py-2">
                             <div class="min-w-0 flex-1 px-1">
                                 <p class="text-xs font-semibold">
                                     <span x-text="dirty ? '{{ __('Belum disimpan') }}' : '{{ __('Tersimpan') }}'"></span>
