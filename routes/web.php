@@ -6,8 +6,8 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EkskulController;
 use App\Http\Controllers\EkskulPenilaianController;
 use App\Http\Controllers\GuruController;
-use App\Http\Controllers\KoreksiNilaiController;
 use App\Http\Controllers\KelasController;
+use App\Http\Controllers\KoreksiNilaiController;
 use App\Http\Controllers\MataPelajaranController;
 use App\Http\Controllers\MengajarController;
 use App\Http\Controllers\MengajarTahfidzController;
@@ -50,6 +50,22 @@ Route::middleware(['auth'])->group(function () {
         ->name('tahun-ajaran.switch-session');
 
     // [fitur:pwa-start] Pintu masuk aplikasi HP (arahkan sesuai peran)
+    // start_url manifest PWA; satu ikon terpasang melayani admin maupun guru.
+    Route::get('app', function () {
+        return redirect()->route(match (auth()->user()?->role) {
+            'admin' => 'admin.pwa.beranda',
+            'guru' => 'guru.pwa.beranda',
+            default => 'dashboard',
+        });
+    })->name('app.start');
+    // Pintasan "Nilai" di ikon aplikasi: guru ke input nilai, admin ke koreksi nilai
+    Route::get('app/nilai', function () {
+        return redirect()->route(match (auth()->user()?->role) {
+            'admin' => 'koreksi-nilai.index',
+            'guru' => 'guru.pwa.nilai',
+            default => 'dashboard',
+        });
+    })->name('app.nilai');
     // [/fitur:pwa-start]
 
     // Admin-only
@@ -104,6 +120,8 @@ Route::middleware(['auth'])->group(function () {
 
         // [fitur:wizard-tahun-ajaran] Wizard tahun ajaran baru
         Route::get('tahun-ajaran-baru', [TahunAjaranBaruController::class, 'create'])->name('tahun-ajaran-baru.create');
+        Route::get('tahun-ajaran-baru/pratinjau', [TahunAjaranBaruController::class, 'preview'])->name('tahun-ajaran-baru.preview');
+        Route::get('tahun-ajaran-baru/hasil', [TahunAjaranBaruController::class, 'hasil'])->name('tahun-ajaran-baru.hasil');
         Route::post('tahun-ajaran-baru', [TahunAjaranBaruController::class, 'store'])->name('tahun-ajaran-baru.store');
         // [/fitur:wizard-tahun-ajaran]
 
@@ -116,6 +134,8 @@ Route::middleware(['auth'])->group(function () {
         // [fitur:pwa-admin] Aplikasi admin (PWA, mobile-first)
         Route::prefix('admin-app')->name('admin.pwa.')->group(function () {
             Route::get('/', [PwaAdminController::class, 'beranda'])->name('beranda');
+            Route::get('menu', [PwaAdminController::class, 'menu'])->name('menu');
+            Route::get('akun', [PwaAdminController::class, 'akun'])->name('akun');
         });
         // [/fitur:pwa-admin]
     });

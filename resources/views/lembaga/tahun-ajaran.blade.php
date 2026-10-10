@@ -6,7 +6,13 @@
                 {{ __('Kelola tahun ajaran aktif, termasuk pengaturan semester dan status aktif yang digunakan sistem.') }}
             </p>
         </div>
-        <div class="flex items-center gap-3">
+        <div class="flex flex-wrap items-center gap-3">
+            <a href="{{ route('tahun-ajaran-baru.create') }}"
+                title="{{ __('Pindahkan kelas, siswa, dan jadwal mengajar ke semester/tahun ajaran berikutnya sekaligus') }}"
+                class="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700 shadow-sm transition hover:bg-emerald-100 focus:outline-none focus:ring-4 focus:ring-emerald-500/30 dark:border-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200 dark:hover:bg-emerald-900/60">
+                <i class="fas fa-forward"></i>
+                {{ __('Wizard Tahun Ajaran Baru') }}
+            </a>
             <button type="button" id="openCreateModal"
                 class="inline-flex items-center gap-2 rounded-full bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-500/40">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
