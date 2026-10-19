@@ -49,10 +49,11 @@ it('menyusun tanda tangan: orang tua kiri, tanggal dan wali kelas kanan, kepala 
     $ttd = substr($html, (int) strpos($html, 'class="ttd"'));
 
     expect($ttd)->toContain('Orang Tua/Wali')
-        ->and($ttd)->toContain('class="ttd-garis"');
+        ->and($ttd)->toContain('class="ttd-garis"')
+        ->and($ttd)->not->toContain('198001012005011002');
 
     // Urutan di halaman: blok kiri, blok kanan (tanggal di atas Wali Kelas), lalu blok tengah bawah
-    $urutan = ['Orang Tua/Wali', 'Tangerang, 19 Desember 2025', 'Wali Kelas', 'SATIYAH, S.Pd', 'NIP. 198001012005011002', 'Mengetahui', 'Kepala Madrasah', 'IDA ROSIDA, S.Pd', 'NIP. -'];
+    $urutan = ['Orang Tua/Wali', 'Tangerang, 19 Desember 2025', 'Wali Kelas', 'SATIYAH, S.Pd', 'Mengetahui', 'Kepala Madrasah', 'IDA ROSIDA, S.Pd', 'NIP. -'];
     $posisi = array_map(fn (string $teks) => strpos($ttd, $teks), $urutan);
 
     expect($posisi)->each->not->toBeFalse()

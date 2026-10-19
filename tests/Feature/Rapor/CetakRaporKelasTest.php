@@ -102,7 +102,9 @@ it('menampilkan rapor setiap siswa aktif berurutan nama dengan satu pemisah hala
         ->assertOk()
         ->assertSeeInOrder(['Ahmad Fauzi', 'Budi Santoso', 'Citra Lestari'])
         ->assertDontSee('Dodi Sudah Pindah')
-        ->assertDontSee('Eka Kelas Sebelah');
+        ->assertDontSee('Eka Kelas Sebelah')
+        ->assertSee('SATIYAH, S.Pd')
+        ->assertDontSee('198001012005011002');
 
     $html = $response->getContent();
 

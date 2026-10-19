@@ -195,7 +195,6 @@
                 <div>{{ $printPlace }}, {{ optional($raporDate)->translatedFormat('d F Y') }}</div>
                 <div>Wali Kelas</div>
                 <div class="ttd-nama">{{ $wali->nama ?? '—' }}</div>
-                <div>NIP. {{ $wali?->nip ?: '-' }}</div>
             </div>
         </div>
         <div class="ttd-tengah">
