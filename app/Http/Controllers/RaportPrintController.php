@@ -289,6 +289,14 @@ class RaportPrintController extends Controller
             ->where('tahun_ajaran_id', $tahunId)
             ->where('semester', $semester)
             ->get()
+            // Pergantian guru dapat menyisakan beberapa penilaian untuk mapel
+            // yang sama. Cetak satu baris: terlengkap, lalu perubahan terbaru.
+            ->sortByDesc(fn (Penilaian $n) => [
+                (int) ($n->nilai_sumatif !== null) + (int) ($n->nilai_sts !== null),
+                $n->updated_at?->getTimestamp() ?? 0,
+                $n->id,
+            ])
+            ->unique('mata_pelajaran_id')
             ->map(function ($n) use ($gradeService) {
                 $guruUser = $n->guru?->user;
                 $bobotSumatif = $guruUser?->bobot_sumatif;
