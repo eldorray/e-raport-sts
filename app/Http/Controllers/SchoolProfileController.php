@@ -99,6 +99,7 @@ class SchoolProfileController extends Controller
             }
 
             $data = $request->validate([
+                'jenis_satuan' => ['required', Rule::in(['madrasah', 'sekolah'])],
                 'headmaster' => ['nullable', 'string', 'max:255'],
                 'nip_headmaster' => ['nullable', 'string', 'max:255'],
             ]);

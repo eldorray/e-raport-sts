@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Model;
  *
  * @property int $id
  * @property string|null $name
+ * @property string|null $jenis_satuan
  * @property string|null $nsm
  * @property string|null $npsn
  * @property string|null $email
@@ -29,6 +30,7 @@ class SchoolProfile extends Model
 
     protected $fillable = [
         'name',
+        'jenis_satuan',
         'nsm',
         'npsn',
         'email',
@@ -41,4 +43,12 @@ class SchoolProfile extends Model
         'logo',
         'logo_right',
     ];
+
+    /**
+     * Sebutan satuan pendidikan untuk label cetak, mis. "Kepala Sekolah".
+     */
+    public function sebutan(): string
+    {
+        return $this->jenis_satuan === 'sekolah' ? 'Sekolah' : 'Madrasah';
+    }
 }

@@ -120,7 +120,7 @@
                 <td>{{ $tahun->nama ?? $tahunId }}</td>
             </tr>
             <tr>
-                <td>Madrasah</td>
+                <td>{{ $school?->sebutan() ?? 'Madrasah' }}</td>
                 <td>:</td>
                 <td>{{ $school->name ?? '—' }}</td>
                 <td>Semester</td>
@@ -165,7 +165,7 @@
         <div class="footer">
             <div class="signature">
                 <div>Mengetahui</div>
-                <div>Kepala Madrasah</div>
+                <div>Kepala {{ $school?->sebutan() ?? 'Madrasah' }}</div>
                 <div style="margin-top:32px; text-decoration: underline; font-weight: bold;">
                     {{ $school->headmaster ?? '____________________' }}</div>
                 <div>NIP. {{ $school->nip_headmaster ?? '____________________' }}</div>

@@ -1,8 +1,14 @@
 {{-- Isi rapor satu siswa (dua halaman). Dipakai rapor.print dan rapor.print-kelas agar keduanya identik. --}}
+@php $sebutan = $school?->sebutan() ?? 'Madrasah'; @endphp
 <div class="page">
     @if ($watermarkDataUrl)
         <div class="watermark" style="background-image: url('{{ $watermarkDataUrl }}');"></div>
     @endif
+    {{-- thead/tfoot berulang otomatis di setiap halaman cetak, termasuk saat isi meluap --}}
+    <table class="bingkai">
+        <thead><tr><td><div class="nama-atas">{{ $siswa->nama }}</div></td></tr></thead>
+        <tfoot><tr><td><div class="nama-bawah">{{ $siswa->nama }}</div></td></tr></tfoot>
+        <tbody><tr><td>
     <header>
         <img src="{{ $school?->logo ? asset('storage/' . $school->logo) : asset('images/default-school.png') }}"
             alt="logo" class="logo">
@@ -10,7 +16,7 @@
             @if ($namaYayasan)
                 <h1>{{ $namaYayasan }}</h1>
             @endif
-            <h2>{{ $school->name ?? 'Nama Madrasah' }}</h2>
+            <h2>{{ $school->name ?? 'Nama ' . $sebutan }}</h2>
             <p>{{ $school->address ?? '-' }}</p>
             <p>{{ $school->district ?? '' }} {{ $school->city ? '• ' . $school->city : '' }}
                 {{ $school->province ? '• ' . $school->province : '' }}</p>
@@ -32,7 +38,7 @@
             <td>: {{ ucfirst($semester) }}</td>
         </tr>
         <tr>
-            <td class="label">Madrasah</td>
+            <td class="label">{{ $sebutan }}</td>
             <td>: {{ $school->name ?? '-' }}</td>
             <td class="label">Tahun Ajaran</td>
             <td>: {{ $tahun?->nama ?? '-' }}</td>
@@ -87,12 +93,19 @@
             @endforelse
         </tbody>
     </table>
+        </td></tr></tbody>
+    </table>
 </div>
 
 <div class="page">
     @if ($watermarkDataUrl)
         <div class="watermark" style="background-image: url('{{ $watermarkDataUrl }}');"></div>
     @endif
+    {{-- thead/tfoot berulang otomatis di setiap halaman cetak, termasuk saat isi meluap --}}
+    <table class="bingkai">
+        <thead><tr><td><div class="nama-atas">{{ $siswa->nama }}</div></td></tr></thead>
+        <tfoot><tr><td><div class="nama-bawah">{{ $siswa->nama }}</div></td></tr></tfoot>
+        <tbody><tr><td>
     <div class="two-col">
         <div class="block">
             <h3>Ekstrakurikuler</h3>
@@ -183,7 +196,7 @@
         </div>
     </div>
 
-    {{-- Tanda tangan: Orang Tua/Wali (kiri), tanggal + Wali Kelas (kanan), Kepala Madrasah (tengah bawah) --}}
+    {{-- Tanda tangan: Orang Tua/Wali (kiri), tanggal + Wali Kelas (kanan), Kepala Madrasah/Sekolah (tengah bawah) --}}
     <div class="ttd">
         <div class="ttd-baris">
             <div class="ttd-blok">
@@ -200,10 +213,12 @@
         <div class="ttd-tengah">
             <div class="ttd-blok">
                 <div>Mengetahui</div>
-                <div>Kepala Madrasah</div>
+                <div>Kepala {{ $sebutan }}</div>
                 <div class="ttd-nama">{{ $school?->headmaster ?: '—' }}</div>
                 <div>NIP. {{ $school?->nip_headmaster ?: '-' }}</div>
             </div>
         </div>
     </div>
+        </td></tr></tbody>
+    </table>
 </div>

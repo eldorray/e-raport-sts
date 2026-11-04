@@ -10,13 +10,14 @@ use App\Models\TahunAjaran;
 use App\Models\User;
 use Illuminate\Support\Carbon;
 
-function cetakRaporContoh(?string $nipKepala): string
+function cetakRaporContoh(?string $nipKepala, string $jenisSatuan = 'madrasah'): string
 {
     Carbon::setTestNow('2025-12-19 08:00:00');
 
     $tahun = TahunAjaran::create(['nama' => '2025/2026', 'tahun_mulai' => 2025, 'tahun_selesai' => 2026, 'semester' => 'Ganjil', 'is_active' => true]);
     SchoolProfile::create([
         'name' => 'MI Nurul Jihad',
+        'jenis_satuan' => $jenisSatuan,
         'nsm' => '111236710001',
         'npsn' => '60700001',
         'email' => 'mi@example.test',
@@ -62,4 +63,39 @@ it('menyusun tanda tangan: orang tua kiri, tanggal dan wali kelas kanan, kepala 
 
 it('menampilkan NIP kepala madrasah dari profil sekolah', function () {
     expect(cetakRaporContoh('197001011995012001'))->toContain('NIP. 197001011995012001');
+});
+
+it('menyebut kepala sekolah untuk satuan sekolah', function () {
+    expect(cetakRaporContoh(null, 'sekolah'))->toContain('Kepala Sekolah')
+        ->not->toContain('Kepala Madrasah')
+        ->not->toContain('>Madrasah<');
+});
+
+it('mencetak nama siswa di header dan footer kedua halaman', function () {
+    $html = cetakRaporContoh(null);
+
+    expect(substr_count($html, '<div class="nama-atas">Ahmad</div>'))->toBe(2)
+        ->and(substr_count($html, '<div class="nama-bawah">Ahmad</div>'))->toBe(2);
+});
+
+it('menyimpan jenis satuan dari form pimpinan dan menolak nilai lain', function () {
+    $profil = SchoolProfile::factory()->create();
+    $admin = User::factory()->create(['role' => 'admin', 'is_active' => true]);
+
+    test()->actingAs($admin)->put(route('school-profile.update'), ['intent' => 'leadership', 'jenis_satuan' => 'sekolah'])
+        ->assertSessionHasNoErrors();
+    expect($profil->fresh()->sebutan())->toBe('Sekolah');
+    test()->get(route('school-profile.index'))->assertOk()->assertSee('Nama Kepala Sekolah');
+
+    test()->actingAs($admin)->put(route('school-profile.update'), ['intent' => 'leadership', 'jenis_satuan' => 'kampus'])
+        ->assertSessionHasErrors('jenis_satuan');
+});
+
+it('menolak non-admin mengubah jenis satuan', function () {
+    $profil = SchoolProfile::factory()->create();
+
+    test()->actingAs(User::factory()->create(['role' => 'guru', 'is_active' => true]))
+        ->put(route('school-profile.update'), ['intent' => 'leadership', 'jenis_satuan' => 'sekolah'])
+        ->assertForbidden();
+    expect($profil->fresh()->jenis_satuan)->not->toBe('sekolah');
 });

@@ -12,8 +12,9 @@
     }
 
     @page {
-        size: 210mm 330mm portrait;
-        margin: 10mm;
+        size: 210mm 330mm;
+        /* Tanpa margin, browser tidak punya tempat mencetak tanggal/judul/URL bawaannya */
+        margin: 0;
     }
 
     html,
@@ -25,12 +26,35 @@
 
     .page {
         width: 210mm;
-        min-height: calc(330mm - 20mm);
-        padding: 10mm;
+        /* 1mm di bawah tinggi kertas agar pembulatan tidak memunculkan halaman kosong */
+        min-height: 329mm;
+        padding: 0 10mm;
         margin: 0 auto;
         position: relative;
         background: #fff;
         page-break-inside: avoid;
+    }
+
+    .page+.page {
+        break-before: page;
+        page-break-before: always;
+    }
+
+    .bingkai {
+        height: 329mm;
+    }
+
+    .bingkai>tbody>tr>td {
+        padding: 0;
+        vertical-align: top;
+    }
+
+    .bingkai>thead>tr>td,
+    .bingkai>tfoot>tr>td {
+        height: 12mm;
+        padding: 0;
+        font-size: 10px;
+        text-align: right;
     }
 
     .page-break:not(:last-child) {

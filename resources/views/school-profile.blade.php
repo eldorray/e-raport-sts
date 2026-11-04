@@ -277,7 +277,7 @@
                     <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ __('Informasi Madrasah') }}
                     </h2>
                     <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                        {{ __('Data ini akan ditampilkan pada seluruh modul sekolah dan laporan resmi.') }}</p>
+                        {{ __('Data ini akan ditampilkan pada seluruh modul sekolah dan laporan resmi.', ['sebutan' => $schoolProfile->sebutan()]) }}</p>
                 </div>
                 <div class="space-y-5 px-6 py-6 max-md:space-y-4 max-md:px-4 max-md:py-4">
                     <div class="grid gap-5 max-md:gap-4 sm:grid-cols-2">
@@ -388,14 +388,27 @@
                 <div class="border-b border-gray-100 bg-gray-50 px-6 py-5 max-md:px-4 max-md:py-4 dark:border-gray-700 dark:bg-gray-900/40">
                     <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ __('Data Pimpinan') }}</h2>
                     <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                        {{ __('Masukkan informasi Kepala Madrasah untuk kebutuhan administrasi dan laporan resmi.') }}
+                        {{ __('Masukkan informasi Kepala :sebutan untuk kebutuhan administrasi dan laporan resmi.', ['sebutan' => $schoolProfile->sebutan()]) }}
                     </p>
                 </div>
                 <div class="space-y-5 px-6 py-6 max-md:space-y-4 max-md:px-4 max-md:py-4">
+                    <div>
+                        <label for="jenis_satuan"
+                            class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Jenis Satuan Pendidikan') }}</label>
+                        <select id="jenis_satuan" name="jenis_satuan"
+                            class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 max-md:h-11 max-md:py-0 max-md:text-base dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:focus:border-blue-400">
+                            @foreach (['madrasah' => __('Madrasah (Kepala Madrasah)'), 'sekolah' => __('Sekolah (Kepala Sekolah)')] as $nilai => $label)
+                                <option value="{{ $nilai }}" @selected(old('jenis_satuan', $schoolProfile->jenis_satuan ?? 'madrasah') === $nilai)>{{ $label }}</option>
+                            @endforeach
+                        </select>
+                        @error('jenis_satuan')
+                            <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                        @enderror
+                    </div>
                     <div class="grid gap-5 max-md:gap-4 sm:grid-cols-2">
                         <div>
                             <label for="headmaster"
-                                class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Nama Kepala Madrasah') }}</label>
+                                class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Nama Kepala :sebutan', ['sebutan' => $schoolProfile->sebutan()]) }}</label>
                             <input id="headmaster" name="headmaster" type="text"
                                 value="{{ old('headmaster', $schoolProfile->headmaster) }}"
                                 class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 max-md:h-11 max-md:py-0 max-md:text-base dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:focus:border-blue-400">
@@ -405,7 +418,7 @@
                         </div>
                         <div>
                             <label for="nip_headmaster"
-                                class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('NIP Kepala Madrasah') }}</label>
+                                class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('NIP Kepala :sebutan', ['sebutan' => $schoolProfile->sebutan()]) }}</label>
                             <input id="nip_headmaster" name="nip_headmaster" type="text"
                                 value="{{ old('nip_headmaster', $schoolProfile->nip_headmaster) }}"
                                 class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 max-md:h-11 max-md:py-0 max-md:text-base dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:focus:border-blue-400">
