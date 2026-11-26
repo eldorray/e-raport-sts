@@ -188,7 +188,7 @@
                                         value="{{ old('nilai_sumatif.' . $siswa->id, $sumatif) }}"
                                         aria-label="{{ __('Nilai sumatif :nama', ['nama' => $siswa->nama]) }}"
                                         @disabled(!$canEdit)
-                                        class="h-9 w-24 rounded-[10px] border-0 bg-zinc-100 transition-colors duration-200 hover:bg-zinc-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-accent px-2 text-center text-sm font-medium tabular-nums max-md:h-11 max-md:w-full max-md:text-base dark:bg-zinc-700/60 dark:hover:bg-zinc-700 dark:focus:bg-zinc-900 dark:text-zinc-100 disabled:cursor-not-allowed disabled:opacity-60">
+                                        class="h-9 w-24 rounded-xl border-0 bg-zinc-100 transition-colors duration-200 hover:bg-zinc-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-accent px-2 text-center text-sm font-medium tabular-nums max-md:h-11 max-md:w-full max-md:text-base dark:bg-zinc-700/60 dark:hover:bg-zinc-700 dark:focus:bg-zinc-900 dark:text-zinc-100 disabled:cursor-not-allowed disabled:opacity-60">
                                 </td>
                                 <td class="px-4 py-3 max-md:p-0">
                                     <label for="nilai_sts_{{ $siswa->id }}"
@@ -198,7 +198,7 @@
                                         value="{{ old('nilai_sts.' . $siswa->id, $sts) }}"
                                         aria-label="{{ __('Nilai SAS / STS :nama', ['nama' => $siswa->nama]) }}"
                                         @disabled(!$canEdit)
-                                        class="h-9 w-24 rounded-[10px] border-0 bg-zinc-100 transition-colors duration-200 hover:bg-zinc-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-accent px-2 text-center text-sm font-medium tabular-nums max-md:h-11 max-md:w-full max-md:text-base dark:bg-zinc-700/60 dark:hover:bg-zinc-700 dark:focus:bg-zinc-900 dark:text-zinc-100 disabled:cursor-not-allowed disabled:opacity-60">
+                                        class="h-9 w-24 rounded-xl border-0 bg-zinc-100 transition-colors duration-200 hover:bg-zinc-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-accent px-2 text-center text-sm font-medium tabular-nums max-md:h-11 max-md:w-full max-md:text-base dark:bg-zinc-700/60 dark:hover:bg-zinc-700 dark:focus:bg-zinc-900 dark:text-zinc-100 disabled:cursor-not-allowed disabled:opacity-60">
                                 </td>
                                 <td class="px-4 py-3 text-zinc-600 max-md:p-0 dark:text-zinc-300">
                                     <span

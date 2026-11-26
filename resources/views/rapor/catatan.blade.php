@@ -14,7 +14,7 @@
             <div class="flex flex-col gap-1">
                 <label class="text-xs font-semibold text-zinc-600 dark:text-zinc-300">Kelas</label>
                 <select name="kelas_id" onchange="this.form.submit()"
-                    class="w-full h-10 rounded-xl border-0 bg-zinc-100 transition-colors duration-200 hover:bg-zinc-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-accent px-3 text-sm max-md:h-11 max-md:text-base dark:bg-zinc-700/60 dark:hover:bg-zinc-700 dark:focus:bg-zinc-900 dark:text-zinc-100">
+                    class="isian h-10 w-full px-3 text-sm max-md:h-11 max-md:text-base">
                     @foreach ($kelasList as $k)
                         <option value="{{ $k->id }}" @selected((string) $kelasId === (string) $k->id)>{{ $k->nama }}</option>
                     @endforeach
@@ -81,7 +81,7 @@
                                         class="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-zinc-600 md:sr-only dark:text-zinc-400">{{ __('Catatan Wali') }}</label>
                                     <textarea id="catatan-{{ $siswa->id }}" name="catatan[{{ $siswa->id }}]" rows="2" placeholder="Catatan singkat dari wali kelas"
                                         @disabled(!$canEdit)
-                                        class="w-full rounded-[10px] border-0 bg-zinc-100 transition-colors duration-200 hover:bg-zinc-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-accent px-3 py-2 text-sm max-md:min-h-24 max-md:text-base dark:bg-zinc-700/60 dark:hover:bg-zinc-700 dark:focus:bg-zinc-900 disabled:opacity-60 disabled:cursor-not-allowed">{{ old('catatan.' . $siswa->id, $val) }}</textarea>
+                                        class="w-full rounded-xl border-0 bg-zinc-100 transition-colors duration-200 hover:bg-zinc-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-accent px-3 py-2 text-sm max-md:min-h-24 max-md:text-base dark:bg-zinc-700/60 dark:hover:bg-zinc-700 dark:focus:bg-zinc-900 disabled:opacity-60 disabled:cursor-not-allowed">{{ old('catatan.' . $siswa->id, $val) }}</textarea>
                                 </td>
                             </tr>
                         @empty

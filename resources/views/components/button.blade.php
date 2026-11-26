@@ -6,10 +6,10 @@
 
 @php
     $styleClasses = \Illuminate\Support\Arr::toCssClasses([
-        'text-white font-medium py-2 px-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors flex items-center justify-center cursor-pointer',
+        'tombol px-4 py-2 text-sm',
         match ($type) {
-            'primary' => 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500',
-            'danger' => 'bg-red-600 hover:bg-red-700 focus:ring-red-500',
+            'primary' => 'tombol-aksen',
+            'danger' => 'tombol-bahaya',
         },
     ]);
 @endphp

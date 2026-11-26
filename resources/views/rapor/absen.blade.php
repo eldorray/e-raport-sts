@@ -14,7 +14,7 @@
             <div class="flex flex-col gap-1">
                 <label class="text-xs font-semibold text-zinc-600 dark:text-zinc-300">Kelas</label>
                 <select name="kelas_id" onchange="this.form.submit()"
-                    class="w-full h-10 rounded-xl border-0 bg-zinc-100 transition-colors duration-200 hover:bg-zinc-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-accent px-3 text-sm max-md:h-11 max-md:text-base dark:bg-zinc-700/60 dark:hover:bg-zinc-700 dark:focus:bg-zinc-900 dark:text-zinc-100">
+                    class="isian h-10 w-full px-3 text-sm max-md:h-11 max-md:text-base">
                     @foreach ($kelasList as $k)
                         <option value="{{ $k->id }}" @selected((string) $kelasId === (string) $k->id)>{{ $k->nama }}</option>
                     @endforeach
@@ -83,7 +83,7 @@
                                         class="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-zinc-600 md:sr-only dark:text-zinc-400">{{ __('Sakit') }}</label>
                                     <input type="number" id="absen-{{ $siswa->id }}-sakit" name="absen[{{ $siswa->id }}][sakit]" min="0"
                                         max="255" inputmode="numeric" @disabled(!$canEdit)
-                                        class="h-9 w-16 rounded-[10px] border-0 bg-zinc-100 transition-colors duration-200 hover:bg-zinc-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-accent px-2 py-1 text-center text-sm max-md:h-11 max-md:w-full max-md:text-base dark:bg-zinc-700/60 dark:hover:bg-zinc-700 dark:focus:bg-zinc-900 disabled:opacity-60 disabled:cursor-not-allowed"
+                                        class="h-9 w-16 rounded-xl border-0 bg-zinc-100 transition-colors duration-200 hover:bg-zinc-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-accent px-2 py-1 text-center text-sm max-md:h-11 max-md:w-full max-md:text-base dark:bg-zinc-700/60 dark:hover:bg-zinc-700 dark:focus:bg-zinc-900 disabled:opacity-60 disabled:cursor-not-allowed"
                                         value="{{ old('absen.' . $siswa->id . '.sakit', $row['sakit']) }}">
                                 </td>
                                 <td class="px-3 py-3 text-center max-md:p-0">
@@ -91,7 +91,7 @@
                                         class="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-zinc-600 md:sr-only dark:text-zinc-400">{{ __('Izin') }}</label>
                                     <input type="number" id="absen-{{ $siswa->id }}-izin" name="absen[{{ $siswa->id }}][izin]" min="0"
                                         max="255" inputmode="numeric" @disabled(!$canEdit)
-                                        class="h-9 w-16 rounded-[10px] border-0 bg-zinc-100 transition-colors duration-200 hover:bg-zinc-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-accent px-2 py-1 text-center text-sm max-md:h-11 max-md:w-full max-md:text-base dark:bg-zinc-700/60 dark:hover:bg-zinc-700 dark:focus:bg-zinc-900 disabled:opacity-60 disabled:cursor-not-allowed"
+                                        class="h-9 w-16 rounded-xl border-0 bg-zinc-100 transition-colors duration-200 hover:bg-zinc-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-accent px-2 py-1 text-center text-sm max-md:h-11 max-md:w-full max-md:text-base dark:bg-zinc-700/60 dark:hover:bg-zinc-700 dark:focus:bg-zinc-900 disabled:opacity-60 disabled:cursor-not-allowed"
                                         value="{{ old('absen.' . $siswa->id . '.izin', $row['izin']) }}">
                                 </td>
                                 <td class="px-3 py-3 text-center max-md:p-0">
@@ -99,7 +99,7 @@
                                         class="mb-1 block text-[11px] font-semibold uppercase tracking-wide text-zinc-600 md:sr-only dark:text-zinc-400">{{ __('Alpa') }}</label>
                                     <input type="number" id="absen-{{ $siswa->id }}-alpa" name="absen[{{ $siswa->id }}][alpa]" min="0"
                                         max="255" inputmode="numeric" @disabled(!$canEdit)
-                                        class="h-9 w-16 rounded-[10px] border-0 bg-zinc-100 transition-colors duration-200 hover:bg-zinc-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-accent px-2 py-1 text-center text-sm max-md:h-11 max-md:w-full max-md:text-base dark:bg-zinc-700/60 dark:hover:bg-zinc-700 dark:focus:bg-zinc-900 disabled:opacity-60 disabled:cursor-not-allowed"
+                                        class="h-9 w-16 rounded-xl border-0 bg-zinc-100 transition-colors duration-200 hover:bg-zinc-200 focus:bg-white focus:outline-none focus:ring-2 focus:ring-accent px-2 py-1 text-center text-sm max-md:h-11 max-md:w-full max-md:text-base dark:bg-zinc-700/60 dark:hover:bg-zinc-700 dark:focus:bg-zinc-900 disabled:opacity-60 disabled:cursor-not-allowed"
                                         value="{{ old('absen.' . $siswa->id . '.alpa', $row['alpa']) }}">
                                 </td>
                             </tr>

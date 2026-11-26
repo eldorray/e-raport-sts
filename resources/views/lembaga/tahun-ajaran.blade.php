@@ -1,8 +1,8 @@
 <x-layouts.app>
     <div class="mb-8 flex flex-col gap-3 max-md:mb-5 md:flex-row md:items-center md:justify-between">
         <div>
-            <h1 class="text-3xl font-semibold text-gray-900 max-md:text-2xl dark:text-gray-100">{{ __('Tahun Ajaran') }}</h1>
-            <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+            <h1 class="text-[28px] font-semibold leading-tight tracking-[-0.025em] text-zinc-900 max-md:text-2xl dark:text-zinc-50">{{ __('Tahun Ajaran') }}</h1>
+            <p class="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
                 {{ __('Kelola tahun ajaran aktif, termasuk pengaturan semester dan status aktif yang digunakan sistem.') }}
             </p>
         </div>
@@ -14,7 +14,7 @@
                 {{ __('Wizard Tahun Ajaran Baru') }}
             </a>
             <button type="button" id="openCreateModal"
-                class="inline-flex items-center gap-2 rounded-full bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-500/40 max-md:min-h-11 max-md:justify-center">
+                class="tombol tombol-aksen gap-2 px-4 py-2 text-sm font-semibold max-md:min-h-11">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
                     stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 4v16m8-8H4" />
@@ -27,20 +27,20 @@
     <div class="grid gap-6">
         <div class="max-md:min-w-0">
             <div
-                class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
-                <div class="border-b border-gray-100 bg-gray-50 px-6 py-5 max-md:px-4 max-md:py-4 dark:border-gray-700 dark:bg-gray-900/40">
+                class="kartu overflow-hidden">
+                <div class="border-b border-zinc-100 bg-zinc-50 px-6 py-5 max-md:px-4 max-md:py-4 dark:border-zinc-700 dark:bg-zinc-900/40">
                     <div class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                         <div>
-                            <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                            <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
                                 {{ __('Daftar Tahun Ajaran') }}</h2>
-                            <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                            <p class="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
                                 {{ __('Sunting atau aktifkan tahun ajaran dari tabel berikut.') }}</p>
                         </div>
                     </div>
                 </div>
 
                 {{-- HP: kartu per tahun ajaran (aksi sama dengan tabel, area sentuh minimal 44px) --}}
-                <ul class="divide-y divide-gray-200 md:hidden dark:divide-gray-700">
+                <ul class="divide-y divide-zinc-200 md:hidden dark:divide-zinc-700">
                     @forelse ($tahunAjaran as $tahun)
                         @php
                             $dataTahunAjaran = $tahun->siswas_count
@@ -53,15 +53,15 @@
                         <li class="space-y-3 px-4 py-4">
                             <div class="flex items-start justify-between gap-3">
                                 <div class="min-w-0">
-                                    <p class="truncate text-base font-semibold text-gray-900 dark:text-gray-100">
+                                    <p class="truncate text-base font-semibold text-zinc-900 dark:text-zinc-100">
                                         {{ $tahun->nama }}
-                                        <span class="font-medium text-gray-500 dark:text-gray-400">• {{ $tahun->semester ?? '—' }}</span>
+                                        <span class="font-medium text-zinc-600 dark:text-zinc-400">• {{ $tahun->semester ?? '—' }}</span>
                                     </p>
-                                    <p class="text-sm text-gray-600 dark:text-gray-400">
+                                    <p class="text-sm text-zinc-600 dark:text-zinc-400">
                                         {{ __('Periode') }} {{ $tahun->tahun_mulai }} / {{ $tahun->tahun_selesai }}
                                     </p>
                                 </div>
-                                <span class="shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold {{ $tahun->is_active ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-200' : 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-300' }}">
+                                <span class="shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold {{ $tahun->is_active ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-200' : 'bg-zinc-100 text-zinc-600 dark:bg-zinc-700 dark:text-zinc-300' }}">
                                     {{ $tahun->is_active ? __('Aktif') : __('Nonaktif') }}
                                 </span>
                             </div>
@@ -70,10 +70,10 @@
                                 @csrf
                                 @method('PATCH')
                                 <button type="submit"
-                                    class="flex min-h-11 w-full items-center justify-between gap-3 rounded-xl border border-gray-200 px-3 text-left text-sm font-medium text-gray-700 transition active:bg-gray-50 dark:border-gray-700 dark:text-gray-200 dark:active:bg-gray-700/50">
+                                    class="tombol tombol-netral flex min-h-11 w-full justify-between gap-3 px-3 text-left text-sm font-medium">
                                     <span>{{ $tahun->is_active ? __('Nonaktifkan tahun ajaran') : __('Aktifkan tahun ajaran') }}</span>
                                     <span aria-hidden="true"
-                                        class="relative inline-flex h-6 w-11 shrink-0 items-center rounded-full {{ $tahun->is_active ? 'bg-emerald-500' : 'bg-gray-300 dark:bg-gray-600' }}">
+                                        class="relative inline-flex h-6 w-11 shrink-0 items-center rounded-full {{ $tahun->is_active ? 'bg-emerald-500' : 'bg-zinc-300 dark:bg-zinc-600' }}">
                                         <span class="inline-block h-4 w-4 transform rounded-full bg-white shadow {{ $tahun->is_active ? 'translate-x-6' : 'translate-x-1' }}"></span>
                                     </span>
                                 </button>
@@ -95,7 +95,7 @@
                                 </button>
                                 @if ($dataTahunAjaran > 0)
                                     <x-hapus-nilai-terkunci :jumlah="$dataTahunAjaran"
-                                        class="inline-flex min-h-11 cursor-not-allowed items-center justify-center gap-2 rounded-xl bg-gray-100 px-3 text-sm font-semibold text-gray-400 dark:bg-gray-800 dark:text-gray-500" />
+                                        class="inline-flex min-h-11 cursor-not-allowed items-center justify-center gap-2 rounded-xl bg-zinc-100 px-3 text-sm font-semibold text-zinc-400 dark:bg-zinc-800 dark:text-zinc-600" />
                                 @else
                                     <form action="{{ route('tahun-ajaran.destroy', $tahun) }}" method="POST"
                                         onsubmit="return confirm('{{ __('Hapus tahun ajaran ini?') }}');">
@@ -111,14 +111,14 @@
                             </div>
                             @if ($dataTahunAjaran > 0)
                                 {{-- Pengganti tooltip tombol Hapus terkunci (tidak ada hover di HP) --}}
-                                <p class="text-xs text-gray-500 dark:text-gray-400">
+                                <p class="text-xs text-zinc-600 dark:text-zinc-400">
                                     <i class="fas fa-lock mr-1 text-[10px]" aria-hidden="true"></i>
                                     {{ __('Tidak bisa dihapus: masih terhubung ke :jumlah nilai. Hapus nilai tersebut lebih dulu.', ['jumlah' => number_format($dataTahunAjaran, 0, ',', '.')]) }}
                                 </p>
                             @endif
                         </li>
                     @empty
-                        <li class="px-4 py-6 text-center text-sm text-gray-500 dark:text-gray-400">
+                        <li class="px-4 py-6 text-center text-sm text-zinc-600 dark:text-zinc-400">
                             {{ __('Belum ada data tahun ajaran. Tambahkan data baru untuk memulai.') }}
                         </li>
                     @endforelse
@@ -127,9 +127,9 @@
                 <div class="px-6 pb-6 max-md:hidden">
                     <div class="overflow-x-auto">
                         <table
-                            class="min-w-full divide-y divide-gray-200 text-left text-sm text-gray-700 dark:divide-gray-700 dark:text-gray-200">
+                            class="tabel min-w-full text-left text-sm text-zinc-700 dark:text-zinc-200">
                             <thead
-                                class="bg-gray-100 text-xs font-semibold uppercase tracking-wide text-gray-600 dark:bg-gray-900/40 dark:text-gray-400">
+                               >
                                 <tr>
                                     <th class="px-4 py-3">{{ __('Nama') }}</th>
                                     <th class="px-4 py-3">{{ __('Periode') }}</th>
@@ -138,10 +138,10 @@
                                     <th class="px-4 py-3 text-center">{{ __('Aksi') }}</th>
                                 </tr>
                             </thead>
-                            <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                            <tbody>
                                 @forelse ($tahunAjaran as $tahun)
                                     <tr>
-                                        <td class="px-4 py-3 font-semibold text-gray-900 dark:text-gray-100">
+                                        <td class="px-4 py-3 font-semibold text-zinc-900 dark:text-zinc-100">
                                             {{ $tahun->nama }}
                                         </td>
                                         <td class="px-4 py-3">{{ $tahun->tahun_mulai }} / {{ $tahun->tahun_selesai }}
@@ -152,21 +152,21 @@
                                                 @csrf
                                                 @method('PATCH')
                                                 <button type="submit"
-                                                    class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 {{ $tahun->is_active ? 'bg-emerald-500 focus:ring-emerald-500' : 'bg-gray-300 dark:bg-gray-600 focus:ring-gray-400' }}"
+                                                    class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 {{ $tahun->is_active ? 'bg-emerald-500 focus:ring-emerald-500' : 'bg-zinc-300 dark:bg-zinc-600 focus:ring-zinc-400' }}"
                                                     title="{{ $tahun->is_active ? __('Klik untuk menonaktifkan') : __('Klik untuk mengaktifkan') }}">
                                                     <span class="sr-only">{{ __('Toggle status') }}</span>
                                                     <span
                                                         class="inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform duration-200 {{ $tahun->is_active ? 'translate-x-6' : 'translate-x-1' }}"></span>
                                                 </button>
                                             </form>
-                                            <span class="ml-2 text-xs font-medium {{ $tahun->is_active ? 'text-emerald-600 dark:text-emerald-400' : 'text-gray-500 dark:text-gray-400' }}">
+                                            <span class="ml-2 text-xs font-medium {{ $tahun->is_active ? 'text-emerald-600 dark:text-emerald-400' : 'text-zinc-600 dark:text-zinc-400' }}">
                                                 {{ $tahun->is_active ? __('Aktif') : __('Nonaktif') }}
                                             </span>
                                         </td>
                                         <td class="px-4 py-3">
                                             <div class="flex items-center justify-center gap-2">
                                                 <button type="button"
-                                                    class="inline-flex items-center gap-1 rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold text-indigo-600 transition hover:bg-indigo-100 dark:bg-indigo-900/40 dark:text-indigo-200 dark:hover:bg-indigo-900/60"
+                                                    class="pil-aksi"
                                                     data-action="edit"
                                                     data-update-url="{{ route('tahun-ajaran.update', $tahun) }}"
                                                     data-nama="{{ $tahun->nama }}"
@@ -200,7 +200,7 @@
                                                         @csrf
                                                         @method('DELETE')
                                                         <button type="submit"
-                                                            class="inline-flex items-center gap-1 rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-600 transition hover:bg-red-100 dark:bg-red-900/40 dark:text-red-300 dark:hover:bg-red-900/60">
+                                                            class="pil-aksi pil-bahaya">
                                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4"
                                                                 fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                                 <path stroke-linecap="round" stroke-linejoin="round"
@@ -217,7 +217,7 @@
                                 @empty
                                     <tr>
                                         <td colspan="5"
-                                            class="px-4 py-6 text-center text-sm text-gray-500 dark:text-gray-400">
+                                            class="px-4 py-6 text-center text-sm text-zinc-600 dark:text-zinc-400">
                                             {{ __('Belum ada data tahun ajaran. Tambahkan data baru untuk memulai.') }}
                                         </td>
                                     </tr>
@@ -231,11 +231,11 @@
     </div>
 
     {{-- Di HP modal tampil sebagai lembar bawah selebar layar (di atas menu bawah aplikasi). --}}
-    <div id="modalOverlay" class="fixed inset-0 z-40 hidden items-center justify-center bg-gray-900/60 px-4 max-md:items-end max-md:px-0">
+    <div id="modalOverlay" class="fixed inset-0 z-40 hidden items-center justify-center bg-zinc-900/40 backdrop-blur-sm px-4 max-md:items-end max-md:px-0">
         <div id="createModal"
-            class="modal-card hidden w-full max-w-2xl overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl max-md:max-h-[92dvh] max-md:max-w-none max-md:overflow-y-auto max-md:overscroll-contain max-md:rounded-b-none max-md:border-x-0 max-md:border-b-0 dark:border-gray-700 dark:bg-gray-900">
-            <div class="border-b border-gray-100 bg-gray-50 px-6 py-4 max-md:px-4 dark:border-gray-700 dark:bg-gray-900/40">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ __('Tambah Tahun Ajaran') }}
+            class="permukaan modal-card hidden w-full max-w-2xl overflow-hidden max-md:max-h-[92dvh] max-md:max-w-none max-md:overflow-y-auto max-md:overscroll-contain max-md:rounded-b-none shadow-[0_24px_64px_rgba(0,0,0,.25)] animate-pop motion-reduce:animate-none rounded-3xl bg-white dark:bg-zinc-900">
+            <div class="px-6 pb-1 pt-6 max-md:px-4">
+                <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">{{ __('Tambah Tahun Ajaran') }}
                 </h3>
             </div>
             <form action="{{ route('tahun-ajaran.store') }}" method="POST" class="space-y-4 px-6 py-6 max-md:px-4 max-md:pb-[calc(1rem+env(safe-area-inset-bottom))] max-md:pt-4">
@@ -243,31 +243,31 @@
                 <div class="grid gap-4 sm:grid-cols-2">
                     <div>
                         <label for="create_nama"
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Nama (contoh: 2024/2025)') }}</label>
+                            class="block text-sm font-medium text-zinc-700 dark:text-zinc-300">{{ __('Nama (contoh: 2024/2025)') }}</label>
                         <input id="create_nama" name="nama" type="text" required
-                            class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 max-md:h-11 max-md:py-0 max-md:text-base dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+                            class="isian mt-1 w-full px-4 py-2.5 text-sm max-md:h-11 max-md:py-0 max-md:text-base">
                     </div>
                     <div class="grid grid-cols-2 gap-3">
                         <div>
                             <label for="create_mulai"
-                                class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Tahun Mulai') }}</label>
+                                class="block text-sm font-medium text-zinc-700 dark:text-zinc-300">{{ __('Tahun Mulai') }}</label>
                             <input id="create_mulai" name="tahun_mulai" type="number" required
-                                class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 max-md:h-11 max-md:py-0 max-md:text-base dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+                                class="isian mt-1 w-full px-4 py-2.5 text-sm max-md:h-11 max-md:py-0 max-md:text-base">
                         </div>
                         <div>
                             <label for="create_selesai"
-                                class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Tahun Selesai') }}</label>
+                                class="block text-sm font-medium text-zinc-700 dark:text-zinc-300">{{ __('Tahun Selesai') }}</label>
                             <input id="create_selesai" name="tahun_selesai" type="number" required
-                                class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 max-md:h-11 max-md:py-0 max-md:text-base dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+                                class="isian mt-1 w-full px-4 py-2.5 text-sm max-md:h-11 max-md:py-0 max-md:text-base">
                         </div>
                     </div>
                 </div>
                 <div class="grid gap-4 sm:grid-cols-2">
                     <div>
                         <label for="create_semester"
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Semester') }} <span class="text-red-500">*</span></label>
+                            class="block text-sm font-medium text-zinc-700 dark:text-zinc-300">{{ __('Semester') }} <span class="text-red-500">*</span></label>
                         <select id="create_semester" name="semester" required
-                            class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 max-md:h-11 max-md:py-0 max-md:text-base dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+                            class="isian mt-1 w-full px-4 py-2.5 text-sm max-md:h-11 max-md:py-0 max-md:text-base">
                             <option value="">{{ __('-- Pilih Semester --') }}</option>
                             <option value="Ganjil">{{ __('Ganjil') }}</option>
                             <option value="Genap">{{ __('Genap') }}</option>
@@ -276,23 +276,23 @@
                     <div class="flex items-center gap-3 pt-6 max-md:min-h-11 max-md:pt-0">
                         <input type="hidden" name="is_active" value="0">
                         <input id="create_active" name="is_active" type="checkbox" value="1"
-                            class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 max-md:h-6 max-md:w-6">
+                            class="accent-accent h-4 w-4 max-md:h-6 max-md:w-6">
                         <label for="create_active"
-                            class="text-sm font-semibold text-gray-800 max-md:flex max-md:min-h-11 max-md:flex-1 max-md:items-center dark:text-gray-200">{{ __('Tandai sebagai aktif') }}</label>
+                            class="text-sm font-semibold text-zinc-800 max-md:flex max-md:min-h-11 max-md:flex-1 max-md:items-center dark:text-zinc-200">{{ __('Tandai sebagai aktif') }}</label>
                     </div>
                 </div>
                 <div>
                     <label for="create_keterangan"
-                        class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Keterangan') }}</label>
+                        class="block text-sm font-medium text-zinc-700 dark:text-zinc-300">{{ __('Keterangan') }}</label>
                     <textarea id="create_keterangan" name="keterangan" rows="3"
-                        class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 max-md:text-base dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"></textarea>
+                        class="isian mt-1 w-full px-4 py-2.5 text-sm max-md:text-base"></textarea>
                 </div>
-                <div class="flex items-center justify-end gap-3 border-t border-gray-100 pt-4 max-md:grid max-md:grid-cols-2 dark:border-gray-700">
+                <div class="flex items-center justify-end gap-3 border-t border-zinc-100 pt-4 max-md:grid max-md:grid-cols-2 dark:border-zinc-700">
                     <button type="button"
-                        class="rounded-lg border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-600 transition hover:border-gray-300 hover:text-gray-800 max-md:min-h-11 dark:border-gray-700 dark:text-gray-300"
+                        class="tombol tombol-netral px-4 py-2 text-sm font-semibold max-md:min-h-11"
                         data-close-modal>{{ __('Batal') }}</button>
                     <button type="submit"
-                        class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-500/30 max-md:min-h-11 max-md:justify-center max-md:px-3">
+                        class="tombol tombol-aksen gap-2 px-5 py-2.5 text-sm font-semibold max-md:min-h-11 max-md:px-3">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
@@ -305,9 +305,9 @@
         </div>
 
         <div id="editModal"
-            class="modal-card hidden w-full max-w-2xl overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl max-md:max-h-[92dvh] max-md:max-w-none max-md:overflow-y-auto max-md:overscroll-contain max-md:rounded-b-none max-md:border-x-0 max-md:border-b-0 dark:border-gray-700 dark:bg-gray-900">
-            <div class="border-b border-gray-100 bg-gray-50 px-6 py-4 max-md:px-4 dark:border-gray-700 dark:bg-gray-900/40">
-                <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ __('Edit Tahun Ajaran') }}</h3>
+            class="permukaan modal-card hidden w-full max-w-2xl overflow-hidden max-md:max-h-[92dvh] max-md:max-w-none max-md:overflow-y-auto max-md:overscroll-contain max-md:rounded-b-none shadow-[0_24px_64px_rgba(0,0,0,.25)] animate-pop motion-reduce:animate-none rounded-3xl bg-white dark:bg-zinc-900">
+            <div class="px-6 pb-1 pt-6 max-md:px-4">
+                <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">{{ __('Edit Tahun Ajaran') }}</h3>
             </div>
             <form id="editForm" method="POST" class="space-y-4 px-6 py-6 max-md:px-4 max-md:pb-[calc(1rem+env(safe-area-inset-bottom))] max-md:pt-4">
                 @csrf
@@ -315,31 +315,31 @@
                 <div class="grid gap-4 sm:grid-cols-2">
                     <div>
                         <label for="edit_nama"
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Nama') }}</label>
+                            class="block text-sm font-medium text-zinc-700 dark:text-zinc-300">{{ __('Nama') }}</label>
                         <input id="edit_nama" name="nama" type="text" required
-                            class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 max-md:h-11 max-md:py-0 max-md:text-base dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+                            class="isian mt-1 w-full px-4 py-2.5 text-sm max-md:h-11 max-md:py-0 max-md:text-base">
                     </div>
                     <div class="grid grid-cols-2 gap-3">
                         <div>
                             <label for="edit_mulai"
-                                class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Tahun Mulai') }}</label>
+                                class="block text-sm font-medium text-zinc-700 dark:text-zinc-300">{{ __('Tahun Mulai') }}</label>
                             <input id="edit_mulai" name="tahun_mulai" type="number" required
-                                class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 max-md:h-11 max-md:py-0 max-md:text-base dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+                                class="isian mt-1 w-full px-4 py-2.5 text-sm max-md:h-11 max-md:py-0 max-md:text-base">
                         </div>
                         <div>
                             <label for="edit_selesai"
-                                class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Tahun Selesai') }}</label>
+                                class="block text-sm font-medium text-zinc-700 dark:text-zinc-300">{{ __('Tahun Selesai') }}</label>
                             <input id="edit_selesai" name="tahun_selesai" type="number" required
-                                class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 max-md:h-11 max-md:py-0 max-md:text-base dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+                                class="isian mt-1 w-full px-4 py-2.5 text-sm max-md:h-11 max-md:py-0 max-md:text-base">
                         </div>
                     </div>
                 </div>
                 <div class="grid gap-4 sm:grid-cols-2">
                     <div>
                         <label for="edit_semester"
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Semester') }} <span class="text-red-500">*</span></label>
+                            class="block text-sm font-medium text-zinc-700 dark:text-zinc-300">{{ __('Semester') }} <span class="text-red-500">*</span></label>
                         <select id="edit_semester" name="semester" required
-                            class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 max-md:h-11 max-md:py-0 max-md:text-base dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100">
+                            class="isian mt-1 w-full px-4 py-2.5 text-sm max-md:h-11 max-md:py-0 max-md:text-base">
                             <option value="">{{ __('-- Pilih Semester --') }}</option>
                             <option value="Ganjil">{{ __('Ganjil') }}</option>
                             <option value="Genap">{{ __('Genap') }}</option>
@@ -348,23 +348,23 @@
                     <div class="flex items-center gap-3 pt-6 max-md:min-h-11 max-md:pt-0">
                         <input type="hidden" name="is_active" value="0">
                         <input id="edit_active" name="is_active" type="checkbox" value="1"
-                            class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 max-md:h-6 max-md:w-6">
+                            class="accent-accent h-4 w-4 max-md:h-6 max-md:w-6">
                         <label for="edit_active"
-                            class="text-sm font-semibold text-gray-800 max-md:flex max-md:min-h-11 max-md:flex-1 max-md:items-center dark:text-gray-200">{{ __('Tandai sebagai aktif') }}</label>
+                            class="text-sm font-semibold text-zinc-800 max-md:flex max-md:min-h-11 max-md:flex-1 max-md:items-center dark:text-zinc-200">{{ __('Tandai sebagai aktif') }}</label>
                     </div>
                 </div>
                 <div>
                     <label for="edit_keterangan"
-                        class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Keterangan') }}</label>
+                        class="block text-sm font-medium text-zinc-700 dark:text-zinc-300">{{ __('Keterangan') }}</label>
                     <textarea id="edit_keterangan" name="keterangan" rows="3"
-                        class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 max-md:text-base dark:border-gray-700 dark:bg-gray-800 dark:text-gray-100"></textarea>
+                        class="isian mt-1 w-full px-4 py-2.5 text-sm max-md:text-base"></textarea>
                 </div>
-                <div class="flex items-center justify-between border-t border-gray-100 pt-4 max-md:grid max-md:grid-cols-2 max-md:gap-3 dark:border-gray-700">
+                <div class="flex items-center justify-between border-t border-zinc-100 pt-4 max-md:grid max-md:grid-cols-2 max-md:gap-3 dark:border-zinc-700">
                     <button type="button"
-                        class="rounded-lg border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-600 transition hover:border-gray-300 hover:text-gray-800 max-md:min-h-11 dark:border-gray-700 dark:text-gray-300"
+                        class="tombol tombol-netral px-4 py-2 text-sm font-semibold max-md:min-h-11"
                         data-close-modal>{{ __('Batal') }}</button>
                     <button type="submit"
-                        class="inline-flex items-center gap-2 rounded-lg bg-purple-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-purple-700 focus:outline-none focus:ring-4 focus:ring-purple-500/30 max-md:min-h-11 max-md:justify-center max-md:px-3">
+                        class="tombol tombol-netral gap-2 px-5 py-2.5 text-sm font-semibold max-md:min-h-11 max-md:px-3">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"

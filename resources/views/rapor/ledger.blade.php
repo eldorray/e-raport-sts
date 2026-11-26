@@ -110,7 +110,7 @@
             {{ $tahun->nama ?? $tahunId }}
             &nbsp;•&nbsp; Semester: {{ ucfirst($semester) }}</p>
 
-        <table class="header-table" style="margin-bottom: 10px;">
+        <table class="tabel header-table" style="margin-bottom: 10px;">
             <tr>
                 <td style="width: 80px;">Kelas</td>
                 <td style="width: 6px;">:</td>

@@ -1,12 +1,12 @@
 <x-layouts.auth :title="__('Verify Email')">
     <!-- Verify Email Card -->
     <div
-        class="bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 overflow-hidden">
+        class="kartu overflow-hidden">
         <div class="p-6">
             <div class="text-center mb-6">
-                <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100">{{ __('Verify Your Email Address') }}
+                <h1 class="text-[28px] font-semibold leading-tight tracking-[-0.025em] text-zinc-900 max-md:text-2xl dark:text-zinc-50">{{ __('Verify Your Email Address') }}
                 </h1>
-                <p class="text-gray-600 dark:text-gray-400 mt-1">
+                <p class="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
                     {{ __('Before proceeding, please check your email for a verification link.') }}<br>
                     {{ __('If you did not receive the email, you can request another below.') }}
                 </p>
@@ -28,7 +28,7 @@
             <div class="text-center mt-6">
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
-                    <button type="submit" class="text-blue-600 dark:text-blue-400 hover:underline font-medium">
+                    <button type="submit" class="text-accent-strong dark:text-blue-400 hover:underline font-medium">
                         {{ __('Log out') }}
                     </button>
                 </form>

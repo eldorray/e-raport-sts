@@ -8,7 +8,7 @@
 
 @theme {
     --font-sans:
-        "Instrument Sans", ui-sans-serif, system-ui, sans-serif,
+        "Inter", ui-sans-serif, system-ui, sans-serif,
         "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
         "Noto Color Emoji";
     --color-accent: #006fee;
@@ -187,6 +187,141 @@ html[data-warna-font] body {
 
 html.dark[data-warna-font] body {
     color: var(--font-color-dark);
+}
+
+/*
+ * Komponen desain (acuan: HeroUI v3). Ada di layer components, jadi utility Tailwind
+ * di markup (padding, lebar, tinggi) tetap menang.
+ */
+@layer components {
+    /* Permukaan putih. Isian di dalamnya otomatis memakai varian "secondary" (terisi abu). */
+    .kartu {
+        @apply rounded-[20px] bg-white shadow-[0_1px_2px_rgba(0,0,0,.05)] dark:bg-zinc-800;
+    }
+
+    /* Kartu di dalam kartu: permukaan sekunder, tanpa bayangan */
+    .kartu .kartu {
+        @apply rounded-2xl bg-zinc-50 shadow-none dark:bg-zinc-700/40;
+    }
+
+    /* Isian form. Bawaan = varian "primary" HeroUI: putih dengan bayangan tipis, untuk latar halaman. */
+    .isian {
+        @apply rounded-xl border-0 bg-white text-zinc-900 shadow-[0_2px_4px_rgba(0,0,0,.04),0_1px_2px_rgba(0,0,0,.06),0_0_1px_rgba(0,0,0,.06)] transition-[background-color,box-shadow] duration-200 placeholder:text-zinc-500 hover:bg-zinc-50 focus:outline-none focus:ring-2 focus:ring-accent disabled:cursor-not-allowed disabled:opacity-50 dark:bg-zinc-800 dark:text-zinc-100 dark:shadow-none dark:placeholder:text-zinc-400 dark:hover:bg-zinc-700;
+    }
+
+    /* Varian "secondary": di atas permukaan putih (kartu, modal) */
+    .kartu .isian,
+    .permukaan .isian {
+        @apply bg-zinc-100 shadow-none hover:bg-zinc-200 focus:bg-white dark:bg-zinc-700/60 dark:hover:bg-zinc-700 dark:focus:bg-zinc-900;
+    }
+
+    .kartu .kartu .isian {
+        @apply bg-white hover:bg-zinc-100 dark:bg-zinc-800;
+    }
+
+    /* Tombol: mengecil 0.97 saat ditekan, seperti .button:active di HeroUI */
+    .tombol {
+        @apply inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl font-semibold transition duration-200 ease-[cubic-bezier(.32,.72,0,1)] hover:opacity-90 focus:outline-none focus-visible:ring-4 focus-visible:ring-accent/30 active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50 motion-reduce:transition-none;
+    }
+
+    .tombol-aksen {
+        @apply bg-accent text-white;
+    }
+
+    .tombol-netral {
+        @apply bg-zinc-200/70 text-zinc-900 dark:bg-zinc-700 dark:text-zinc-100;
+    }
+
+    .kartu .tombol-netral,
+    .permukaan .tombol-netral {
+        @apply bg-zinc-100 dark:bg-zinc-700;
+    }
+
+    .tombol-bahaya {
+        @apply bg-rose-100 text-rose-800 focus-visible:ring-rose-500/30 dark:bg-rose-900/40 dark:text-rose-300;
+    }
+
+    /* Tombol aksi kecil di baris tabel */
+    .pil-aksi {
+        @apply inline-flex h-[30px] cursor-pointer items-center gap-1 whitespace-nowrap rounded-[10px] bg-zinc-100 px-3 text-xs font-semibold text-zinc-900 transition duration-200 hover:opacity-80 active:scale-[0.97] dark:bg-zinc-700 dark:text-zinc-100;
+    }
+
+    .pil-aksi.pil-bahaya {
+        @apply bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-300;
+    }
+
+    /* Chip status */
+    .pil {
+        @apply inline-flex items-center gap-1 whitespace-nowrap rounded-full bg-zinc-100 text-xs font-semibold text-zinc-700 dark:bg-zinc-700 dark:text-zinc-300;
+    }
+
+    .pil.pil-sukses {
+        @apply bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300;
+    }
+
+    .pil.pil-peringatan {
+        @apply bg-amber-100 text-amber-900 dark:bg-amber-900/40 dark:text-amber-300;
+    }
+
+    .pil.pil-bahaya {
+        @apply bg-rose-100 text-rose-800 dark:bg-rose-900/40 dark:text-rose-300;
+    }
+
+    .pil.pil-info {
+        @apply bg-accent/10 text-accent-strong dark:bg-accent/20 dark:text-blue-300;
+    }
+
+    /* Tabel: kepala membulat berdiri sendiri (varian "secondary" HeroUI), baris menyala saat disorot */
+    .tabel {
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .tabel thead th {
+        @apply bg-zinc-100 text-left text-xs font-semibold text-zinc-600 dark:bg-zinc-700/60 dark:text-zinc-400;
+    }
+
+    .tabel thead th:first-child {
+        border-radius: 0.75rem 0 0 0.75rem;
+    }
+
+    .tabel thead th:last-child {
+        border-radius: 0 0.75rem 0.75rem 0;
+    }
+
+    .tabel tbody td {
+        @apply border-b border-zinc-100 dark:border-zinc-700;
+    }
+
+    .tabel tbody tr {
+        @apply transition-colors duration-150;
+    }
+
+    .tabel tbody tr:hover {
+        @apply bg-zinc-50 dark:bg-zinc-700/40;
+    }
+
+    /* Tabel menempel ke tepi kartu: beri jarak supaya kepala membulatnya tidak terpotong */
+    @media (width >= 48rem) {
+        .kartu > :where(div):has(table.tabel) {
+            padding: 1.25rem 1.25rem 0.5rem;
+        }
+    }
+
+    /* Tabel yang di HP berubah menjadi kartu per baris: garis antar baris, bukan antar sel */
+    @media (width < 48rem) {
+        .tabel.max-md\:block tbody td {
+            border-bottom-width: 0;
+        }
+
+        .tabel.max-md\:block tbody tr + tr {
+            @apply border-t border-zinc-100 dark:border-zinc-700;
+        }
+
+        .tabel.max-md\:block tbody tr:hover {
+            background-color: transparent;
+        }
+    }
 }
 
 /* Kontrol DataTables (cari, jumlah baris, halaman) mengikuti gaya form aplikasi */

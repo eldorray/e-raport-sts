@@ -1,11 +1,11 @@
 <x-layouts.auth :title="__('Confirm Password')">
     <!-- Confirm Password Card -->
     <div
-        class="bg-white dark:bg-gray-800 rounded-lg shadow-md border border-gray-200 dark:border-gray-700 overflow-hidden">
+        class="kartu overflow-hidden">
         <div class="p-6">
             <div class="text-center mb-6">
-                <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100">{{ __('Confirm Password') }}</h1>
-                <p class="text-gray-600 dark:text-gray-400 mt-1">
+                <h1 class="text-[28px] font-semibold leading-tight tracking-[-0.025em] text-zinc-900 max-md:text-2xl dark:text-zinc-50">{{ __('Confirm Password') }}</h1>
+                <p class="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
                     {{ __('Please confirm your password before continuing.') }}
                 </p>
             </div>
@@ -26,7 +26,7 @@
             <!-- Forgot Password Link -->
             <div class="text-center mt-6">
                 <a href="{{ route('password.request') }}"
-                    class="text-blue-600 dark:text-blue-400 hover:underline font-medium">{{ __('Forgot your password?') }}</a>
+                    class="text-accent-strong dark:text-blue-400 hover:underline font-medium">{{ __('Forgot your password?') }}</a>
             </div>
         </div>
     </div>

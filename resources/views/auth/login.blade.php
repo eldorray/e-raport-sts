@@ -7,7 +7,7 @@
         $logoUrl = $school?->logo ? asset('storage/' . $school->logo) : asset('images/eraport-icon.png');
 
         $press = 'transition duration-200 ease-[cubic-bezier(.32,.72,0,1)] hover:opacity-90 active:scale-[0.97] motion-reduce:transition-none';
-        $field = 'flex h-12 items-center rounded-[14px] bg-zinc-100 transition-colors duration-200 hover:bg-zinc-200 focus-within:bg-white focus-within:ring-2 focus-within:ring-accent dark:bg-zinc-700/60 dark:hover:bg-zinc-700 dark:focus-within:bg-zinc-900';
+        $field = 'flex h-12 items-center rounded-xl bg-zinc-100 transition-colors duration-200 hover:bg-zinc-200 focus-within:bg-white focus-within:ring-2 focus-within:ring-accent dark:bg-zinc-700/60 dark:hover:bg-zinc-700 dark:focus-within:bg-zinc-900';
         $input = 'min-w-0 flex-1 bg-transparent text-[15px] text-zinc-900 placeholder-zinc-500 focus:outline-none dark:text-zinc-100 dark:placeholder-zinc-400';
         $label = 'text-[13px] font-medium text-zinc-900 dark:text-zinc-200';
         $error = 'text-sm text-red-600 dark:text-red-400';

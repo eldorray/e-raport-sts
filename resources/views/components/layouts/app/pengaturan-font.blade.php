@@ -18,7 +18,7 @@
 
     // Apply font family settings
     (function() {
-        const fontFamily = window.localStorage.getItem('fontFamily') || 'sfpro';
+        const fontFamily = window.localStorage.getItem('fontFamily') || 'inter';
         const fonts = {
             sfpro: '"SF Pro Display", -apple-system, BlinkMacSystemFont, sans-serif',
             inter: '"Inter", sans-serif',
@@ -27,7 +27,7 @@
             lato: '"Lato", sans-serif',
             montserrat: '"Montserrat", sans-serif'
         };
-        document.documentElement.style.fontFamily = fonts[fontFamily] || fonts.sfpro;
+        document.documentElement.style.fontFamily = fonts[fontFamily] || fonts.inter;
     })();
 
     // Apply font color settings

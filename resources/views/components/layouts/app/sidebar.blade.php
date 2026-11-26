@@ -35,11 +35,11 @@
                             :class="{ 'justify-center': !sidebarOpen }">
                             @svg('fas-mobile-screen-button', 'h-[18px] w-[18px] shrink-0 text-zinc-600 dark:text-zinc-300')
                             <span x-show="sidebarOpen" x-transition:enter="transition-all duration-300"
-                                x-transition:enter-start="opacity-0 transform -tranzinc-x-2"
-                                x-transition:enter-end="opacity-100 transform tranzinc-x-0"
+                                x-transition:enter-start="opacity-0 transform -translate-x-2"
+                                x-transition:enter-end="opacity-100 transform translate-x-0"
                                 x-transition:leave="transition-all duration-300"
-                                x-transition:leave-start="opacity-100 transform tranzinc-x-0"
-                                x-transition:leave-end="opacity-0 transform -tranzinc-x-2"
+                                x-transition:leave-start="opacity-100 transform translate-x-0"
+                                x-transition:leave-end="opacity-0 transform -translate-x-2"
                                 class="ml-3 whitespace-nowrap">{{ __('Aplikasi Admin (HP)') }}</span>
                         </a>
                     </li>
@@ -127,11 +127,11 @@
                             :class="{ 'justify-center': !sidebarOpen }">
                             @svg('fas-mobile-screen-button', 'h-[18px] w-[18px] shrink-0 text-zinc-600 dark:text-zinc-300')
                             <span x-show="sidebarOpen" x-transition:enter="transition-all duration-300"
-                                x-transition:enter-start="opacity-0 transform -tranzinc-x-2"
-                                x-transition:enter-end="opacity-100 transform tranzinc-x-0"
+                                x-transition:enter-start="opacity-0 transform -translate-x-2"
+                                x-transition:enter-end="opacity-100 transform translate-x-0"
                                 x-transition:leave="transition-all duration-300"
-                                x-transition:leave-start="opacity-100 transform tranzinc-x-0"
-                                x-transition:leave-end="opacity-0 transform -tranzinc-x-2"
+                                x-transition:leave-start="opacity-100 transform translate-x-0"
+                                x-transition:leave-end="opacity-0 transform -translate-x-2"
                                 class="ml-3 whitespace-nowrap">{{ __('Aplikasi Guru (HP)') }}</span>
                         </a>
                     </li>

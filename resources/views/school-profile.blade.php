@@ -21,13 +21,13 @@
 
     <div class="mb-8 flex flex-col gap-3 max-md:mb-5 md:flex-row md:items-center md:justify-between">
         <div>
-            <h1 class="text-3xl font-semibold text-gray-900 max-md:text-2xl dark:text-gray-100">{{ __('Profil Sekolah') }}</h1>
-            <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
+            <h1 class="text-[28px] font-semibold leading-tight tracking-[-0.025em] text-zinc-900 max-md:text-2xl dark:text-zinc-50">{{ __('Profil Sekolah') }}</h1>
+            <p class="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
                 {{ __('Kelola identitas madrasah Anda agar data tetap selaras dengan sistem pusat.') }}</p>
         </div>
         <div class="flex items-center gap-3">
             <a href="{{ route('dashboard') }}"
-                class="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm transition hover:border-gray-300 hover:text-gray-900 max-md:min-h-11 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 dark:hover:border-gray-600 dark:hover:text-gray-100">
+                class="tombol tombol-netral gap-2 px-4 py-2 text-sm font-semibold max-md:min-h-11">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
                     stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 19l-7-7 7-7" />
@@ -40,9 +40,9 @@
     <div class="grid gap-6 max-md:gap-4 lg:grid-cols-[360px_minmax(0,1fr)]">
         <div class="space-y-6 max-md:min-w-0 max-md:space-y-4">
             <div
-                class="relative overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                class="kartu relative overflow-hidden">
                 <div aria-hidden="true" class="pointer-events-none absolute inset-0">
-                    <div class="absolute -top-14 -right-16 h-36 w-36 rounded-full bg-blue-100/70 dark:bg-blue-900/30">
+                    <div class="absolute -top-14 -right-16 h-36 w-36 rounded-full bg-accent/10 dark:bg-blue-900/30">
                     </div>
                     <div
                         class="absolute -bottom-16 -left-10 h-40 w-40 rounded-full bg-indigo-100/70 dark:bg-indigo-900/30">
@@ -51,7 +51,7 @@
                 <div class="relative p-8 max-md:p-4">
                     <div class="flex items-start gap-4">
                         <div
-                            class="relative h-24 w-24 overflow-hidden rounded-xl border border-white bg-white shadow-lg ring-2 ring-white/40 max-md:h-20 max-md:w-20 max-md:shrink-0 dark:border-gray-700 dark:bg-gray-900 dark:ring-gray-600/30">
+                            class="kartu relative h-24 w-24 overflow-hidden border-white ring-2 ring-white/40 max-md:h-20 max-md:w-20 max-md:shrink-0 dark:ring-zinc-600/30">
                             @if ($logoUrl)
                                 <img src="{{ $logoUrl }}" alt="{{ $schoolProfile->name ?? __('Logo Sekolah') }}"
                                     class="h-full w-full object-cover">
@@ -63,16 +63,16 @@
                             @endif
                         </div>
                         <div class="max-md:min-w-0">
-                            <p class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                            <p class="text-xs font-semibold uppercase tracking-wide text-zinc-600 dark:text-zinc-400">
                                 {{ __('Profil Madrasah') }}</p>
-                            <h2 class="mt-1 text-2xl font-semibold text-gray-900 max-md:text-lg max-md:leading-snug dark:text-gray-100">
+                            <h2 class="mt-1 text-2xl font-semibold text-zinc-900 max-md:text-lg max-md:leading-snug dark:text-zinc-100">
                                 {{ $schoolProfile->name ?? __('Belum diatur') }}</h2>
-                            <p class="mt-2 text-sm text-gray-600 dark:text-gray-300">
+                            <p class="mt-2 text-sm text-zinc-600 dark:text-zinc-300">
                                 {{ $schoolProfile->address ?? __('Alamat belum diatur') }}
                             </p>
                             @if ($schoolProfile->email)
                                 <div
-                                    class="mt-3 inline-flex items-center gap-2 rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700 max-md:max-w-full dark:bg-blue-900/40 dark:text-blue-200">
+                                    class="pil pil-info mt-3 gap-2 px-3 py-1 font-medium max-md:max-w-full">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 max-md:shrink-0" fill="none"
                                         viewBox="0 0 24 24" stroke="currentColor">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -88,33 +88,33 @@
 
                     <dl class="mt-6 grid grid-cols-1 gap-4 text-sm max-md:mt-4 max-md:grid-cols-2 max-md:gap-3 sm:grid-cols-2">
                         <div>
-                            <dt class="text-gray-500 dark:text-gray-400">{{ __('NSM') }}</dt>
-                            <dd class="mt-1 font-semibold text-gray-900 dark:text-gray-100">
+                            <dt class="text-zinc-600 dark:text-zinc-400">{{ __('NSM') }}</dt>
+                            <dd class="mt-1 font-semibold text-zinc-900 dark:text-zinc-100">
                                 {{ $schoolProfile->nsm ?? '—' }}</dd>
                         </div>
                         <div>
-                            <dt class="text-gray-500 dark:text-gray-400">{{ __('NPSN') }}</dt>
-                            <dd class="mt-1 font-semibold text-gray-900 dark:text-gray-100">
+                            <dt class="text-zinc-600 dark:text-zinc-400">{{ __('NPSN') }}</dt>
+                            <dd class="mt-1 font-semibold text-zinc-900 dark:text-zinc-100">
                                 {{ $schoolProfile->npsn ?? '—' }}</dd>
                         </div>
                         <div>
-                            <dt class="text-gray-500 dark:text-gray-400">{{ __('Kecamatan') }}</dt>
-                            <dd class="mt-1 font-semibold text-gray-900 dark:text-gray-100">
+                            <dt class="text-zinc-600 dark:text-zinc-400">{{ __('Kecamatan') }}</dt>
+                            <dd class="mt-1 font-semibold text-zinc-900 dark:text-zinc-100">
                                 {{ $schoolProfile->district ?? '—' }}</dd>
                         </div>
                         <div>
-                            <dt class="text-gray-500 dark:text-gray-400">{{ __('Kota/Kabupaten') }}</dt>
-                            <dd class="mt-1 font-semibold text-gray-900 dark:text-gray-100">
+                            <dt class="text-zinc-600 dark:text-zinc-400">{{ __('Kota/Kabupaten') }}</dt>
+                            <dd class="mt-1 font-semibold text-zinc-900 dark:text-zinc-100">
                                 {{ $schoolProfile->city ?? '—' }}</dd>
                         </div>
                         <div class="max-md:col-span-2 sm:col-span-2">
-                            <dt class="text-gray-500 dark:text-gray-400">{{ __('Provinsi') }}</dt>
-                            <dd class="mt-1 font-semibold text-gray-900 dark:text-gray-100">
+                            <dt class="text-zinc-600 dark:text-zinc-400">{{ __('Provinsi') }}</dt>
+                            <dd class="mt-1 font-semibold text-zinc-900 dark:text-zinc-100">
                                 {{ $schoolProfile->province ?? '—' }}</dd>
                         </div>
                     </dl>
                 </div>
-                <div class="relative border-t border-gray-100 bg-gray-50 p-6 max-md:p-4 dark:border-gray-700 dark:bg-gray-900/40">
+                <div class="relative border-t border-zinc-100 bg-zinc-50 p-6 max-md:p-4 dark:border-zinc-700 dark:bg-zinc-900/40">
                     <form action="{{ route('school-profile.update') }}" method="POST" enctype="multipart/form-data"
                         class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                         @csrf
@@ -124,7 +124,7 @@
                             <input id="logo" name="logo" type="file" accept="image/*" class="sr-only"
                                 onchange="this.form.submit()">
                             <label for="logo"
-                                class="inline-flex cursor-pointer items-center gap-2 rounded-full bg-blue-600 px-4 py-2 max-md:min-h-11 max-md:justify-center max-md:px-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus-within:outline-none focus-within:ring-4 focus-within:ring-blue-500/40">
+                                class="tombol tombol-aksen gap-2 px-4 py-2 max-md:min-h-11 max-md:px-3 text-sm font-semibold">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
                                     viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
@@ -143,7 +143,7 @@
                             </button>
                         </div>
                         <button type="button" title="{{ __('Segera hadir') }}"
-                            class="inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-white px-4 py-2 max-md:min-h-11 max-md:justify-center max-md:px-3 text-sm font-semibold text-indigo-600 transition hover:border-indigo-300 hover:bg-indigo-50 dark:border-indigo-700/60 dark:bg-gray-900 dark:text-indigo-300 dark:hover:border-indigo-600/60">
+                            class="inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-white px-4 py-2 max-md:min-h-11 max-md:justify-center max-md:px-3 text-sm font-semibold text-indigo-600 transition hover:border-indigo-300 hover:bg-indigo-50 dark:border-indigo-700/60 dark:bg-zinc-900 dark:text-indigo-300 dark:hover:border-indigo-600/60">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
                                 stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
@@ -160,7 +160,7 @@
 
             {{-- Logo Kanan (Kop Raport) --}}
             <div
-                class="relative overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                class="kartu relative overflow-hidden">
                 <div aria-hidden="true" class="pointer-events-none absolute inset-0">
                     <div class="absolute -top-14 -right-16 h-36 w-36 rounded-full bg-green-100/70 dark:bg-green-900/30">
                     </div>
@@ -171,7 +171,7 @@
                 <div class="relative p-8 max-md:p-4">
                     <div class="flex items-start gap-4">
                         <div
-                            class="relative h-24 w-24 overflow-hidden rounded-xl border border-white bg-white shadow-lg ring-2 ring-white/40 max-md:h-20 max-md:w-20 max-md:shrink-0 dark:border-gray-700 dark:bg-gray-900 dark:ring-gray-600/30">
+                            class="kartu relative h-24 w-24 overflow-hidden border-white ring-2 ring-white/40 max-md:h-20 max-md:w-20 max-md:shrink-0 dark:ring-zinc-600/30">
                             @if ($logoRightUrl)
                                 <img src="{{ $logoRightUrl }}" alt="{{ __('Logo Kanan') }}"
                                     class="h-full w-full object-cover">
@@ -187,15 +187,15 @@
                             @endif
                         </div>
                         <div class="max-md:min-w-0">
-                            <p class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                            <p class="text-xs font-semibold uppercase tracking-wide text-zinc-600 dark:text-zinc-400">
                                 {{ __('Logo Kanan') }}</p>
-                            <h2 class="mt-1 text-lg font-semibold text-gray-900 dark:text-gray-100">
+                            <h2 class="mt-1 text-lg font-semibold text-zinc-900 dark:text-zinc-100">
                                 {{ __('Logo Kop Raport') }}</h2>
-                            <p class="mt-2 text-sm text-gray-600 dark:text-gray-300">
+                            <p class="mt-2 text-sm text-zinc-600 dark:text-zinc-300">
                                 {{ __('Logo ini akan ditampilkan di sisi kanan kop cetak raport.') }}
                             </p>
                             <div
-                                class="mt-3 inline-flex items-center gap-2 rounded-full bg-green-50 px-3 py-1 text-xs font-medium text-green-700 dark:bg-green-900/40 dark:text-green-200">
+                                class="pil pil-sukses mt-3 gap-2 px-3 py-1 font-medium">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none"
                                     viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -206,7 +206,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="relative border-t border-gray-100 bg-gray-50 p-6 max-md:p-4 dark:border-gray-700 dark:bg-gray-900/40">
+                <div class="relative border-t border-zinc-100 bg-zinc-50 p-6 max-md:p-4 dark:border-zinc-700 dark:bg-zinc-900/40">
                     <form action="{{ route('school-profile.update') }}" method="POST" enctype="multipart/form-data"
                         class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-start">
                         @csrf
@@ -216,7 +216,7 @@
                             <input id="logo_right" name="logo_right" type="file" accept="image/*" class="sr-only"
                                 onchange="this.form.submit()">
                             <label for="logo_right"
-                                class="inline-flex cursor-pointer items-center gap-2 rounded-full bg-green-600 px-4 py-2 max-md:min-h-11 max-md:justify-center max-md:px-3 text-sm font-semibold text-white shadow-sm transition hover:bg-green-700 focus-within:outline-none focus-within:ring-4 focus-within:ring-green-500/40">
+                                class="tombol tombol-netral gap-2 px-4 py-2 max-md:min-h-11 max-md:px-3 text-sm font-semibold">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
                                     viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
@@ -242,20 +242,20 @@
             </div>
 
             <div
-                class="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm max-md:p-4 dark:border-gray-700 dark:bg-gray-800">
+                class="kartu p-6 max-md:p-4">
                 <div class="flex items-start justify-between gap-4 max-md:flex-col-reverse max-md:gap-2">
                     <div>
-                        <h3 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ __('Keamanan Akun') }}
+                        <h3 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">{{ __('Keamanan Akun') }}
                         </h3>
-                        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                        <p class="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
                             {{ __('Perbarui password Anda secara berkala untuk menjaga keamanan akses.') }}</p>
                     </div>
                     <span
-                        class="inline-flex items-center rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-600 dark:bg-gray-900 dark:text-gray-300">{{ __('Direkomendasikan') }}</span>
+                        class="pil px-3 py-1">{{ __('Direkomendasikan') }}</span>
                 </div>
                 <div class="mt-5">
                     <a href="{{ route('settings.password.edit') }}"
-                        class="inline-flex items-center gap-2 rounded-lg bg-gray-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-gray-700 max-md:min-h-11 max-md:w-full max-md:justify-center dark:bg-gray-700 dark:hover:bg-gray-600">
+                        class="inline-flex items-center gap-2 rounded-lg bg-zinc-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-zinc-700 max-md:min-h-11 max-md:w-full max-md:justify-center dark:bg-zinc-700 dark:hover:bg-zinc-600">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
@@ -269,34 +269,34 @@
 
         <div class="space-y-6 max-md:min-w-0 max-md:space-y-4">
             <form action="{{ route('school-profile.update') }}" method="POST"
-                class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                class="kartu overflow-hidden">
                 @csrf
                 @method('PUT')
                 <input type="hidden" name="intent" value="identity">
-                <div class="border-b border-gray-100 bg-gray-50 px-6 py-5 max-md:px-4 max-md:py-4 dark:border-gray-700 dark:bg-gray-900/40">
-                    <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ __('Informasi Madrasah') }}
+                <div class="border-b border-zinc-100 bg-zinc-50 px-6 py-5 max-md:px-4 max-md:py-4 dark:border-zinc-700 dark:bg-zinc-900/40">
+                    <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">{{ __('Informasi Madrasah') }}
                     </h2>
-                    <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                    <p class="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
                         {{ __('Data ini akan ditampilkan pada seluruh modul sekolah dan laporan resmi.', ['sebutan' => $schoolProfile->sebutan()]) }}</p>
                 </div>
                 <div class="space-y-5 px-6 py-6 max-md:space-y-4 max-md:px-4 max-md:py-4">
                     <div class="grid gap-5 max-md:gap-4 sm:grid-cols-2">
                         <div>
                             <label for="name"
-                                class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Nama Sekolah') }}</label>
+                                class="block text-sm font-medium text-zinc-700 dark:text-zinc-300">{{ __('Nama Sekolah') }}</label>
                             <input id="name" name="name" type="text"
                                 value="{{ old('name', $schoolProfile->name) }}"
-                                class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 max-md:h-11 max-md:py-0 max-md:text-base dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:focus:border-blue-400">
+                                class="isian mt-1 w-full px-4 py-2.5 text-sm max-md:h-11 max-md:py-0 max-md:text-base">
                             @error('name')
                                 <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
                             @enderror
                         </div>
                         <div>
                             <label for="email"
-                                class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Email Resmi') }}</label>
+                                class="block text-sm font-medium text-zinc-700 dark:text-zinc-300">{{ __('Email Resmi') }}</label>
                             <input id="email" name="email" type="email"
                                 value="{{ old('email', $schoolProfile->email) }}"
-                                class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 max-md:h-11 max-md:py-0 max-md:text-base dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:focus:border-blue-400">
+                                class="isian mt-1 w-full px-4 py-2.5 text-sm max-md:h-11 max-md:py-0 max-md:text-base">
                             @error('email')
                                 <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
                             @enderror
@@ -305,20 +305,20 @@
                     <div class="grid gap-5 max-md:gap-4 sm:grid-cols-2">
                         <div>
                             <label for="nsm"
-                                class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('NSM') }}</label>
+                                class="block text-sm font-medium text-zinc-700 dark:text-zinc-300">{{ __('NSM') }}</label>
                             <input id="nsm" name="nsm" type="text"
                                 value="{{ old('nsm', $schoolProfile->nsm) }}"
-                                class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 max-md:h-11 max-md:py-0 max-md:text-base dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:focus:border-blue-400">
+                                class="isian mt-1 w-full px-4 py-2.5 text-sm max-md:h-11 max-md:py-0 max-md:text-base">
                             @error('nsm')
                                 <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
                             @enderror
                         </div>
                         <div>
                             <label for="npsn"
-                                class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('NPSN') }}</label>
+                                class="block text-sm font-medium text-zinc-700 dark:text-zinc-300">{{ __('NPSN') }}</label>
                             <input id="npsn" name="npsn" type="text"
                                 value="{{ old('npsn', $schoolProfile->npsn) }}"
-                                class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 max-md:h-11 max-md:py-0 max-md:text-base dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:focus:border-blue-400">
+                                class="isian mt-1 w-full px-4 py-2.5 text-sm max-md:h-11 max-md:py-0 max-md:text-base">
                             @error('npsn')
                                 <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
                             @enderror
@@ -326,9 +326,9 @@
                     </div>
                     <div>
                         <label for="address"
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Alamat Lengkap') }}</label>
+                            class="block text-sm font-medium text-zinc-700 dark:text-zinc-300">{{ __('Alamat Lengkap') }}</label>
                         <textarea id="address" name="address" rows="3"
-                            class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 max-md:text-base dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:focus:border-blue-400">{{ old('address', $schoolProfile->address) }}</textarea>
+                            class="isian mt-1 w-full px-4 py-2.5 text-sm max-md:text-base">{{ old('address', $schoolProfile->address) }}</textarea>
                         @error('address')
                             <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
                         @enderror
@@ -336,30 +336,30 @@
                     <div class="grid gap-5 max-md:gap-4 sm:grid-cols-3">
                         <div>
                             <label for="district"
-                                class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Kecamatan') }}</label>
+                                class="block text-sm font-medium text-zinc-700 dark:text-zinc-300">{{ __('Kecamatan') }}</label>
                             <input id="district" name="district" type="text"
                                 value="{{ old('district', $schoolProfile->district) }}"
-                                class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 max-md:h-11 max-md:py-0 max-md:text-base dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:focus:border-blue-400">
+                                class="isian mt-1 w-full px-4 py-2.5 text-sm max-md:h-11 max-md:py-0 max-md:text-base">
                             @error('district')
                                 <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
                             @enderror
                         </div>
                         <div>
                             <label for="city"
-                                class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Kota/Kabupaten') }}</label>
+                                class="block text-sm font-medium text-zinc-700 dark:text-zinc-300">{{ __('Kota/Kabupaten') }}</label>
                             <input id="city" name="city" type="text"
                                 value="{{ old('city', $schoolProfile->city) }}"
-                                class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 max-md:h-11 max-md:py-0 max-md:text-base dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:focus:border-blue-400">
+                                class="isian mt-1 w-full px-4 py-2.5 text-sm max-md:h-11 max-md:py-0 max-md:text-base">
                             @error('city')
                                 <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
                             @enderror
                         </div>
                         <div>
                             <label for="province"
-                                class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Provinsi') }}</label>
+                                class="block text-sm font-medium text-zinc-700 dark:text-zinc-300">{{ __('Provinsi') }}</label>
                             <input id="province" name="province" type="text"
                                 value="{{ old('province', $schoolProfile->province) }}"
-                                class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 max-md:h-11 max-md:py-0 max-md:text-base dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:focus:border-blue-400">
+                                class="isian mt-1 w-full px-4 py-2.5 text-sm max-md:h-11 max-md:py-0 max-md:text-base">
                             @error('province')
                                 <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
                             @enderror
@@ -367,9 +367,9 @@
                     </div>
                 </div>
                 <div
-                    class="flex items-center justify-end gap-3 border-t border-gray-100 bg-gray-50 px-6 py-4 max-md:px-4 dark:border-gray-700 dark:bg-gray-900/40">
+                    class="flex items-center justify-end gap-3 border-t border-zinc-100 bg-zinc-50 px-6 py-4 max-md:px-4 dark:border-zinc-700 dark:bg-zinc-900/40">
                     <button type="submit"
-                        class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-500/30 max-md:min-h-11 max-md:w-full max-md:justify-center max-md:text-base">
+                        class="tombol tombol-aksen gap-2 px-5 py-2.5 text-sm font-semibold max-md:min-h-11 max-md:w-full max-md:text-base">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
@@ -381,22 +381,22 @@
             </form>
 
             <form action="{{ route('school-profile.update') }}" method="POST"
-                class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+                class="kartu overflow-hidden">
                 @csrf
                 @method('PUT')
                 <input type="hidden" name="intent" value="leadership">
-                <div class="border-b border-gray-100 bg-gray-50 px-6 py-5 max-md:px-4 max-md:py-4 dark:border-gray-700 dark:bg-gray-900/40">
-                    <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ __('Data Pimpinan') }}</h2>
-                    <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                <div class="border-b border-zinc-100 bg-zinc-50 px-6 py-5 max-md:px-4 max-md:py-4 dark:border-zinc-700 dark:bg-zinc-900/40">
+                    <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">{{ __('Data Pimpinan') }}</h2>
+                    <p class="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
                         {{ __('Masukkan informasi Kepala :sebutan untuk kebutuhan administrasi dan laporan resmi.', ['sebutan' => $schoolProfile->sebutan()]) }}
                     </p>
                 </div>
                 <div class="space-y-5 px-6 py-6 max-md:space-y-4 max-md:px-4 max-md:py-4">
                     <div>
                         <label for="jenis_satuan"
-                            class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Jenis Satuan Pendidikan') }}</label>
+                            class="block text-sm font-medium text-zinc-700 dark:text-zinc-300">{{ __('Jenis Satuan Pendidikan') }}</label>
                         <select id="jenis_satuan" name="jenis_satuan"
-                            class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 max-md:h-11 max-md:py-0 max-md:text-base dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:focus:border-blue-400">
+                            class="isian mt-1 w-full px-4 py-2.5 text-sm max-md:h-11 max-md:py-0 max-md:text-base">
                             @foreach (['madrasah' => __('Madrasah (Kepala Madrasah)'), 'sekolah' => __('Sekolah (Kepala Sekolah)')] as $nilai => $label)
                                 <option value="{{ $nilai }}" @selected(old('jenis_satuan', $schoolProfile->jenis_satuan ?? 'madrasah') === $nilai)>{{ $label }}</option>
                             @endforeach
@@ -408,20 +408,20 @@
                     <div class="grid gap-5 max-md:gap-4 sm:grid-cols-2">
                         <div>
                             <label for="headmaster"
-                                class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Nama Kepala :sebutan', ['sebutan' => $schoolProfile->sebutan()]) }}</label>
+                                class="block text-sm font-medium text-zinc-700 dark:text-zinc-300">{{ __('Nama Kepala :sebutan', ['sebutan' => $schoolProfile->sebutan()]) }}</label>
                             <input id="headmaster" name="headmaster" type="text"
                                 value="{{ old('headmaster', $schoolProfile->headmaster) }}"
-                                class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 max-md:h-11 max-md:py-0 max-md:text-base dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:focus:border-blue-400">
+                                class="isian mt-1 w-full px-4 py-2.5 text-sm max-md:h-11 max-md:py-0 max-md:text-base">
                             @error('headmaster')
                                 <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
                             @enderror
                         </div>
                         <div>
                             <label for="nip_headmaster"
-                                class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('NIP Kepala :sebutan', ['sebutan' => $schoolProfile->sebutan()]) }}</label>
+                                class="block text-sm font-medium text-zinc-700 dark:text-zinc-300">{{ __('NIP Kepala :sebutan', ['sebutan' => $schoolProfile->sebutan()]) }}</label>
                             <input id="nip_headmaster" name="nip_headmaster" type="text"
                                 value="{{ old('nip_headmaster', $schoolProfile->nip_headmaster) }}"
-                                class="mt-1 w-full rounded-lg border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-4 focus:ring-blue-500/10 max-md:h-11 max-md:py-0 max-md:text-base dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 dark:focus:border-blue-400">
+                                class="isian mt-1 w-full px-4 py-2.5 text-sm max-md:h-11 max-md:py-0 max-md:text-base">
                             @error('nip_headmaster')
                                 <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
                             @enderror
@@ -429,9 +429,9 @@
                     </div>
                 </div>
                 <div
-                    class="flex items-center justify-end gap-3 border-t border-gray-100 bg-gray-50 px-6 py-4 max-md:px-4 dark:border-gray-700 dark:bg-gray-900/40">
+                    class="flex items-center justify-end gap-3 border-t border-zinc-100 bg-zinc-50 px-6 py-4 max-md:px-4 dark:border-zinc-700 dark:bg-zinc-900/40">
                     <button type="submit"
-                        class="inline-flex items-center gap-2 rounded-lg bg-purple-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-purple-700 focus:outline-none focus:ring-4 focus:ring-purple-500/30 max-md:min-h-11 max-md:w-full max-md:justify-center max-md:text-base">
+                        class="tombol tombol-netral gap-2 px-5 py-2.5 text-sm font-semibold max-md:min-h-11 max-md:w-full max-md:text-base">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
                             stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"

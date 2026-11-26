@@ -8,33 +8,33 @@
         ['label' => __('Siswa aktif'), 'nilai' => $kelasList->sum('siswa_aktif'), 'ikon' => 'fa-user-graduate'],
         ['label' => __('Jadwal mengajar'), 'nilai' => $kelasList->sum('mengajar'), 'ikon' => 'fa-book-open'],
     ] as $kartu)
-        <div class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm max-md:min-w-0 max-md:p-3 dark:border-gray-700 dark:bg-gray-800">
-            <p class="text-xs font-semibold uppercase tracking-wide text-gray-500 max-md:text-[11px] max-md:normal-case max-md:tracking-normal dark:text-gray-400">
+        <div class="kartu p-5 max-md:min-w-0 max-md:p-3">
+            <p class="text-xs font-semibold uppercase tracking-wide text-zinc-600 max-md:text-[11px] max-md:normal-case max-md:tracking-normal dark:text-zinc-400">
                 <i class="fas {{ $kartu['ikon'] }} mr-1"></i> {{ $kartu['label'] }}
             </p>
-            <p class="mt-2 text-2xl font-bold text-gray-900 max-md:mt-1 max-md:text-xl dark:text-gray-100">{{ $kartu['nilai'] }}</p>
+            <p class="mt-2 text-2xl font-bold text-zinc-900 max-md:mt-1 max-md:text-xl dark:text-zinc-100">{{ $kartu['nilai'] }}</p>
         </div>
     @endforeach
 </div>
 
-<div class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
-    <div class="border-b border-gray-100 bg-gray-50 px-6 py-5 max-md:px-4 max-md:py-4 dark:border-gray-700 dark:bg-gray-900/40">
-        <h2 class="text-lg font-semibold text-gray-900 dark:text-gray-100">{{ __('Lanjut semester') }}</h2>
-        <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+<div class="kartu overflow-hidden">
+    <div class="border-b border-zinc-100 bg-zinc-50 px-6 py-5 max-md:px-4 max-md:py-4 dark:border-zinc-700 dark:bg-zinc-900/40">
+        <h2 class="text-lg font-semibold text-zinc-900 dark:text-zinc-100">{{ __('Lanjut semester') }}</h2>
+        <p class="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
             {{ __('Setiap kelas disalin dengan nama, tingkat, dan wali kelas yang sama. Siswa aktif masuk ke kelas bernama sama, dan jadwal mengajar (termasuk tahfidz) disalin ke semester :semester.', ['semester' => $tujuan->semester]) }}
         </p>
     </div>
     {{-- HP: daftar kartu per kelas; md ke atas: tabel --}}
-    <ul class="divide-y divide-gray-200 md:hidden dark:divide-gray-700">
+    <ul class="divide-y divide-zinc-200 md:hidden dark:divide-zinc-700">
         @foreach ($kelasList as $kelas)
             <li class="px-4 py-3">
-                <p class="flex flex-wrap items-center gap-2 font-semibold text-gray-900 dark:text-gray-100">
+                <p class="flex flex-wrap items-center gap-2 font-semibold text-zinc-900 dark:text-zinc-100">
                     {{ __('Kelas :nama', ['nama' => $kelas['nama']]) }}
-                    <span class="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-semibold text-gray-600 dark:bg-gray-700 dark:text-gray-300">{{ __('Tingkat :tingkat', ['tingkat' => $kelas['tingkat']]) }}</span>
+                    <span class="pil px-2 py-0.5">{{ __('Tingkat :tingkat', ['tingkat' => $kelas['tingkat']]) }}</span>
                 </p>
-                <p class="mt-1 truncate text-sm text-gray-600 dark:text-gray-400">{{ __('Wali Kelas') }}: {{ $kelas['wali'] ?? '—' }}</p>
+                <p class="mt-1 truncate text-sm text-zinc-600 dark:text-zinc-400">{{ __('Wali Kelas') }}: {{ $kelas['wali'] ?? '—' }}</p>
                 <dl class="mt-2 flex flex-wrap gap-2 text-xs">
-                    <div class="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2.5 py-1 font-semibold text-blue-700 dark:bg-blue-900/40 dark:text-blue-200">
+                    <div class="inline-flex items-center gap-1 rounded-full bg-accent/10 px-2.5 py-1 font-semibold text-accent-strong dark:bg-blue-900/40 dark:text-blue-200">
                         <dt>{{ __('Siswa aktif') }}</dt>
                         <dd>{{ $kelas['siswa_aktif'] }}</dd>
                     </div>
@@ -47,8 +47,8 @@
         @endforeach
     </ul>
     <div class="overflow-x-auto px-6 pb-6 max-md:hidden">
-        <table class="min-w-full divide-y divide-gray-200 text-left text-sm text-gray-700 dark:divide-gray-700 dark:text-gray-200">
-            <thead class="bg-gray-100 text-xs font-semibold uppercase tracking-wide text-gray-600 dark:bg-gray-900/40 dark:text-gray-400">
+        <table class="tabel min-w-full text-left text-sm text-zinc-700 dark:text-zinc-200">
+            <thead>
                 <tr>
                     <th class="px-4 py-3">{{ __('Kelas') }}</th>
                     <th class="px-4 py-3">{{ __('Tingkat') }}</th>
@@ -57,10 +57,10 @@
                     <th class="px-4 py-3 text-right">{{ __('Jadwal mengajar') }}</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+            <tbody>
                 @foreach ($kelasList as $kelas)
                     <tr>
-                        <td class="px-4 py-3 font-semibold text-gray-900 dark:text-gray-100">{{ $kelas['nama'] }}</td>
+                        <td class="px-4 py-3 font-semibold text-zinc-900 dark:text-zinc-100">{{ $kelas['nama'] }}</td>
                         <td class="px-4 py-3">{{ $kelas['tingkat'] }}</td>
                         <td class="px-4 py-3">{{ $kelas['wali'] ?? '—' }}</td>
                         <td class="px-4 py-3 text-right">{{ $kelas['siswa_aktif'] }}</td>
@@ -73,7 +73,7 @@
 </div>
 
 @if ($ringkasan['siswa_nonaktif'] > 0 || $ringkasan['siswa_tanpa_kelas'] > 0)
-    <div class="rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-800 max-md:p-4 dark:border-amber-800 dark:bg-amber-900/30 dark:text-amber-100">
+    <div class="bg-amber-50 p-5 text-sm text-amber-800 max-md:p-4 dark:bg-amber-900/30 dark:text-amber-100 rounded-2xl">
         <i class="fas fa-info-circle mr-1"></i>
         @if ($ringkasan['siswa_nonaktif'] > 0)
             {{ __(':jumlah siswa nonaktif tidak ikut disalin.', ['jumlah' => $ringkasan['siswa_nonaktif']]) }}
