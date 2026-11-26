@@ -65,7 +65,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body class="bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-200 antialiased" x-data="{
+<body class="bg-zinc-100 dark:bg-zinc-900 text-zinc-900 dark:text-zinc-200 antialiased" x-data="{
     sidebarOpen: localStorage.getItem('sidebarOpen') === null ? window.innerWidth >= 1024 : localStorage.getItem('sidebarOpen') === 'true',
     toggleSidebar() {
         this.sidebarOpen = !this.sidebarOpen;
@@ -87,18 +87,18 @@
 }">
 
     <!-- Main Container -->
-    <div class="min-h-screen flex flex-col">
+    <div class="min-h-screen flex">
 
-        <x-layouts.app.header />
+        <x-layouts.app.sidebar />
 
-        <!-- Main Content Area -->
-        <div class="flex flex-1 overflow-hidden">
+        {{-- Di HP sidebar yang terbuka memakai lebar penuh, jadi kolom isi disembunyikan --}}
+        <div class="flex min-w-0 flex-1 flex-col" :class="{ 'max-md:hidden': sidebarOpen }">
 
-            <x-layouts.app.sidebar />
+            <x-layouts.app.header :title="$title ?? null" />
 
             <!-- Main Content -->
-            <main class="flex-1 overflow-auto bg-slate-100 dark:bg-slate-900 content-transition">
-                <div class="p-6">
+            <main class="flex-1 overflow-x-auto content-transition">
+                <div class="px-4 pb-10 pt-2 sm:px-8">
                     <!-- Success Message -->
                     @foreach (['status', 'success'] as $flashKey)
                     @if (session()->has($flashKey))
@@ -109,7 +109,7 @@
                             x-transition:leave="transition ease-in duration-300"
                             x-transition:leave-start="opacity-100 transform translate-y-0"
                             x-transition:leave-end="opacity-0 transform -translate-y-2"
-                            class="mb-6 bg-green-50 dark:bg-green-900 border-l-4 border-green-500 p-4 rounded-md">
+                            class="mb-6 bg-green-50 dark:bg-green-900 p-4 rounded-2xl">
                             <div class="flex items-center">
                                 <div class="flex-shrink-0">
                                     <svg class="h-5 w-5 text-green-500 dark:text-green-400"
@@ -149,7 +149,7 @@
                             x-transition:leave="transition ease-in duration-300"
                             x-transition:leave-start="opacity-100 transform translate-y-0"
                             x-transition:leave-end="opacity-0 transform -translate-y-2"
-                            class="mb-6 bg-red-50 dark:bg-red-900 border-l-4 border-red-500 p-4 rounded-md">
+                            class="mb-6 bg-red-50 dark:bg-red-900 p-4 rounded-2xl">
                             <div class="flex items-start gap-3">
                                 <div class="flex-shrink-0">
                                     <svg class="h-5 w-5 text-red-600 dark:text-red-300"
@@ -181,7 +181,7 @@
                             x-transition:leave="transition ease-in duration-300"
                             x-transition:leave-start="opacity-100 transform translate-y-0"
                             x-transition:leave-end="opacity-0 transform -translate-y-2"
-                            class="mb-6 bg-red-50 dark:bg-red-900 border-l-4 border-red-500 p-4 rounded-md">
+                            class="mb-6 bg-red-50 dark:bg-red-900 p-4 rounded-2xl">
                             <div class="flex items-start gap-3">
                                 <div class="flex-shrink-0">
                                     <svg class="h-5 w-5 text-red-600 dark:text-red-300"
@@ -211,7 +211,7 @@
                             x-transition:leave="transition ease-in duration-300"
                             x-transition:leave-start="opacity-100 transform translate-y-0"
                             x-transition:leave-end="opacity-0 transform -translate-y-2"
-                            class="mb-6 bg-amber-50 dark:bg-amber-900 border-l-4 border-amber-500 p-4 rounded-md">
+                            class="mb-6 bg-amber-50 dark:bg-amber-900 p-4 rounded-2xl">
                             <div class="flex items-start gap-3">
                                 <div class="flex-shrink-0">
                                     <svg class="h-5 w-5 text-amber-500 dark:text-amber-300"
@@ -238,7 +238,7 @@
                 </div>
 
                 {{-- Footer --}}
-                <footer class="border-t border-gray-200 dark:border-gray-700 bg-white/50 dark:bg-gray-800/50 px-6 py-4">
+                <footer class="border-t border-zinc-200 px-6 py-4 dark:border-zinc-800">
                     <p class="text-center text-s text-gray-400 dark:text-gray-500">
                         Dibuat dengan <span class="text-red-400">❤️</span> oleh
                         <a href="https://fahmiealkhudhorie.site" target="_blank"

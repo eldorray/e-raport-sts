@@ -1,150 +1,157 @@
 <x-layouts.auth :title="__('Login')">
     @php
-        $defaultTahunAjaran =
-            old('tahun_ajaran_id') ??
-            ($tahunAjaranOptions->firstWhere('is_active', true)->id ?? ($tahunAjaranOptions->first()->id ?? null));
-        $defaultSemester = old('semester', 'Ganjil');
+        $tahunAktif = $tahunAjaranOptions->firstWhere('is_active', true);
+        $defaultTahunAjaran = old('tahun_ajaran_id') ?? ($tahunAktif->id ?? ($tahunAjaranOptions->first()->id ?? null));
         $school = \App\Models\SchoolProfile::first();
+        $namaSekolah = $school?->name ?? config('app.name', 'e-Raport');
+        $logoUrl = $school?->logo ? asset('storage/' . $school->logo) : asset('images/eraport-icon.png');
+
+        $press = 'transition duration-200 ease-[cubic-bezier(.32,.72,0,1)] hover:opacity-90 active:scale-[0.97] motion-reduce:transition-none';
+        $field = 'flex h-12 items-center rounded-[14px] bg-zinc-100 transition-colors duration-200 hover:bg-zinc-200 focus-within:bg-white focus-within:ring-2 focus-within:ring-accent dark:bg-zinc-700/60 dark:hover:bg-zinc-700 dark:focus-within:bg-zinc-900';
+        $input = 'min-w-0 flex-1 bg-transparent text-[15px] text-zinc-900 placeholder-zinc-500 focus:outline-none dark:text-zinc-100 dark:placeholder-zinc-400';
+        $label = 'text-[13px] font-medium text-zinc-900 dark:text-zinc-200';
+        $error = 'text-sm text-red-600 dark:text-red-400';
     @endphp
 
-    <div
-        class="relative overflow-hidden rounded-3xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-xl">
-        <div
-            class="absolute inset-0 bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:from-slate-800 dark:via-slate-900 dark:to-slate-800">
-        </div>
-        <div class="relative p-8 sm:p-10 lg:p-12">
-            <div class="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-                <div class="space-y-3">
-                    <p class="text-sm font-semibold tracking-wide text-slate-700 dark:text-slate-300 uppercase">
-                        {{ __('E-Raport Kurikulum Merdeka') }}</p>
-                    <h1 class="text-3xl font-extrabold leading-tight text-slate-900 dark:text-slate-50 lg:text-4xl">
-                        {{ $school?->name }}
-                    </h1>
-                    <p class="text-sm text-slate-600 dark:text-slate-400">
-                        {{ __('Silahkan login menggunakan akun Anda') }}</p>
-
-                </div>
-
-                <div class="w-full max-w-xl">
-                    <div
-                        class="space-y-4 rounded-2xl bg-white/80 dark:bg-slate-800/80 p-6 shadow-inner ring-1 ring-slate-200 dark:ring-slate-700 backdrop-blur">
-                        <form method="POST" action="{{ route('login') }}" class="space-y-4">
-                            @csrf
-                            <div class="space-y-1">
-                                <label
-                                    class="text-sm font-semibold text-slate-700 dark:text-slate-300">{{ __('Nomor Akun') }}</label>
-                                <div
-                                    class="flex items-center gap-2 rounded-xl border border-slate-300 dark:border-slate-600 bg-blue-50 dark:bg-slate-700/50 px-3 py-2.5 ring-1 ring-transparent focus-within:border-blue-500 focus-within:ring-blue-200 dark:focus-within:ring-blue-500/30">
-                                    <span class="text-slate-500 dark:text-slate-400">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
-                                            viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"
-                                                d="M5.121 17.804A13.937 13.937 0 0112 15c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0z" />
-                                        </svg>
-                                    </span>
-                                    <input type="text" name="login" value="{{ old('login') }}" required
-                                        autocomplete="username"
-                                        class="w-full bg-transparent text-base font-semibold text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none"
-                                        placeholder="Masukan email anda">
-                                </div>
-                                @error('login')
-                                    <p class="text-sm text-red-600">{{ $message }}</p>
-                                @enderror
-                            </div>
-
-                            <div class="space-y-1">
-                                <label
-                                    class="text-sm font-semibold text-slate-700 dark:text-slate-300">{{ __('Kata Sandi') }}</label>
-                                <div
-                                    class="flex items-center gap-2 rounded-xl border border-slate-300 dark:border-slate-600 bg-blue-50 dark:bg-slate-700/50 px-3 py-2.5 ring-1 ring-transparent focus-within:border-blue-500 focus-within:ring-blue-200 dark:focus-within:ring-blue-500/30">
-                                    <span class="text-slate-500 dark:text-slate-400">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
-                                            viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"
-                                                d="M12 15v2m-6 2h12a2 2 0 002-2v-6a2 2 0 00-2-2h-1V7a5 5 0 00-10 0v2H6a2 2 0 00-2 2v6a2 2 0 002 2z" />
-                                        </svg>
-                                    </span>
-                                    <input id="password" name="password" type="password" required
-                                        autocomplete="current-password"
-                                        class="w-full bg-transparent text-base font-semibold text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none"
-                                        placeholder="••••••••">
-                                    <button type="button" id="togglePassword"
-                                        class="text-slate-500 dark:text-slate-400 transition hover:text-slate-700 dark:hover:text-slate-200">
-                                        <svg id="eyeIcon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5"
-                                            fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"
-                                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"
-                                                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                        </svg>
-                                    </button>
-                                </div>
-                                @error('password')
-                                    <p class="text-sm text-red-600">{{ $message }}</p>
-                                @enderror
-                            </div>
-
-                            <div class="space-y-1">
-                                <label
-                                    class="text-sm font-semibold text-slate-700 dark:text-slate-300">{{ __('Tahun Ajaran & Semester') }}</label>
-                                <div
-                                    class="flex items-center gap-2 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700/50 px-3 py-2.5 ring-1 ring-transparent focus-within:border-blue-500 focus-within:ring-blue-200 dark:focus-within:ring-blue-500/30">
-                                    <span class="text-slate-500 dark:text-slate-400">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
-                                            viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"
-                                                d="M8 7h12M8 12h12m-5 5h5M4 7h.01M4 12h.01M4 17h.01" />
-                                        </svg>
-                                    </span>
-                                    <select name="tahun_ajaran_id"
-                                        class="w-full bg-transparent text-base font-semibold text-slate-900 dark:text-slate-100 focus:outline-none">
-                                        <option value="" disabled {{ $defaultTahunAjaran ? '' : 'selected' }}>
-                                            {{ __('Pilih tahun ajaran') }}</option>
-                                        @foreach ($tahunAjaranOptions as $tahun)
-                                            <option value="{{ $tahun->id }}" data-semester="{{ $tahun->semester }}"
-                                                @selected($defaultTahunAjaran == $tahun->id)>
-                                                {{ $tahun->nama }} - Semester {{ $tahun->semester }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                @error('tahun_ajaran_id')
-                                    <p class="text-sm text-red-600">{{ $message }}</p>
-                                @enderror
-                            </div>
-
-                            <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
-                                <div class="flex items-center gap-2">
-                                    <input id="remember" name="remember" type="checkbox" value="1"
-                                        class="h-4 w-4 rounded border-slate-300 dark:border-slate-600 text-blue-600 focus:ring-blue-500 dark:focus:ring-blue-400"
-                                        @checked(old('remember'))>
-                                    <label for="remember"
-                                        class="text-sm font-medium text-slate-700 dark:text-slate-300">{{ __('Ingat saya') }}</label>
-                                </div>
-                                @if (Route::has('password.request'))
-                                    <a href="{{ route('password.request') }}"
-                                        class="text-sm font-semibold text-blue-600 dark:text-blue-400 hover:underline">{{ __('Lupa Password Admin?') }}</a>
-                                @endif
-                            </div>
-
-                            <div class="pt-2">
-                                <button type="submit"
-                                    class="inline-flex w-full items-center justify-center rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 px-4 py-3 text-lg font-semibold text-white shadow-lg transition focus:outline-none focus:ring-4 focus:ring-blue-500/30">
-                                    {{ __('Login') }}
-                                </button>
-                            </div>
-                        </form>
-
-                        <div class="pt-3 text-sm text-slate-600 dark:text-slate-400">
-                            <p>{{ __('Aplikasi E-Raport Kurikulum Merdeka') }}</p>
-                            <p>{{ __('Masih dalam pengembangan') }}
-                            </p>
-                            <p class="pt-1 text-slate-500 dark:text-slate-500">E-Raport Versi 1.0
-                                ({{ now()->format('YmdHis') }})</p>
-                        </div>
-                    </div>
+    <x-slot:header>
+        <header class="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-3 px-6 py-3.5">
+            <div class="flex items-center gap-3">
+                <img src="{{ $logoUrl }}" alt="" class="h-10 w-10 rounded-xl bg-white object-contain">
+                <div class="flex flex-col leading-tight">
+                    <span class="text-[15px] font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">{{ $namaSekolah }}</span>
+                    @if ($school?->city)
+                        <span class="text-xs text-zinc-600 dark:text-zinc-400">{{ $school->city }}</span>
+                    @endif
                 </div>
             </div>
+            <a href="{{ route('home') }}"
+                class="inline-flex items-center gap-2 rounded-[10px] px-3 py-2.5 text-sm font-medium text-zinc-700 transition-colors duration-200 hover:bg-zinc-200 hover:text-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-zinc-100">
+                <svg aria-hidden="true" class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M19 12H5M11 6l-6 6 6 6" />
+                </svg>
+                {{ __('Kembali ke beranda') }}
+            </a>
+        </header>
+    </x-slot:header>
+
+    <div class="mx-auto flex w-full max-w-[440px] flex-col gap-5">
+        <form method="POST" action="{{ route('login') }}" id="loginForm"
+            class="animate-rise flex flex-col gap-[22px] rounded-[28px] bg-white p-7 shadow-[0_1px_2px_rgba(0,0,0,.04),0_16px_40px_rgba(0,0,0,.06)] motion-reduce:animate-none sm:p-9 dark:bg-zinc-800">
+            @csrf
+
+            <div class="flex flex-col gap-4">
+                @if ($tahunAktif)
+                    <span
+                        class="inline-flex h-[30px] items-center gap-2 self-start rounded-full bg-zinc-100 px-3 text-[13px] font-medium text-zinc-900 dark:bg-zinc-700 dark:text-zinc-100">
+                        <span class="h-2 w-2 rounded-full bg-green-500"></span>
+                        {{ __('Tahun ajaran') }} {{ $tahunAktif->nama }}
+                    </span>
+                @endif
+                <div class="flex flex-col gap-1.5">
+                    <h1 class="text-[28px] font-semibold leading-tight tracking-[-0.03em] text-zinc-900 dark:text-zinc-50">
+                        {{ __('Masuk ke e-Raport') }}</h1>
+                    <p class="text-[15px] text-zinc-700 dark:text-zinc-400">
+                        {{ __('Silahkan login menggunakan akun Anda') }}.</p>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-4">
+                <div class="flex flex-col gap-1.5">
+                    <label for="login" class="{{ $label }}">{{ __('Nomor Akun') }}</label>
+                    <div class="{{ $field }} px-3.5">
+                        <input id="login" type="text" name="login" value="{{ old('login') }}" required
+                            autocomplete="username" class="{{ $input }}" placeholder="Masukan email anda">
+                    </div>
+                    @error('login')
+                        <p class="{{ $error }}">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div class="flex flex-col gap-1.5">
+                    <div class="flex items-baseline justify-between gap-3">
+                        <label for="password" class="{{ $label }}">{{ __('Kata Sandi') }}</label>
+                        @if (Route::has('password.request'))
+                            <a href="{{ route('password.request') }}"
+                                class="text-[13px] font-medium text-accent hover:underline dark:text-blue-400">{{ __('Lupa Password Admin?') }}</a>
+                        @endif
+                    </div>
+                    <div class="{{ $field }} gap-1 pl-3.5 pr-0.5">
+                        <input id="password" name="password" type="password" required
+                            autocomplete="current-password" class="{{ $input }}" placeholder="••••••••">
+                        <button type="button" id="togglePassword" aria-pressed="false"
+                            aria-label="{{ __('Tampilkan kata sandi') }}"
+                            class="{{ $press }} group flex h-11 w-11 flex-none items-center justify-center rounded-xl text-zinc-600 dark:text-zinc-400">
+                            <svg aria-hidden="true" class="h-5 w-5 group-aria-pressed:hidden" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z" />
+                                <circle cx="12" cy="12" r="3" />
+                            </svg>
+                            <svg aria-hidden="true" class="hidden h-5 w-5 group-aria-pressed:block" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path d="M3 3l18 18" />
+                                <path d="M10.6 5.1A10.6 10.6 0 0 1 12 5c6.5 0 10 7 10 7a17 17 0 0 1-3.2 4" />
+                                <path d="M6.5 6.6C3.6 8.5 2 12 2 12s3.5 7 10 7c1.7 0 3.2-.5 4.5-1.2" />
+                                <path d="M9.9 9.9a3 3 0 0 0 4.2 4.2" />
+                            </svg>
+                        </button>
+                    </div>
+                    @error('password')
+                        <p class="{{ $error }}">{{ $message }}</p>
+                    @enderror
+                </div>
+
+                <div class="flex flex-col gap-1.5">
+                    <label for="tahun_ajaran_id" class="{{ $label }}">{{ __('Tahun Ajaran & Semester') }}</label>
+                    <div class="{{ $field }} gap-2 px-3.5">
+                        <select id="tahun_ajaran_id" name="tahun_ajaran_id"
+                            class="{{ $input }} h-full cursor-pointer appearance-none">
+                            <option value="" disabled {{ $defaultTahunAjaran ? '' : 'selected' }}>
+                                {{ __('Pilih tahun ajaran') }}</option>
+                            @foreach ($tahunAjaranOptions as $tahun)
+                                <option value="{{ $tahun->id }}" @selected($defaultTahunAjaran == $tahun->id)>
+                                    {{ $tahun->nama }} - Semester {{ $tahun->semester }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <svg aria-hidden="true" class="h-[18px] w-[18px] flex-none text-zinc-600 dark:text-zinc-400"
+                            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M6 9l6 6 6-6" />
+                        </svg>
+                    </div>
+                    @error('tahun_ajaran_id')
+                        <p class="{{ $error }}">{{ $message }}</p>
+                    @enderror
+                </div>
+            </div>
+
+            <label class="flex cursor-pointer items-center gap-2.5 self-start text-sm text-zinc-900 dark:text-zinc-200">
+                <input id="remember" name="remember" type="checkbox" value="1" class="h-[18px] w-[18px] accent-accent"
+                    @checked(old('remember'))>
+                {{ __('Ingat saya') }}
+            </label>
+
+            <button type="submit" id="loginSubmit"
+                class="{{ $press }} group flex h-[52px] items-center justify-center gap-2.5 rounded-2xl bg-accent text-base font-semibold text-white focus:outline-none focus-visible:ring-4 focus-visible:ring-accent/30 disabled:cursor-wait">
+                <svg aria-hidden="true" class="hidden h-[18px] w-[18px] animate-spin group-aria-busy:block"
+                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round">
+                    <path d="M12 3a9 9 0 1 0 9 9" />
+                </svg>
+                <span class="group-aria-busy:hidden">{{ __('Masuk') }}</span>
+                <span class="hidden group-aria-busy:inline">{{ __('Memeriksa akun…') }}</span>
+                <svg aria-hidden="true" class="h-[18px] w-[18px] group-aria-busy:hidden" viewBox="0 0 24 24"
+                    fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M5 12h14M13 6l6 6-6 6" />
+                </svg>
+            </button>
+        </form>
+
+        <div class="text-center text-[13px] leading-relaxed text-zinc-600 dark:text-zinc-400">
+            <p>{{ __('Akun dibuat oleh admin atau TU madrasah. Lupa kata sandi? Hubungi admin atau TU.') }}</p>
+            <p class="pt-1 text-xs">E-Raport Versi 1.0 ({{ now()->format('YmdHis') }})</p>
         </div>
     </div>
 
@@ -152,11 +159,21 @@
         document.addEventListener('DOMContentLoaded', () => {
             const toggleBtn = document.getElementById('togglePassword');
             const passwordInput = document.getElementById('password');
+            const submitBtn = document.getElementById('loginSubmit');
 
-            toggleBtn?.addEventListener('click', () => {
-                const isHidden = passwordInput.type === 'password';
-                passwordInput.type = isHidden ? 'text' : 'password';
+            toggleBtn.addEventListener('click', () => {
+                const show = passwordInput.type === 'password';
+                passwordInput.type = show ? 'text' : 'password';
+                toggleBtn.setAttribute('aria-pressed', String(show));
             });
+
+            const setBusy = (busy) => {
+                submitBtn.disabled = busy;
+                submitBtn.setAttribute('aria-busy', String(busy));
+            };
+            document.getElementById('loginForm').addEventListener('submit', () => setBusy(true));
+            // tombol kembali di browser memulihkan halaman dari cache dengan tombol masih terkunci
+            window.addEventListener('pageshow', () => setBusy(false));
         });
     </script>
 </x-layouts.auth>

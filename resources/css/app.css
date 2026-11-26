@@ -11,6 +11,28 @@
         "Instrument Sans", ui-sans-serif, system-ui, sans-serif,
         "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
         "Noto Color Emoji";
+    --color-accent: #006fee;
+    --color-accent-strong: #005bc4;
+    --animate-pop: pop 0.35s cubic-bezier(0.32, 0.72, 0, 1) both;
+    @keyframes pop {
+        from {
+            opacity: 0;
+            transform: scale(0.95) translateY(10px);
+        }
+    }
+    --animate-grow: grow 0.8s cubic-bezier(0.32, 0.72, 0, 1) 0.3s both;
+    @keyframes grow {
+        from {
+            transform: scaleX(0);
+        }
+    }
+    --animate-rise: rise 0.6s cubic-bezier(0.32, 0.72, 0, 1) both;
+    @keyframes rise {
+        from {
+            opacity: 0;
+            transform: translateY(16px);
+        }
+    }
     --sidebar-background: hsl(var(--sidebar-background));
     --sidebar-foreground: hsl(var(--sidebar-foreground));
     --sidebar-accent: hsl(var(--sidebar-accent));
@@ -45,7 +67,7 @@
 
 @layer base {
     :root {
-        --sidebar-background: 210 40% 98%;
+        --sidebar-background: 0 0% 100%;
         --sidebar-foreground: 215 25% 27%;
         --sidebar-accent: 217 33% 17%;
         --sidebar-accent-foreground: 210 40% 98%;
@@ -56,7 +78,7 @@
     }
 
     .dark {
-        --sidebar-background: 217 33% 17%;
+        --sidebar-background: 240 6% 10%;
         --sidebar-foreground: 210 40% 98%;
         --sidebar-accent: 210 40% 96%;
         --sidebar-accent-foreground: 217 33% 17%;
@@ -165,4 +187,40 @@ html[data-warna-font] body {
 
 html.dark[data-warna-font] body {
     color: var(--font-color-dark);
+}
+
+/* Kontrol DataTables (cari, jumlah baris, halaman) mengikuti gaya form aplikasi */
+.dt-container .dt-input {
+    border: 0 !important;
+    border-radius: 10px !important;
+    background-color: var(--color-zinc-100) !important;
+    padding: 8px 12px !important;
+}
+
+.dark .dt-container .dt-input {
+    background-color: var(--color-zinc-700) !important;
+}
+
+.dt-container .dt-input:focus {
+    outline: 2px solid var(--color-accent);
+}
+
+.dt-container .dt-paging .dt-paging-button {
+    border: 0 !important;
+    border-radius: 10px !important;
+}
+
+.dt-container .dt-paging .dt-paging-button.current,
+.dt-container .dt-paging .dt-paging-button:not(.disabled):hover {
+    background: var(--color-accent) !important;
+    color: #fff !important;
+}
+
+table.dataTable > thead > tr > th,
+table.dataTable > thead > tr > td {
+    border-bottom: 0 !important;
+}
+
+.dt-container.dt-empty-footer tbody > tr:last-child > * {
+    border-bottom-color: var(--color-zinc-100) !important;
 }

@@ -29,7 +29,7 @@
     </script>
 </head>
 
-<body class="bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-200 antialiased" x-data="{
+<body class="bg-zinc-100 dark:bg-zinc-900 text-zinc-900 dark:text-zinc-200 antialiased" x-data="{
     darkMode: localStorage.getItem('darkMode') === 'true',
     toggleDarkMode() {
         this.darkMode = !this.darkMode;
@@ -39,6 +39,7 @@
     :class="{ 'dark': darkMode }">
 
     <div class="min-h-screen flex flex-col">
+        {{ $header ?? '' }}
         <!-- Main Content -->
         <main class="flex-1 flex items-center justify-center p-6">
             <div class="w-full max-w-5xl">

@@ -1,126 +1,95 @@
-<!-- Header -->
-<header class="bg-white dark:bg-slate-800 shadow-sm z-20 border-b border-slate-200 dark:border-slate-700">
-    <div class="flex items-center justify-between h-20 px-4">
-        <!-- Left side: Logo and toggle -->
-        <div class="flex items-center">
-            <button @click="toggleSidebar"
-                class="p-2 rounded-md text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 focus:outline-none">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-            </button>
-            <img src="{{ asset('images/eraport-logo-full.png') }}" alt="E-Raport STS" class="ml-4 h-14">
+@props(['title' => null])
+@php
+    $headerRute = request()->route()?->getName();
+    $headerJudul = $title ?? \App\Support\MenuAplikasi::judul($headerRute);
+    $headerPeran = Auth::user()->role === 'admin' ? 'Admin' : 'Guru';
+
+    $headerTahunOptions = \App\Models\TahunAjaran::orderByDesc('is_active')->orderByDesc('tahun_mulai')->get();
+    $headerYear = $headerTahunOptions->firstWhere('id', session('selected_tahun_ajaran_id'))
+        ?? $headerTahunOptions->firstWhere('is_active', true);
+    $headerSemester = session('selected_semester') ?? $headerYear?->semester;
+
+    $tombolIkon = 'flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-zinc-600 transition duration-200 hover:bg-zinc-200 active:scale-[0.97] dark:text-zinc-300 dark:hover:bg-zinc-800';
+@endphp
+
+<header
+    class="sticky top-0 z-20 flex flex-wrap items-center gap-x-3 gap-y-2 bg-zinc-100/70 px-4 py-3 backdrop-blur-lg backdrop-saturate-150 sm:px-8 dark:bg-zinc-900/70">
+    <button type="button" @click="toggleSidebar" aria-label="{{ __('Buka atau tutup menu') }}"
+        class="{{ $tombolIkon }} -ml-2">
+        <svg aria-hidden="true" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round">
+            <path d="M4 7h16M4 12h16M4 17h16" />
+        </svg>
+    </button>
+
+    <div class="flex min-w-0 items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400">
+        <span class="max-sm:hidden">{{ $headerPeran }}</span>
+        @if ($headerJudul)
+            <svg aria-hidden="true" class="h-3.5 w-3.5 shrink-0 max-sm:hidden" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 6l6 6-6 6" />
+            </svg>
+            <span class="truncate font-semibold text-zinc-900 dark:text-zinc-100">{{ $headerJudul }}</span>
+        @endif
+    </div>
+
+    <div class="ml-auto flex items-center gap-3">
+        <div x-data="digitalClock()" x-init="start()"
+            class="hidden items-center gap-2 text-sm text-zinc-600 lg:flex dark:text-zinc-400">
+            <span><span x-text="dayName"></span>, <span x-text="date"></span></span>
+            <span class="font-semibold tabular-nums text-zinc-900 dark:text-zinc-100" x-text="time"></span>
         </div>
 
-        <!-- Right side: Search, notifications, profile -->
-        @php
-            $sessionYearId = session('selected_tahun_ajaran_id');
-            $sessionSemester = session('selected_semester');
-            $headerYear = $sessionYearId ? \App\Models\TahunAjaran::find($sessionYearId) : null;
-        @endphp
-
-        <div class="flex items-center space-x-4">
-            <!-- Digital Clock -->
-            <div x-data="digitalClock()" x-init="start()"
-                class="hidden sm:flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-3 py-2 shadow-sm dark:border-emerald-800 dark:bg-emerald-900/50">
-                <div
-                    class="flex h-9 w-9 items-center justify-center rounded-xl bg-white/80 text-emerald-600 shadow-sm dark:bg-emerald-800/70 dark:text-emerald-100">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
-                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                </div>
-                <div class="flex flex-col leading-tight">
-                    <span class="text-[11px] uppercase tracking-wide text-emerald-500 dark:text-emerald-200"
-                        x-text="dayName"></span>
-                    <span class="text-sm font-bold tabular-nums text-emerald-800 dark:text-emerald-100"
-                        x-text="time"></span>
-                    <span class="text-[11px] font-medium text-emerald-500/80 dark:text-emerald-200/80"
-                        x-text="date"></span>
-                </div>
-            </div>
-
-            @if ($headerYear)
-                <div
-                    class="hidden sm:flex items-center gap-3 rounded-2xl border border-blue-200 bg-blue-50 px-3 py-2 text-xs font-semibold text-blue-800 shadow-sm dark:border-blue-800 dark:bg-blue-900/50 dark:text-blue-100">
-                    <div
-                        class="flex h-9 w-9 items-center justify-center rounded-xl bg-white/80 text-blue-600 shadow-sm dark:bg-blue-800/70 dark:text-blue-100">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
-                                d="M8 7h12M8 12h12m-5 5h5M4 7h.01M4 12h.01M4 17h.01" />
-                        </svg>
-                    </div>
-                    <div class="flex flex-col leading-tight">
-                        <span class="text-[11px] uppercase tracking-wide text-blue-500 dark:text-blue-200">Tahun
-                            ajaran</span>
-                        <span class="text-sm font-bold">
-                            {{ $headerYear->nama }}
-                            @if ($sessionSemester)
-                                • {{ $sessionSemester }}
-                            @elseif ($headerYear->semester)
-                                • {{ $headerYear->semester }}
-                            @endif
-                        </span>
-                        <span
-                            class="text-[11px] font-medium {{ $headerYear->is_active ? 'text-emerald-600 dark:text-emerald-300' : 'text-gray-500 dark:text-gray-400' }}">
-                            {{ $headerYear->is_active ? 'Aktif' : 'Nonaktif' }}
-                        </span>
-                    </div>
-                </div>
-            @endif
-
-            <!-- Profile -->
-            <div x-data="{ open: false }" class="relative">
-                <button @click="open = !open" class="flex items-center focus:outline-none">
-                    <span class="relative flex h-8 w-8 shrink-0 overflow-hidden rounded-lg">
-                        <span
-                            class="flex h-full w-full items-center justify-center rounded-lg bg-slate-200 text-black dark:bg-slate-700 dark:text-white">
-                            {{ Auth::user()->initials() }}
-                        </span>
-                    </span>
-                    <span class="ml-2 hidden md:block">{{ Auth::user()->name }}</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-1" fill="none" viewBox="0 0 24 24"
-                        stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+        @if ($headerYear)
+            <div x-data="{ open: false }" class="relative" @keydown.escape="open = false">
+                <button type="button" @click="open = !open" aria-haspopup="true" :aria-expanded="open"
+                    class="flex h-10 items-center gap-2.5 rounded-xl border border-zinc-200 bg-white px-3.5 text-sm font-medium text-zinc-900 transition duration-200 hover:opacity-90 active:scale-[0.97] dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100">
+                    <span @class([
+                        'h-2 w-2 shrink-0 rounded-full',
+                        'bg-green-500' => $headerYear->is_active,
+                        'bg-zinc-400' => !$headerYear->is_active,
+                    ])></span>
+                    <span class="whitespace-nowrap">{{ $headerYear->nama }}@if ($headerSemester) • {{ $headerSemester }}@endif</span>
+                    <svg aria-hidden="true" class="h-4 w-4 text-zinc-600 transition-transform duration-200 dark:text-zinc-400"
+                        :class="{ 'rotate-180': open }" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M6 9l6 6 6-6" />
                     </svg>
                 </button>
 
-                <div x-show="open" @click.away="open = false" :class="{ 'block': open, 'hidden': !open }"
-                    class="hidden absolute right-0 mt-2 w-48 bg-white dark:bg-slate-800 rounded-md shadow-lg py-1 z-50 border border-slate-200 dark:border-slate-700">
-                    <a href="{{ route('settings.profile.edit') }}"
-                        class="block px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700">
-                        <div class="flex items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                            Settings
-                        </div>
-                    </a>
-                    <div class="border-t border-slate-200 dark:border-slate-700"></div>
-                    <form method="POST" action="{{ route('logout') }}" class="w-full">
-                        @csrf
-                        <button type="submit"
-                            class="block w-full px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700">
-                            <div class="flex items-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                <form method="POST" action="{{ route('tahun-ajaran.switch-session') }}" x-show="open"
+                    style="display: none" @click.outside="open = false"
+                    x-transition:enter="transition duration-200 ease-[cubic-bezier(.32,.72,0,1)]"
+                    x-transition:enter-start="opacity-0 scale-95 -translate-y-1.5"
+                    x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                    x-transition:leave="transition duration-150 ease-in"
+                    x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
+                    class="absolute right-0 top-12 z-50 max-h-80 w-64 origin-top-right overflow-y-auto rounded-2xl border border-zinc-200 bg-white p-1.5 shadow-[0_12px_32px_rgba(0,0,0,.12)] dark:border-zinc-700 dark:bg-zinc-800">
+                    @csrf
+                    @method('PATCH')
+                    <p class="px-3 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-zinc-600 dark:text-zinc-400">
+                        {{ __('Ganti tahun ajaran') }}</p>
+                    @foreach ($headerTahunOptions as $option)
+                        <button type="submit" name="tahun_ajaran_id" value="{{ $option->id }}"
+                            @if ($option->id === $headerYear->id) aria-current="true" @endif
+                            class="flex min-h-10 w-full items-center justify-between gap-3 rounded-[10px] px-3 text-left text-sm text-zinc-900 transition-colors duration-150 hover:bg-zinc-100 dark:text-zinc-100 dark:hover:bg-zinc-700">
+                            <span>{{ $option->nama }} - {{ $option->semester }}
+                                @if ($option->is_active)
+                                    <span class="text-xs text-zinc-600 dark:text-zinc-400">• {{ __('Aktif') }}</span>
+                                @endif
+                            </span>
+                            @if ($option->id === $headerYear->id)
+                                <svg aria-hidden="true" class="h-4 w-4 shrink-0 text-accent dark:text-blue-400"
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M5 12l5 5 9-10" />
                                 </svg>
-                                Logout
-                            </div>
+                            @endif
                         </button>
-                    </form>
-                </div>
+                    @endforeach
+                </form>
             </div>
-        </div>
+        @endif
     </div>
 </header>
 

@@ -1,8 +1,8 @@
 <x-layouts.app>
     <div class="mb-6 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
         <div>
-            <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100">{{ __('Pelajaran Saya') }}</h1>
-            <p class="text-gray-600 dark:text-gray-400 mt-1">
+            <h1 class="text-[28px] font-semibold leading-tight tracking-[-0.025em] text-zinc-900 max-md:text-2xl dark:text-zinc-50">{{ __('Pelajaran Saya') }}</h1>
+            <p class="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
                 {{ __('Daftar mata pelajaran yang ditugaskan admin kepada Anda pada tahun ajaran & semester terpilih.') }}
             </p>
         </div>
@@ -10,31 +10,31 @@
 
     @if (!$tahunId)
         <div
-            class="rounded-2xl border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-800 shadow-sm dark:border-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-100">
+            class="rounded-2xl bg-amber-100 p-4 text-sm text-amber-900 dark:bg-amber-900/40 dark:text-amber-100">
             {{ __('Pilih tahun ajaran terlebih dahulu di dashboard.') }}
         </div>
     @elseif (!$guru)
         <div
-            class="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-800 shadow-sm dark:border-red-800 dark:bg-red-900/40 dark:text-red-100">
+            class="rounded-2xl bg-rose-100 p-4 text-sm text-rose-800 dark:bg-rose-900/40 dark:text-rose-200">
             {{ __('Akun Anda belum terhubung dengan data guru.') }}
         </div>
     @else
         <div class="mb-4 grid gap-3 md:grid-cols-2">
             <div
-                class="rounded-2xl border border-blue-100 bg-blue-50 p-4 text-sm text-blue-900 shadow-sm dark:border-blue-500/60 dark:bg-blue-900/40 dark:text-blue-50">
+                class="rounded-[20px] bg-white shadow-[0_1px_2px_rgba(0,0,0,.05)] p-5 text-sm text-zinc-900 dark:bg-zinc-800 dark:text-zinc-100">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-xs uppercase tracking-wide text-blue-700 dark:text-blue-200">Bobot Penilaian Saya
+                        <p class="text-[13px] font-medium text-zinc-600 dark:text-zinc-400">Bobot Penilaian Saya
                         </p>
                         <p class="mt-1 text-base font-semibold">Sumatif
                             {{ number_format(auth()->user()->bobot_sumatif ?? config('rapor.bobot_sumatif', 50), 2) }}%
                             • STS {{ number_format(auth()->user()->bobot_sts ?? config('rapor.bobot_sts', 50), 2) }}%
                         </p>
-                        <p class="mt-1 text-xs text-blue-800/80 dark:text-blue-100/80">Berlaku untuk semua mapel yang
+                        <p class="mt-1 text-xs text-zinc-600 dark:text-zinc-400">Berlaku untuk semua mapel yang
                             Anda nilai.</p>
                     </div>
                     <a href="{{ route('penilaian.bobot.edit') }}"
-                        class="inline-flex items-center gap-2 rounded-lg border border-blue-500 bg-white px-3 py-1.5 text-xs font-semibold text-blue-700 shadow-sm transition hover:bg-blue-50 dark:border-blue-300 dark:bg-blue-800 dark:text-white dark:hover:bg-blue-700">
+                        class="inline-flex h-9 shrink-0 items-center rounded-xl px-3.5 text-[13px] font-semibold bg-zinc-100 text-zinc-900 dark:bg-zinc-700 dark:text-zinc-100 transition duration-200 ease-[cubic-bezier(.32,.72,0,1)] hover:opacity-90 active:scale-[0.97]">
                         Ubah Bobot
                     </a>
                 </div>
@@ -42,17 +42,17 @@
         </div>
 
         <div
-            class="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
+            class="overflow-hidden rounded-[20px] bg-white shadow-[0_1px_2px_rgba(0,0,0,.05)] dark:border-zinc-700 dark:bg-zinc-800">
             @if ($assignments->isEmpty())
-                <div class="px-6 py-10 text-center text-sm text-gray-500 dark:text-gray-400">
+                <div class="px-6 py-10 text-center text-sm text-zinc-600 dark:text-zinc-400">
                     {{ __('Belum ada penugasan mengajar untuk Anda di tahun ajaran ini.') }}
                 </div>
             @else
-                <div class="px-6 pb-6 overflow-x-auto">
+                <div class="overflow-x-auto p-5">
                     <table id="guru-subjects-table"
-                        class="min-w-full divide-y divide-gray-200 text-left text-sm text-gray-700 dark:divide-gray-700 dark:text-gray-200">
+                        class="min-w-full border-separate border-spacing-0 text-left text-sm text-zinc-700 dark:text-zinc-200">
                         <thead
-                            class="bg-gray-100 text-xs font-semibold uppercase tracking-wide text-gray-600 dark:bg-gray-900/40 dark:text-gray-400">
+                            class="text-xs font-semibold text-zinc-600 dark:text-zinc-400 [&_th]:bg-zinc-100 [&_th:first-child]:rounded-l-xl [&_th:last-child]:rounded-r-xl dark:[&_th]:bg-zinc-700/60">
                             <tr>
                                 <th class="px-3 py-3">{{ __('Kelas') }}</th>
                                 <th class="px-3 py-3">{{ __('Mata Pelajaran') }}</th>
@@ -60,7 +60,7 @@
                                 <th class="px-3 py-3">{{ __('JTM') }}</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                        <tbody class="[&_td]:border-b [&_td]:border-zinc-100 dark:[&_td]:border-zinc-700">
                             @foreach ($assignments as $item)
                                 <tr>
                                     <td class="px-3 py-3">{{ $item->kelas->nama ?? '—' }}</td>
