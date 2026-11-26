@@ -18,6 +18,9 @@ return Application::configure(basePath: dirname(__DIR__))
         // Prevent browser caching for authenticated pages
         $middleware->appendToGroup('web', [
             \App\Http\Middleware\NoCacheHeaders::class,
+            // Berlaku di setiap request, bukan hanya saat login.
+            \App\Http\Middleware\PastikanAkunAktif::class,
+            \App\Http\Middleware\WajibGantiSandi::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

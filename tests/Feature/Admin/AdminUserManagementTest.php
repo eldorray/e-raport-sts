@@ -71,8 +71,8 @@ test('admin dapat menonaktifkan dan menurunkan admin lain selama masih ada admin
         ->and($lain->is_active)->toBeFalse();
 });
 
-test('admin aktif terakhir tidak dapat diturunkan atau dinonaktifkan', function () {
-    // Sesi admin yang sudah dinonaktifkan masih bisa mengakses halaman.
+test('admin yang dinonaktifkan tidak dapat menurunkan atau menonaktifkan admin aktif terakhir', function () {
+    // Sesi admin nonaktif diputus oleh PastikanAkunAktif sebelum sampai ke controller.
     $adminNonaktif = User::factory()->create(['role' => 'admin', 'is_active' => false]);
     $adminTerakhir = User::factory()->create(['role' => 'admin', 'is_active' => true]);
 
@@ -83,7 +83,9 @@ test('admin aktif terakhir tidak dapat diturunkan atau dinonaktifkan', function 
             'role' => 'guru',
             'is_active' => '1',
         ])
-        ->assertSessionHasErrors('user');
+        ->assertRedirect(route('login'));
+
+    $this->assertGuest();
 
     $this->actingAs($adminNonaktif)
         ->put("/users/{$adminTerakhir->id}", [
@@ -91,21 +93,22 @@ test('admin aktif terakhir tidak dapat diturunkan atau dinonaktifkan', function 
             'email' => $adminTerakhir->email,
             'role' => 'admin',
         ])
-        ->assertSessionHasErrors('user');
+        ->assertRedirect(route('login'));
 
     $adminTerakhir->refresh();
     expect($adminTerakhir->role)->toBe('admin')
         ->and($adminTerakhir->is_active)->toBeTrue();
 });
 
-test('admin aktif terakhir tidak dapat dihapus', function () {
+test('admin yang dinonaktifkan tidak dapat menghapus admin aktif terakhir', function () {
     $adminNonaktif = User::factory()->create(['role' => 'admin', 'is_active' => false]);
     $adminTerakhir = User::factory()->create(['role' => 'admin', 'is_active' => true]);
 
     $this->actingAs($adminNonaktif)
         ->delete("/users/{$adminTerakhir->id}")
-        ->assertSessionHasErrors('user');
+        ->assertRedirect(route('login'));
 
+    $this->assertGuest();
     expect($adminTerakhir->fresh())->not->toBeNull();
 });
 

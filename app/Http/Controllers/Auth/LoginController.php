@@ -69,6 +69,11 @@ class LoginController extends Controller
 
         RateLimiter::clear($this->throttleKey($request));
 
+        // Kata sandi yang sama dengan NIP/NIK adalah kata sandi bawaan lama: wajib diganti.
+        if (in_array((string) $password, array_filter([$user->nip, $user->nik]), true)) {
+            $user->forceFill(['must_change_password' => true])->save();
+        }
+
         $request->session()->regenerate();
 
         // Log the successful login

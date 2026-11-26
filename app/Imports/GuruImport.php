@@ -64,7 +64,9 @@ class GuruImport implements SkipsEmptyRows, SkipsOnFailure, ToCollection, WithHe
             $wali = trim((string) ($row['wali_kelas'] ?? '')) ?: null;
             $jtmRaw = $row['jtm'] ?? null;
             $jtm = $jtmRaw !== null && $jtmRaw !== '' ? (int) $jtmRaw : null;
-            $passwordPlain = trim((string) ($row['password'] ?? '')) ?: $nip;
+            // Kolom password kosong: buat kata sandi acak (NIP juga nama login, jadi bukan rahasia).
+            $sandiDariBerkas = trim((string) ($row['password'] ?? ''));
+            $passwordPlain = $sandiDariBerkas !== '' ? $sandiDariBerkas : Str::password(12, symbols: false);
             $isActive = $this->toBoolean($row['is_active'] ?? null);
 
             try {
@@ -84,6 +86,10 @@ class GuruImport implements SkipsEmptyRows, SkipsOnFailure, ToCollection, WithHe
                 'nik' => $nik,
                 'is_active' => $isActive,
             ]);
+
+            if ($sandiDariBerkas === '') {
+                $user->forceFill(['must_change_password' => true])->save();
+            }
 
             Guru::create([
                 'user_id' => $user->id,

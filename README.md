@@ -107,11 +107,13 @@ Aplikasi akan berjalan di `http://localhost:8000`
 
 ## 👤 Akun Default
 
-Setelah menjalankan seeder, gunakan akun berikut untuk login:
+Tidak ada akun bawaan. Isi `ADMIN_EMAIL` dan `ADMIN_PASSWORD` (minimal 12 karakter) di `.env`, lalu buat akun admin pertama:
 
-| Role  | Email           | Password |
-| ----- | --------------- | -------- |
-| Admin | admin@admin.com | password |
+```bash
+php artisan db:seed --class=AdminSeeder
+```
+
+Seeder tidak mengubah akun yang sudah ada. Setelah akun dibuat, kosongkan lagi `ADMIN_PASSWORD` di `.env`.
 
 ---
 

@@ -112,4 +112,19 @@ return [
 
     'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 10800),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Admin awal
+    |--------------------------------------------------------------------------
+    |
+    | Dipakai AdminSeeder untuk membuat akun admin pertama. Tidak ada nilai
+    | bawaan: bila kosong, seeder tidak membuat akun apa pun.
+    |
+    */
+
+    'admin_awal' => [
+        'email' => env('ADMIN_EMAIL'),
+        'password' => env('ADMIN_PASSWORD'),
+    ],
+
 ];

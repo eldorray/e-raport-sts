@@ -370,19 +370,24 @@ class GuruController extends Controller
                             ]);
                             $updated++;
                         } else {
+                            // NIP/NIK juga nama login, jadi kata sandi awal dibuat acak.
+                            $sandiAwal = Str::password(12, symbols: false);
+
                             // Create user first
                             $user = User::create([
                                 'name' => $nama,
                                 'email' => Str::slug($nip, '.').self::EMAIL_DOMAIN,
-                                'password' => Hash::make($nip), // Default password is NIP
+                                'password' => Hash::make($sandiAwal),
                                 'role' => self::USER_ROLE_GURU,
                                 'nip' => $nip,
                                 'nik' => $nik,
                                 'is_active' => $guruData['is_active'] ?? true,
                             ]);
 
+                            $user->forceFill(['must_change_password' => true])->save();
+
                             $syncData['user_id'] = $user->id;
-                            $syncData['initial_password'] = $nip;
+                            $syncData['initial_password'] = $sandiAwal;
                             Guru::create($syncData);
                             $created++;
                         }
